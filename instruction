@@ -1,0 +1,4 @@
+javac compiler/Main.java # from dir ~/compilers/fri-prev/src
+java -classpath ../prg/src compiler.Main # from dir ~/compilers/fri-prev/src
+
+

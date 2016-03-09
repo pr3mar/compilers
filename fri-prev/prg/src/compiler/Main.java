@@ -16,11 +16,14 @@ public class Main {
 	 * 
 	 * @param args
 	 *            Command line arguments.
+	 *
+	 *            java -classpath ../prg/src compiler.Main
+	 *            javac -d ../bin/ compiler/Main.java
 	 */
 	public static void main(String args[]) {
 		// OK, start at the very beginning.
 		System.out.println("This is PREV compiler (2016):");
-
+		System.out.println(System.getProperty("user.dir"));
 		try {
 			// Parse the command line.
 			Task task = new Task(args);

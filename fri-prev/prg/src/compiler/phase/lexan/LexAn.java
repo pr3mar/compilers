@@ -17,11 +17,14 @@ public class LexAn extends Phase {
 	private FileReader srcFile;
 
     private int mode;
-    private int col;
-    private int line;
+    private int begCol;
+    private int endCol;
+    private int begLine;
+    private int endLine;
     private int currentChar;
     private int nextChar;
     private boolean read;
+    private String lexeme;
 
 	/**
 	 * Constructs a new lexical analyzer.
@@ -41,9 +44,11 @@ public class LexAn extends Phase {
 		} catch (FileNotFoundException ex) {
 			throw new CompilerError("Source file '" + this.task.srcFName + "' not found.");
 		}
-
-        line = 1;
-        col = 1;
+        begCol = 1;
+        begLine = 1;
+        endLine = 1;
+        endCol = 1;
+        lexeme = "";
 	}
 
 	/**
@@ -73,11 +78,12 @@ public class LexAn extends Phase {
 		// glavna metoda, ki jo moram dopolniti!
 		// return log(symobl)
         if(!read) {
-            try {
+            currentChar = readChar();
+            /*try {
                 currentChar = srcFile.read();
             } catch (IOException e) {
                 e.printStackTrace();
-            }
+            }*/
         } else {
             read = false;
         }
@@ -86,101 +92,119 @@ public class LexAn extends Phase {
 
         switch (currentChar) {
             case '+':
-                sym = new Symbol(Symbol.Token.ADD, new Position(task.srcFName, line, col));
+                sym = new Symbol(Symbol.Token.ADD, new Position(task.srcFName, endLine, endCol));
                 break;
             case '&':
-                sym = new Symbol(Symbol.Token.AND, new Position(task.srcFName, line, col));
+                sym = new Symbol(Symbol.Token.AND, new Position(task.srcFName, endLine, endCol));
                 break;
-            /* TODO add = and == */
             case '=':
-                mode = 1;
+                mode = 1; // = or ==
                 if(!readNext()) {
-                    sym = new Symbol(Symbol.Token.ASSIGN, new Position(task.srcFName, line, col));
+                    sym = new Symbol(Symbol.Token.ASSIGN, new Position(task.srcFName, endLine, endCol));
                 } else {
-                    sym = new Symbol(Symbol.Token.EQU, new Position(task.srcFName, line, col));
+                    sym = new Symbol(Symbol.Token.EQU, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
                 }
                 break;
             case ':':
-                sym = new Symbol(Symbol.Token.COLON, new Position(task.srcFName, line, col));
+                sym = new Symbol(Symbol.Token.COLON, new Position(task.srcFName, endLine, endCol));
                 break;
             case ',':
-                sym = new Symbol(Symbol.Token.COMMA, new Position(task.srcFName, line, col));
+                sym = new Symbol(Symbol.Token.COMMA, new Position(task.srcFName, endLine, endCol));
                 break;
             case '}':
-                sym = new Symbol(Symbol.Token.CLOSING_BRACE, new Position(task.srcFName, line, col));
+                sym = new Symbol(Symbol.Token.CLOSING_BRACE, new Position(task.srcFName, endLine, endCol));
                 break;
             case ']':
-                sym = new Symbol(Symbol.Token.CLOSING_BRACKET, new Position(task.srcFName, line, col));
+                sym = new Symbol(Symbol.Token.CLOSING_BRACKET, new Position(task.srcFName, endLine, endCol));
                 break;
             case ')':
-                sym = new Symbol(Symbol.Token.CLOSING_PARENTHESIS, new Position(task.srcFName, line, col));
+                sym = new Symbol(Symbol.Token.CLOSING_PARENTHESIS, new Position(task.srcFName, endLine, endCol));
                 break;
             case '.':
-                sym = new Symbol(Symbol.Token.DOT, new Position(task.srcFName, line, col));
+                sym = new Symbol(Symbol.Token.DOT, new Position(task.srcFName, endLine, endCol));
+                break;
+            case '/':
+                sym = new Symbol(Symbol.Token.DIV, new Position(task.srcFName, endLine, endCol));
                 break;
             case '>':
-                mode = 2;
+                mode = 2; // > or >=
                 if(!readNext()) {
-                    sym = new Symbol(Symbol.Token.GTH, new Position(task.srcFName, line, col));
+                    sym = new Symbol(Symbol.Token.GTH, new Position(task.srcFName, endLine, endCol));
                 } else {
-                    sym = new Symbol(Symbol.Token.GEQ, new Position(task.srcFName, line, col));
+                    sym = new Symbol(Symbol.Token.GEQ, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
                 }
                 break;
             case '<':
-                mode = 3;
+                mode = 3; // < or <=
                 if(!readNext()) {
-                    sym = new Symbol(Symbol.Token.LTH, new Position(task.srcFName, line, col));
+                    sym = new Symbol(Symbol.Token.LTH, new Position(task.srcFName, endLine, endCol));
                 } else {
-                    sym = new Symbol(Symbol.Token.LEQ, new Position(task.srcFName, line, col));
+                    sym = new Symbol(Symbol.Token.LEQ, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
                 }
                 break;
             case '@':
-                sym = new Symbol(Symbol.Token.MEM, new Position(task.srcFName, line, col));
+                sym = new Symbol(Symbol.Token.MEM, new Position(task.srcFName, endLine, endCol));
                 break;
             case '%':
-                sym = new Symbol(Symbol.Token.MOD, new Position(task.srcFName, line, col));
+                sym = new Symbol(Symbol.Token.MOD, new Position(task.srcFName, endLine, endCol));
                 break;
             case '*':
-                sym = new Symbol(Symbol.Token.MUL, new Position(task.srcFName, line, col));
+                sym = new Symbol(Symbol.Token.MUL, new Position(task.srcFName, endLine, endCol));
                 break;
             case '!':
-                mode = 4;
+                mode = 4; // ! or !=
                 if(!readNext()) {
-                    sym = new Symbol(Symbol.Token.NOT, new Position(task.srcFName, line, col));
+                    sym = new Symbol(Symbol.Token.NOT, new Position(task.srcFName, endLine, endCol));
                 } else {
-                    sym = new Symbol(Symbol.Token.NEQ, new Position(task.srcFName, line, col));
+                    sym = new Symbol(Symbol.Token.NEQ, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
                 }
                 break;
             case '{':
-                sym = new Symbol(Symbol.Token.OPENING_BRACE, new Position(task.srcFName, line, col));
+                sym = new Symbol(Symbol.Token.OPENING_BRACE, new Position(task.srcFName, endLine, endCol));
                 break;
             case '[':
-                sym = new Symbol(Symbol.Token.OPENING_BRACKET, new Position(task.srcFName, line, col));
+                sym = new Symbol(Symbol.Token.OPENING_BRACKET, new Position(task.srcFName, endLine, endCol));
                 break;
             case '(':
-                sym = new Symbol(Symbol.Token.OPENING_PARENTHESIS, new Position(task.srcFName, line, col));
+                sym = new Symbol(Symbol.Token.OPENING_PARENTHESIS, new Position(task.srcFName, endLine, endCol));
                 break;
             case '|':
-                sym = new Symbol(Symbol.Token.OR, new Position(task.srcFName, line, col));
+                sym = new Symbol(Symbol.Token.OR, new Position(task.srcFName, endLine, endCol));
                 break;
             case '-':
-                sym = new Symbol(Symbol.Token.SUB, new Position(task.srcFName, line, col));
+                sym = new Symbol(Symbol.Token.SUB, new Position(task.srcFName, endLine, endCol));
                 break;
             case '^':
-                sym = new Symbol(Symbol.Token.VAL, new Position(task.srcFName, line, col));
+                sym = new Symbol(Symbol.Token.VAL, new Position(task.srcFName, endLine, endCol));
                 break;
             case -1:
-                sym = new Symbol(Symbol.Token.EOF, new Position(task.srcFName, line, col));
+                sym = new Symbol(Symbol.Token.EOF, new Position(task.srcFName, endLine, endCol));
+                break;
+            case '\'':
+                mode = 5; // char constant
+                if(readNext()) {
+                    sym = new Symbol(Symbol.Token.CONST_CHAR, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+                } else {
+                    throw new CompilerError("bad character constant definition");
+                }
+                break;
+            case '\"':
+                mode = 6; // string constant
+                if(readNext()) {
+                    sym = new Symbol(Symbol.Token.CONST_STRING, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+                } else {
+                    throw new CompilerError("bad string constant definition");
+                }
                 break;
             default:
-                sym = new Symbol(Symbol.Token.ERROR, new Position(task.srcFName, line, col));
+                sym = new Symbol(Symbol.Token.ERROR, new Position(task.srcFName, endLine, endCol));
         }
 
         if(currentChar == ((int) '\n')) {
-            line++;
-            col = 0;
+            endLine++;
+            endCol = 0;
         } else {
-            col++;
+            endCol++;
         }
 
         return log(sym);
@@ -188,42 +212,94 @@ public class LexAn extends Phase {
 
 
     boolean readNext() {
-        try {
-            nextChar = srcFile.read();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        nextChar = readChar();
         read = false;
         switch (mode) {
             case 1: // = ASSIGN or EQU?
-                if(nextChar == ((int) '='))
+                if(nextChar == ((int) '=')) {
+                    begCol = endCol;
+                    endCol++;
                     return true;
+                }
                 break;
             case 2: // > GTH or GEQ?
-                if(nextChar == ((int) '='))
+                if(nextChar == ((int) '=')) {
+                    begCol = endCol;
+                    endCol++;
                     return true;
+                }
                 break;
             case 3: // < LTH or LEQ?
-                if(nextChar == ((int) '='))
+                if(nextChar == ((int) '=')) {
+                    begCol = endCol;
+                    endCol++;
                     return true;
+                }
                 break;
 
             case 4: // ! NOT or NEQ?
-                if(nextChar == ((int) '='))
+                if(nextChar == ((int) '=')) {
+                    begCol = endCol;
+                    endCol++;
                     return true;
+                }
                 break;
-
-
+            case 5: // char constant
+                if(!isBetween(nextChar, 32, 126)) {
+                    throw new CompilerError("bad character constant definition [invalid character]");
+                }
+                if (nextChar == ((int)'\'') || nextChar == ((int)'\"')) {
+                    throw new CompilerError("bad char constant definition [must escape \\, \' and \"]");
+                }
+                begCol = endCol;
+                endCol++;
+                currentChar = nextChar;
+                nextChar = readChar();
+                if(currentChar == ((int) '\\')) {
+                    switch (nextChar) {
+                        case 'n':
+                        case 't':
+                        case '\\':
+                        case '\'':
+                        case '\"':
+                            lexeme = "'\\" + nextChar + "'";
+                            break;
+                        default:
+                            throw new CompilerError("bad character constant definition [invalid character is escaped]");
+                    }
+                    currentChar = nextChar;
+                    endCol++;
+                    nextChar = readChar();
+                }
+                if(nextChar == ((int)'\'')) {
+                    endCol++;
+                    lexeme = "\'" + ((char)currentChar) + "\'";
+                    return true;
+                } else {
+                    throw  new CompilerError("bad character constant definition [only 1 char long]");
+                }
+            case 6:
+                
         }
         read = true;
         currentChar = nextChar;
-        if(currentChar == ((int) '\n')) {
-            line++;
-            col = 0;
-        } else {
-            col++;
-        }
         return false;
+    }
+
+
+    private int readChar() {
+        int tmp = -1;
+        try {
+            tmp = srcFile.read();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return tmp;
+    }
+
+
+    private static boolean isBetween(int x, int lower, int upper) {
+        return lower <= x && x <= upper;
     }
 
 

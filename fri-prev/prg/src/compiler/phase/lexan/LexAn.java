@@ -255,22 +255,23 @@ public class LexAn extends Phase {
                 endCol++;
                 currentChar = nextChar;
                 nextChar = readChar();
-                if(currentChar == ((int) '\\')) {
-                    switch (nextChar) {
-                        case 'n':
-                        case 't':
-                        case '\\':
-                        case '\'':
-                        case '\"':
-                            lexeme = "'\\" + nextChar + "'";
-                            break;
-                        default:
-                            throw new CompilerError("bad character constant definition [invalid character is escaped]");
-                    }
-                    currentChar = nextChar;
-                    endCol++;
-                    nextChar = readChar();
-                }
+                escapeChar();
+//                if(currentChar == ((int) '\\')) {
+//                    switch (nextChar) {
+//                        case 'n':
+//                        case 't':
+//                        case '\\':
+//                        case '\'':
+//                        case '\"':
+//                            lexeme = "'\\" + nextChar + "'";
+//                            break;
+//                        default:
+//                            throw new CompilerError("bad character constant definition [invalid character is escaped]");
+//                    }
+//                    currentChar = nextChar;
+//                    endCol++;
+//                    nextChar = readChar();
+//                }
                 if(nextChar == ((int)'\'')) {
                     endCol++;
                     lexeme = "\'" + ((char)currentChar) + "\'";
@@ -278,8 +279,36 @@ public class LexAn extends Phase {
                 } else {
                     throw  new CompilerError("bad character constant definition [only 1 char long]");
                 }
-            case 6:
-                
+//                break;
+            case 6: // string constant
+                if(!isBetween(nextChar, 32, 126)) {
+                    throw new CompilerError("bad string constant definition [invalid character(s)]");
+                }
+                begCol = endCol;
+                if(nextChar == ((char) '\"')) {
+                    endCol++;
+                    lexeme = "\"\"";
+                    return true;
+                }
+                lexeme = "\"";
+                while(nextChar != ((char) '\"')) {
+                    if(!isBetween(nextChar, 32, 126)) {
+                        throw new CompilerError("bad string constant definition [invalid character(s)]");
+                    }
+                    currentChar = nextChar;
+                    endCol++;
+                    nextChar = readChar();
+                    escapeChar();
+//                    lexeme += "" + (char)currentChar;
+                }
+                lexeme += "\"";
+                if(nextChar == ((int)'\"')) {
+                    endCol++;
+                    return true;
+                } else {
+                    throw  new CompilerError("bad character constant definition [only 1 char long]");
+                }
+//                break;
         }
         read = true;
         currentChar = nextChar;
@@ -300,6 +329,30 @@ public class LexAn extends Phase {
 
     private static boolean isBetween(int x, int lower, int upper) {
         return lower <= x && x <= upper;
+    }
+
+    private void escapeChar() {
+        if(currentChar == ((int) '\\')) {
+            switch (nextChar) {
+                case 'n':
+                case 't':
+                case '\\':
+                case '\'':
+                case '\"':
+                    if(mode == 5)
+                        lexeme = "'\\" + ((char)nextChar) + "'";
+                    if(mode == 6)
+                        lexeme += "\\" + ((char)nextChar);
+                    break;
+                default:
+                    throw new CompilerError("bad character constant definition [invalid character is escaped]");
+            }
+            currentChar = nextChar;
+            endCol++;
+            nextChar = readChar();
+        } else if(mode == 6) { // string constant
+            lexeme += "" + ((char)currentChar);
+        }
     }
 
 

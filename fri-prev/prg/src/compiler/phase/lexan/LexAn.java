@@ -79,13 +79,14 @@ public class LexAn extends Phase {
 		// return log(symobl)
         if(!read) {
             currentChar = readChar();
-            /*try {
-                currentChar = srcFile.read();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }*/
         } else {
             read = false;
+        }
+        while(currentChar == ((int)'#') || currentChar == ((int) ' ')
+                || currentChar == ((int) '\n') || currentChar == ((int) '\r')
+                    || currentChar == ((int) '\t')) {
+            detectComment();
+            detectWhiteSpace();
         }
 
         Symbol sym;
@@ -202,7 +203,7 @@ public class LexAn extends Phase {
 
         if(currentChar == ((int) '\n')) {
             endLine++;
-            endCol = 0;
+            endCol = 1;
         } else {
             endCol++;
         }
@@ -217,21 +218,21 @@ public class LexAn extends Phase {
         switch (mode) {
             case 1: // = ASSIGN or EQU?
                 if(nextChar == ((int) '=')) {
-                    begCol = endCol;
+                    begCol = endCol; begLine = endLine;
                     endCol++;
                     return true;
                 }
                 break;
             case 2: // > GTH or GEQ?
                 if(nextChar == ((int) '=')) {
-                    begCol = endCol;
+                    begCol = endCol; begLine = endLine;
                     endCol++;
                     return true;
                 }
                 break;
             case 3: // < LTH or LEQ?
                 if(nextChar == ((int) '=')) {
-                    begCol = endCol;
+                    begCol = endCol; begLine = endLine;
                     endCol++;
                     return true;
                 }
@@ -239,7 +240,7 @@ public class LexAn extends Phase {
 
             case 4: // ! NOT or NEQ?
                 if(nextChar == ((int) '=')) {
-                    begCol = endCol;
+                    begCol = endCol; begLine = endLine;
                     endCol++;
                     return true;
                 }
@@ -251,7 +252,7 @@ public class LexAn extends Phase {
                 if (nextChar == ((int)'\'') || nextChar == ((int)'\"')) {
                     throw new CompilerError("bad char constant definition [must escape \\, \' and \"]");
                 }
-                begCol = endCol;
+                begCol = endCol; begLine = endLine;
                 endCol++;
                 currentChar = nextChar;
                 nextChar = readChar();
@@ -284,7 +285,7 @@ public class LexAn extends Phase {
                 if(!isBetween(nextChar, 32, 126)) {
                     throw new CompilerError("bad string constant definition [invalid character(s)]");
                 }
-                begCol = endCol;
+                begCol = endCol; begLine = endLine;
                 if(nextChar == ((char) '\"')) {
                     endCol++;
                     lexeme = "\"\"";
@@ -315,6 +316,31 @@ public class LexAn extends Phase {
         return false;
     }
 
+    private void detectWhiteSpace() {
+        while(currentChar == ((int) ' ') || currentChar == ((int) '\n') ||
+                currentChar == ((int) '\r') || currentChar == ((int) '\t')) {
+            if(currentChar == ((int)'\n')) {
+                endLine++;
+                endCol = 1;
+            } else
+                endCol++;
+            currentChar = readChar();
+        }
+    }
+
+    private void detectComment() {
+        if(currentChar != ((int)'#')) {
+            return;
+        }
+        while(currentChar == ((int)'#')) {
+            while (currentChar != '\n') {
+                currentChar = readChar();
+            }
+            endLine++;
+            endCol = 1;
+            currentChar = readChar();
+        }
+    }
 
     private int readChar() {
         int tmp = -1;

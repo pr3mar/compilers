@@ -198,18 +198,95 @@ public class LexAn extends Phase {
                 }
                 break;
             default:
-                sym = new Symbol(Symbol.Token.ERROR, new Position(task.srcFName, endLine, endCol));
+                sym = getIdentifiers();
+//                sym = new Symbol(Symbol.Token.ERROR, new Position(task.srcFName, endLine, endCol));
         }
 
-        if(currentChar == ((int) '\n')) {
-            endLine++;
-            endCol = 1;
-        } else {
+//        if(currentChar == ((int) '\n')) {
+//            endLine++;
+//            endCol = 1;
+//        } else {
             endCol++;
-        }
+//        }
 
         return log(sym);
 	}
+
+    Symbol getIdentifiers() {
+        lexeme = "";
+        begLine = endLine; begCol = endCol;
+        boolean underscore = false;
+        boolean number = false;
+        read = true;
+        while(currentChar == ((int) '_') ||
+                isBetween(currentChar, 48, 57) ||
+                    isBetween(currentChar, 65, 90) ||
+                        isBetween(currentChar, 97, 122)) {
+            if(currentChar == ((char) '_')) underscore = true;
+            if(isBetween(currentChar, 48, 57)) number = true;
+            lexeme += (char) currentChar;
+            endCol++;
+            currentChar = readChar();
+        }
+        endCol--;
+        if(underscore || number)
+            return new Symbol(Symbol.Token.IDENTIFIER, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+        else {
+            switch (lexeme) {
+                // constants
+                case "true":
+                case "false":
+                    return new Symbol(Symbol.Token.CONST_BOOLEAN, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+                case "null":
+                    return new Symbol(Symbol.Token.CONST_NULL, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+                case "none":
+                    return new Symbol(Symbol.Token.CONST_NONE, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+
+                // type names
+                case "integer":
+                    return new Symbol(Symbol.Token.INTEGER, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+                case "boolean":
+                    return new Symbol(Symbol.Token.BOOLEAN, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+                case "char":
+                    return new Symbol(Symbol.Token.CHAR, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+                case "string":
+                    return new Symbol(Symbol.Token.STRING, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+                case "void":
+                    return new Symbol(Symbol.Token.VOID, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+
+                // keywords
+                case "arr":
+                    return new Symbol(Symbol.Token.ARR, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+                case "else":
+                    return new Symbol(Symbol.Token.ELSE, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+                case "end":
+                    return new Symbol(Symbol.Token.END, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+                case "for":
+                    return new Symbol(Symbol.Token.FOR, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+                case "fun":
+                    return new Symbol(Symbol.Token.FUN, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+                case "if":
+                    return new Symbol(Symbol.Token.IF, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+                case "then":
+                    return new Symbol(Symbol.Token.THEN, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+                case "ptr":
+                    return new Symbol(Symbol.Token.PTR, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+                case "rec":
+                    return new Symbol(Symbol.Token.REC, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+                case "typ":
+                    return new Symbol(Symbol.Token.TYP, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+                case "var":
+                    return new Symbol(Symbol.Token.VAR, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+                case "where":
+                    return new Symbol(Symbol.Token.WHERE, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+                case "while":
+                    return new Symbol(Symbol.Token.WHILE, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+                default:
+                    return new Symbol(Symbol.Token.IDENTIFIER, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+            }
+        }
+
+    }
 
 
     boolean readNext() {

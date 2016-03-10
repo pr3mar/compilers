@@ -1,0 +1,7 @@
+# json with a wrong escaped character
+{
+    "id": 1,
+    "price": 12.50,
+    "tags": ["home", "green"],
+    "name": "A green\ door"
+}

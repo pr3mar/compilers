@@ -1,0 +1,5 @@
+for integer i in arr a:
+	echo(i)
+# $ is an illegal character outside of string/character constants
+	i $= 5
+end

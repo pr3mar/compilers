@@ -25,6 +25,7 @@ public class LexAn extends Phase {
     private int nextChar;
     private boolean read;
     private String lexeme;
+    private boolean escaped;
 
 	/**
 	 * Constructs a new lexical analyzer.
@@ -198,8 +199,18 @@ public class LexAn extends Phase {
                 }
                 break;
             default:
-                sym = getIdentifiers();
+                if(isBetween(currentChar, 48, 57)) {
+                    sym = getIntegers();
+                } else if (currentChar == ((int) '_') ||
+                            isBetween(currentChar, 48, 57) ||
+                                isBetween(currentChar, 65, 90) ||
+                                    isBetween(currentChar, 97, 122)){
+                    sym = getIdentifiers();
+                } else {
+                    throw  new CompilerError("invalid character!");
+                }
 //                sym = new Symbol(Symbol.Token.ERROR, new Position(task.srcFName, endLine, endCol));
+
         }
 
 //        if(currentChar == ((int) '\n')) {
@@ -211,6 +222,24 @@ public class LexAn extends Phase {
 
         return log(sym);
 	}
+
+    Symbol getIntegers() {
+        lexeme = "";
+        begLine = endLine; begCol = endCol;
+        read = true;
+        while(isBetween(currentChar, 48, 57)) {
+            lexeme += (char) currentChar;
+            endCol++;
+            currentChar = readChar();
+        }
+        endCol--;
+        try {
+            long num = Long.parseLong(lexeme);
+            return new Symbol(Symbol.Token.CONST_INTEGER, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+        } catch (NumberFormatException e) {
+            throw new CompilerError("integer too big or too small");
+        }
+    }
 
     Symbol getIdentifiers() {
         lexeme = "";
@@ -352,7 +381,10 @@ public class LexAn extends Phase {
 //                }
                 if(nextChar == ((int)'\'')) {
                     endCol++;
-                    lexeme = "\'" + ((char)currentChar) + "\'";
+                    if(!escaped)
+                        lexeme = "\'" + ((char)currentChar) + "\'";
+                    else
+                        escaped = false;
                     return true;
                 } else {
                     throw  new CompilerError("bad character constant definition [only 1 char long]");
@@ -412,10 +444,16 @@ public class LexAn extends Phase {
         while(currentChar == ((int)'#')) {
             while (currentChar != '\n') {
                 currentChar = readChar();
+                if(currentChar == -1) {
+                    throw new CompilerError("end of file detected");
+                }
             }
             endLine++;
             endCol = 1;
             currentChar = readChar();
+            if(currentChar == -1) {
+                throw new CompilerError("end of file detected");
+            }
         }
     }
 
@@ -442,6 +480,7 @@ public class LexAn extends Phase {
                 case '\\':
                 case '\'':
                 case '\"':
+                    escaped = true;
                     if(mode == 5)
                         lexeme = "'\\" + ((char)nextChar) + "'";
                     if(mode == 6)

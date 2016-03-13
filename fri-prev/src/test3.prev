@@ -1,0 +1,2 @@
+'a'+-"str"*"many escapes\n\t\\\'\""
+^'\n''\\'"\\"where # a comment

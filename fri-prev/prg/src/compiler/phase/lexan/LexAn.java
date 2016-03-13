@@ -451,9 +451,9 @@ public class LexAn extends Phase {
             endLine++;
             endCol = 1;
             currentChar = readChar();
-            if(currentChar == -1) {
-                throw new CompilerError("end of file detected");
-            }
+//            if(currentChar == -1) {
+//                throw new CompilerError("end of file detected");
+//            }
         }
     }
 

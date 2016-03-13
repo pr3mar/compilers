@@ -1,2 +1,3 @@
 var i:char = '\t', println(i).
 #"this comment ends with EOF instead of LF
+sifdhgdf

@@ -1,0 +1,3 @@
+# illegal character inside string
+"this is ok \'"
+"this is not ok ' "

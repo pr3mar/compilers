@@ -267,49 +267,49 @@ public class LexAn extends Phase {
                 case "false":
                     return new Symbol(Symbol.Token.CONST_BOOLEAN, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
                 case "null":
-                    return new Symbol(Symbol.Token.CONST_NULL, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+                    return new Symbol(Symbol.Token.CONST_NULL, "", new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
                 case "none":
-                    return new Symbol(Symbol.Token.CONST_NONE, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+                    return new Symbol(Symbol.Token.CONST_NONE, "", new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
 
                 // type names
                 case "integer":
-                    return new Symbol(Symbol.Token.INTEGER, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+                    return new Symbol(Symbol.Token.INTEGER, "", new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
                 case "boolean":
-                    return new Symbol(Symbol.Token.BOOLEAN, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+                    return new Symbol(Symbol.Token.BOOLEAN, "", new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
                 case "char":
-                    return new Symbol(Symbol.Token.CHAR, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+                    return new Symbol(Symbol.Token.CHAR, "", new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
                 case "string":
-                    return new Symbol(Symbol.Token.STRING, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+                    return new Symbol(Symbol.Token.STRING, "", new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
                 case "void":
-                    return new Symbol(Symbol.Token.VOID, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+                    return new Symbol(Symbol.Token.VOID, "", new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
 
                 // keywords
                 case "arr":
-                    return new Symbol(Symbol.Token.ARR, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+                    return new Symbol(Symbol.Token.ARR, "", new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
                 case "else":
-                    return new Symbol(Symbol.Token.ELSE, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+                    return new Symbol(Symbol.Token.ELSE, "", new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
                 case "end":
-                    return new Symbol(Symbol.Token.END, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+                    return new Symbol(Symbol.Token.END, "", new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
                 case "for":
-                    return new Symbol(Symbol.Token.FOR, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+                    return new Symbol(Symbol.Token.FOR, "", new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
                 case "fun":
-                    return new Symbol(Symbol.Token.FUN, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+                    return new Symbol(Symbol.Token.FUN, "", new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
                 case "if":
-                    return new Symbol(Symbol.Token.IF, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+                    return new Symbol(Symbol.Token.IF, "", new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
                 case "then":
-                    return new Symbol(Symbol.Token.THEN, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+                    return new Symbol(Symbol.Token.THEN, "", new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
                 case "ptr":
-                    return new Symbol(Symbol.Token.PTR, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+                    return new Symbol(Symbol.Token.PTR, "", new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
                 case "rec":
-                    return new Symbol(Symbol.Token.REC, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+                    return new Symbol(Symbol.Token.REC, "", new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
                 case "typ":
-                    return new Symbol(Symbol.Token.TYP, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+                    return new Symbol(Symbol.Token.TYP, "", new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
                 case "var":
-                    return new Symbol(Symbol.Token.VAR, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+                    return new Symbol(Symbol.Token.VAR, "", new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
                 case "where":
-                    return new Symbol(Symbol.Token.WHERE, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+                    return new Symbol(Symbol.Token.WHERE, "", new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
                 case "while":
-                    return new Symbol(Symbol.Token.WHILE, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+                    return new Symbol(Symbol.Token.WHILE, "", new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
                 default:
                     return new Symbol(Symbol.Token.IDENTIFIER, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
             }
@@ -321,6 +321,7 @@ public class LexAn extends Phase {
     boolean readNext() {
         nextChar = readChar();
         read = false;
+        escaped = false;
         switch (mode) {
             case 1: // = ASSIGN or EQU?
                 if(nextChar == ((int) '=')) {
@@ -362,6 +363,7 @@ public class LexAn extends Phase {
                 endCol++;
                 currentChar = nextChar;
                 nextChar = readChar();
+//                escaped = false;
                 escapeChar();
 //                if(currentChar == ((int) '\\')) {
 //                    switch (nextChar) {
@@ -402,6 +404,9 @@ public class LexAn extends Phase {
                 }
                 lexeme = "\"";
                 while(nextChar != ((char) '\"')) {
+                    if (nextChar == ((int)'\'') || nextChar == ((int)'\"')) {
+                        throw new CompilerError("bad string  constant definition [must escape \\, \' and \"]");
+                    }
                     if(!isBetween(nextChar, 32, 126)) {
                         throw new CompilerError("bad string constant definition [invalid character(s)]");
                     }

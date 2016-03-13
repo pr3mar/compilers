@@ -1,0 +1,12 @@
+# check symbols
++ & : ,{}[]()./ == >== > < <= @ % * != ^
+"boolean constans are true &" false
+"escape \\ \t  \n \' from azkaban \" "
+'c''h''a''r''s''\\''\t''\n' '\'' '\"'
+
+none	null
+
+identifiers type names and keywords
+integer boolean char string
+void:fun:if:a==5:then:arr=0:else:arr=1:end 
+where!rec!while!typ

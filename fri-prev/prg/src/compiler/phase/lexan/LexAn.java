@@ -187,7 +187,7 @@ public class LexAn extends Phase {
                 if(readNext()) {
                     sym = new Symbol(Symbol.Token.CONST_CHAR, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
                 } else {
-                    throw new CompilerError("bad character constant definition");
+                    throw new CompilerError("bad character constant definition at " + new Position(task.srcFName, endLine, endCol));
                 }
                 break;
             case '\"':
@@ -195,7 +195,7 @@ public class LexAn extends Phase {
                 if(readNext()) {
                     sym = new Symbol(Symbol.Token.CONST_STRING, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
                 } else {
-                    throw new CompilerError("bad string constant definition");
+                    throw new CompilerError("bad string constant definition at "  + new Position(task.srcFName, endLine, endCol));
                 }
                 break;
             default:
@@ -207,7 +207,7 @@ public class LexAn extends Phase {
                                     isBetween(currentChar, 97, 122)){
                     sym = getIdentifiers();
                 } else {
-                    throw  new CompilerError("invalid character!");
+                    throw new CompilerError("invalid character! at "  + new Position(task.srcFName, endLine, endCol));
                 }
 //                sym = new Symbol(Symbol.Token.ERROR, new Position(task.srcFName, endLine, endCol));
 
@@ -237,7 +237,7 @@ public class LexAn extends Phase {
             long num = Long.parseLong(lexeme);
             return new Symbol(Symbol.Token.CONST_INTEGER, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
         } catch (NumberFormatException e) {
-            throw new CompilerError("integer too big or too small");
+            throw new CompilerError("integer too big or too small at " + new Position(task.srcFName, endLine, endCol));
         }
     }
 
@@ -354,10 +354,10 @@ public class LexAn extends Phase {
                 break;
             case 5: // char constant
                 if(!isBetween(nextChar, 32, 126)) {
-                    throw new CompilerError("bad character constant definition [invalid character]");
+                    throw new CompilerError("bad character constant definition [invalid character] at "  + new Position(task.srcFName, endLine, endCol));
                 }
                 if (nextChar == ((int)'\'') || nextChar == ((int)'\"')) {
-                    throw new CompilerError("bad char constant definition [must escape \\, \' and \"]");
+                    throw new CompilerError("bad char constant definition [must escape \\, \' and \"] at "  + new Position(task.srcFName, endLine, endCol));
                 }
                 begCol = endCol; begLine = endLine;
                 endCol++;
@@ -389,12 +389,12 @@ public class LexAn extends Phase {
                         escaped = false;
                     return true;
                 } else {
-                    throw  new CompilerError("bad character constant definition [only 1 char long]");
+                    throw  new CompilerError("bad character constant definition [only 1 char long] at "  + new Position(task.srcFName, endLine, endCol));
                 }
 //                break;
             case 6: // string constant
                 if(!isBetween(nextChar, 32, 126)) {
-                    throw new CompilerError("bad string constant definition [invalid character(s)]");
+                    throw new CompilerError("bad string constant definition [invalid character(s)] at "  + new Position(task.srcFName, endLine, endCol));
                 }
                 begCol = endCol; begLine = endLine;
                 if(nextChar == ((char) '\"')) {
@@ -405,10 +405,10 @@ public class LexAn extends Phase {
                 lexeme = "\"";
                 while(nextChar != ((char) '\"')) {
                     if (nextChar == ((int)'\'') || nextChar == ((int)'\"')) {
-                        throw new CompilerError("bad string  constant definition [must escape \\, \' and \"]");
+                        throw new CompilerError("bad string  constant definition [must escape \\, \' and \"] at "  + new Position(task.srcFName, endLine, endCol));
                     }
                     if(!isBetween(nextChar, 32, 126)) {
-                        throw new CompilerError("bad string constant definition [invalid character(s)]");
+                        throw new CompilerError("bad string constant definition [invalid character(s)] at "  + new Position(task.srcFName, endLine, endCol));
                     }
                     currentChar = nextChar;
                     endCol++;
@@ -436,6 +436,8 @@ public class LexAn extends Phase {
             if(currentChar == ((int)'\n')) {
                 endLine++;
                 endCol = 1;
+            } else if(currentChar == ((int)'\t')) {
+                endCol += 8;
             } else
                 endCol++;
             currentChar = readChar();
@@ -450,7 +452,10 @@ public class LexAn extends Phase {
             while (currentChar != '\n') {
                 currentChar = readChar();
                 if(currentChar == -1) {
-                    throw new CompilerError("end of file detected");
+                    throw new CompilerError("end of file detected at " + new Position(task.srcFName, endLine, endCol));
+                }
+                if(!isBetween(currentChar, 0, 127)) {
+                    throw new CompilerError("illegal character detected at " + new Position(task.srcFName, endLine, endCol));
                 }
             }
             endLine++;
@@ -492,7 +497,7 @@ public class LexAn extends Phase {
                         lexeme += "\\" + ((char)nextChar);
                     break;
                 default:
-                    throw new CompilerError("bad character constant definition [invalid character is escaped]");
+                    throw new CompilerError("bad character constant definition [invalid character is escaped] at " + new Position(task.srcFName, endLine, endCol));
             }
             currentChar = nextChar;
             endCol++;

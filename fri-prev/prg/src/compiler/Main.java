@@ -2,6 +2,7 @@ package compiler;
 
 import compiler.common.report.*;
 import compiler.phase.lexan.*;
+import compiler.phase.synan.*;
 
 /**
  * The compiler's entry point.
@@ -39,6 +40,13 @@ public class Main {
 					lexAn.close();
 					break;
 				}
+
+				// ***** Syntax analysis. *****
+				SynAn synAn = new SynAn(task);
+				synAn.synAn();
+				synAn.close();
+				if (task.phase.equals("synan"))
+					break;
 
 				break;
 			}

@@ -4,7 +4,7 @@ import compiler.common.report.*;
 
 /**
  * The parameters of the compilation process.
- * 
+ *
  * @author sliva
  */
 public class Task {
@@ -12,14 +12,14 @@ public class Task {
 	/** The name of the source file. */
 	public final String srcFName;
 
-	/** The name of the */
+	/** The stem of the name of the log files. */
 	public final String xmlFName;
 
 	/** The name of the directory containing .xsl files. */
 	public final String xslDName;
 
 	/** A regular expression describing all phases of the compiler. */
-	private static final String allPhases = "(lexan)";
+	private static final String allPhases = "(lexan|synan)";
 
 	/** A list of phases logging should be performed for. */
 	public final String loggedPhases;

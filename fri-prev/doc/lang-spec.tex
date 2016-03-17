@@ -6,6 +6,8 @@
 \parindent=0pt
 \parskip=0.3\baselineskip
 
+\def\production#1#2{\noindent#1$ \longrightarrow $#2\par}
+\def\nont#1{\textit{#1}}
 \def\term#1{\texttt{#1}}
 
 \title{\textbf{The PREV Language Specification}}
@@ -49,5 +51,18 @@ Additionaly, the source might include the following:
 \end{itemize}
 
 To break the source file into individual symbols, the first-match-longest-match rule must be used.
+
+\section{Syntactic structure}
+
+The concrete syntax of the PREV programming language is defined by an LR(1) grammar.  Nonterminal and terminal symbols are written in italic and typewritter fonts, respectivelly.  Terminal symbols \term{IDENTIFIER}, \term{INTEGER}, \term{BOOLEAN}, \term{CHAR} and \term{STRING} denote (all) identifiers, integer constants, bool\-ean constants, character constants and string constants, respectivelly.  The start symbol of the grammar is \nont{Program}.  The LR(1) grammar contains the following productions:
+\medskip\par
+
+\begingroup
+\parskip=0pt
+\input grammar.tex
+\medskip\par
+\endgroup
+
+Note that the LR(1) grammar generates certain sentential forms which are prohibited by semantics.
 
 \end{document}

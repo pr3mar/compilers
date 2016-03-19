@@ -126,6 +126,7 @@ public class SynAn extends Phase {
     private void begLog(String nontName) {
         if (logger == null)
             return;
+        System.out.println(nontName);
         logger.begElement("nont");
         logger.addAttribute("name", nontName);
     }
@@ -857,7 +858,7 @@ public class SynAn extends Phase {
     }
 
     private void parseArgumentsOpt() {
-        begLog("Expression");
+        begLog("ArgumentsOpt");
         switch (laSymbol.token) {
             case WHERE:
             case END:
@@ -937,7 +938,7 @@ public class SynAn extends Phase {
     }
 
     private void parseDeclaration() {
-        begLog("DeclarationsPrime");
+        begLog("Declaration");
         switch (laSymbol.token) {
             case TYP:
                 parseTypeDeclaration();

@@ -2,6 +2,7 @@ package compiler.phase.synan;
 
 import java.util.*;
 
+import compiler.data.ast.Program;
 import org.w3c.dom.*;
 
 import compiler.*;
@@ -9,7 +10,6 @@ import compiler.common.logger.*;
 import compiler.common.report.*;
 import compiler.phase.*;
 import compiler.phase.lexan.*;
-import sun.org.mozilla.javascript.ast.Assignment;
 
 /**
  * The syntax analyzer.
@@ -126,7 +126,7 @@ public class SynAn extends Phase {
     private void begLog(String nontName) {
         if (logger == null)
             return;
-        System.out.println(nontName);
+//        System.out.println(nontName);
         logger.begElement("nont");
         logger.addAttribute("name", nontName);
     }
@@ -145,11 +145,12 @@ public class SynAn extends Phase {
      * <p/>
      * This method performs the syntax analysis of the source file.
      */
-    public void synAn() {
+    public Program synAn() {
         laSymbol = lexAn.lexAn();
         parseProgram();
         if (laSymbol.token != Symbol.Token.EOF)
             Report.warning(laSymbol, "Unexpected symbol(s) at the end of file.");
+        return null;
     }
 
     // TODO

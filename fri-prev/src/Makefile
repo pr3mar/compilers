@@ -2,6 +2,9 @@
 # START GOOGLE CHROME WITH --allow-file-access-from-files
 #
 
+%.abstr.xml	: %.prev
+	java -classpath ../prg/bin compiler.Main --xsldir=../prg/xsl --phase=abstr --loggedphases=abstr $<
+
 %.synan.xml	: %.prev
 	java -classpath ../prg/bin compiler.Main --xsldir=../prg/xsl --phase=synan --loggedphases=synan $<
 
@@ -9,7 +12,4 @@
 	java -classpath ../prg/bin compiler.Main --xsldir=../prg/xsl --phase=lexan --loggedphases=lexan $<
 
 clean		:
-	mv test.prev .test.prev
-	'rm' -fr *.prev
-	mv .test.prev test.prev
 	'rm' -fr *.xml

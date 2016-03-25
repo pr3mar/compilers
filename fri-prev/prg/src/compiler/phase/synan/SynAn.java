@@ -857,7 +857,13 @@ public class SynAn extends Phase {
         switch (laSymbol.token) {
             case IDENTIFIER:
                 Symbol funID = nextSymbol();
-                exp = new FunCall(funID.position, funID.lexeme, parseArgumentsOpt());
+//                exp = new FunCall(funID.position, funID.lexeme, parseArgumentsOpt());
+                Expr tmp = parseArgumentsOpt(funID);
+                if(tmp == null) {
+                    exp = new VarName(funID.position, funID.lexeme);
+                } else {
+                    exp = tmp;
+                }
                 break;
             case CONST_INTEGER:
                 consntant = nextSymbol();
@@ -957,9 +963,9 @@ public class SynAn extends Phase {
         return exp;
     }
 
-    private LinkedList<Expr> parseArgumentsOpt() {
+    private Expr parseArgumentsOpt(Symbol name) {
         begLog("ArgumentsOpt");
-        LinkedList<Expr> exprs = new LinkedList<Expr>();
+        Expr expr = null;
         switch (laSymbol.token) {
             case WHERE:
             case END:
@@ -992,8 +998,8 @@ public class SynAn extends Phase {
             case EOF:
                 break;
             case OPENING_PARENTHESIS:
-                nextSymbol(); // shift opening parenthesis
-                exprs = parseExpressions();
+                Symbol opPar = nextSymbol(); // shift opening parenthesis
+                expr = new FunCall(name.position, name.lexeme, parseExpressions());
                 if (laSymbol.token != Symbol.Token.CLOSING_PARENTHESIS) {
                     throw new CompilerError("[syntax error, parseArgumentsOpt] invalid expression at " + laSymbol);
                 }
@@ -1004,7 +1010,7 @@ public class SynAn extends Phase {
 
         }
         endLog();
-        return exprs;
+        return expr;
     }
 
     private LinkedList<Decl> parseDeclarations() {

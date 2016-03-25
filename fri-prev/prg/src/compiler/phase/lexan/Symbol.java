@@ -149,6 +149,9 @@ public class Symbol extends Position implements Loggable {
 	/** The lexeme of this symbol. */
 	public final String lexeme;
 
+	/** The position of this symbol. */
+	public final Position position;
+
 	/**
 	 * Constructs a new symbol.
 	 * 
@@ -161,6 +164,7 @@ public class Symbol extends Position implements Loggable {
 	 */
 	public Symbol(Token token, String lexeme, Position position) {
 		super(position);
+		this.position = position;
 		this.token = token;
 		this.lexeme = lexeme;
 	}
@@ -175,6 +179,7 @@ public class Symbol extends Position implements Loggable {
 	 */
 	public Symbol(Token token, Position position) {
 		super(position);
+		this.position = position;
 		this.token = token;
 		this.lexeme = null;
 	}

@@ -337,6 +337,7 @@ public class SynAn extends Phase {
             case FUN:
             case VAR:
             case EOF:
+                bin = op1;
                 break;
             case ASSIGN:
                 Symbol symAssign = nextSymbol(); // shift assign
@@ -396,6 +397,7 @@ public class SynAn extends Phase {
             case FUN:
             case VAR:
             case EOF:
+                bin = op1;
                 break;
             case OR:
                 Symbol symOr = nextSymbol(); // shift OR
@@ -457,6 +459,7 @@ public class SynAn extends Phase {
             case FUN:
             case VAR:
             case EOF:
+                bin = op1;
                 break;
             case AND:
                 Symbol symAnd = nextSymbol();
@@ -500,9 +503,9 @@ public class SynAn extends Phase {
         return bin;
     }
 
-    private BinExpr parseRelationalExpressionPrime(Expr op1) {
+    private Expr parseRelationalExpressionPrime(Expr op1) {
         begLog("RelationalExpressionPrime");
-        BinExpr bin = null;
+        Expr bin = null;
         Symbol operator;
         switch (laSymbol.token) {
             case WHERE:
@@ -520,6 +523,7 @@ public class SynAn extends Phase {
             case FUN:
             case VAR:
             case EOF:
+                bin = op1;
                 break;
             case EQU:
                 operator = nextSymbol(); // shift ==
@@ -608,6 +612,7 @@ public class SynAn extends Phase {
             case FUN:
             case VAR:
             case EOF:
+                bin = op1;
                 break;
             case ADD:
                 operator = nextSymbol();
@@ -656,9 +661,9 @@ public class SynAn extends Phase {
         return bin;
     }
 
-    private BinExpr parseMultiplicativeExpressionPrime(Expr op1) {
+    private Expr parseMultiplicativeExpressionPrime(Expr op1) {
         begLog("MultiplicativeExpressionPrime");
-        BinExpr bin = null;
+        Expr bin = null;
         Symbol operator;
         switch (laSymbol.token) {
             case WHERE:
@@ -684,6 +689,7 @@ public class SynAn extends Phase {
             case FUN:
             case VAR:
             case EOF:
+                bin = op1;
                 break;
             case MUL:
                 operator = nextSymbol();

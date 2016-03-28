@@ -31,47 +31,49 @@ public class SynAn extends Phase {
     public SynAn(Task task) {
         super(task, "synan");
         this.lexAn = new LexAn(task);
-        /*this.logger.setTransformer(//
-                new Transformer() {
-                    // This transformer produces the
-                    // left-most derivation.
+        if (task.loggedPhases.equals("synan")) {
+            this.logger.setTransformer(//
+                    new Transformer() {
+                        // This transformer produces the
+                        // left-most derivation.
 
-                    private String nodeName(Node node) {
-                        Element element = (Element) node;
-                        String nodeName = element.getTagName();
-                        if (nodeName.equals("nont")) {
-                            return element.getAttribute("name");
-                        }
-                        if (nodeName.equals("symbol")) {
-                            return element.getAttribute("name");
-                        }
-                        return null;
-                    }
-
-                    private void leftMostDer(Node node) {
-                        if (((Element) node).getTagName().equals("nont")) {
-                            String nodeName = nodeName(node);
-                            NodeList children = node.getChildNodes();
-                            StringBuffer production = new StringBuffer();
-                            production.append(nodeName + " -->");
-                            for (int childIdx = 0; childIdx < children.getLength(); childIdx++) {
-                                Node child = children.item(childIdx);
-                                String childName = nodeName(child);
-                                production.append(" " + childName);
+                        private String nodeName(Node node) {
+                            Element element = (Element) node;
+                            String nodeName = element.getTagName();
+                            if (nodeName.equals("nont")) {
+                                return element.getAttribute("name");
                             }
-                            Report.info(production.toString());
-                            for (int childIdx = 0; childIdx < children.getLength(); childIdx++) {
-                                Node child = children.item(childIdx);
-                                leftMostDer(child);
+                            if (nodeName.equals("symbol")) {
+                                return element.getAttribute("name");
+                            }
+                            return null;
+                        }
+
+                        private void leftMostDer(Node node) {
+                            if (((Element) node).getTagName().equals("nont")) {
+                                String nodeName = nodeName(node);
+                                NodeList children = node.getChildNodes();
+                                StringBuffer production = new StringBuffer();
+                                production.append(nodeName + " -->");
+                                for (int childIdx = 0; childIdx < children.getLength(); childIdx++) {
+                                    Node child = children.item(childIdx);
+                                    String childName = nodeName(child);
+                                    production.append(" " + childName);
+                                }
+                                Report.info(production.toString());
+                                for (int childIdx = 0; childIdx < children.getLength(); childIdx++) {
+                                    Node child = children.item(childIdx);
+                                    leftMostDer(child);
+                                }
                             }
                         }
-                    }
 
-                    public Document transform(Document doc) {
-                        leftMostDer(doc.getDocumentElement().getFirstChild());
-                        return doc;
-                    }
-                });*/
+                        public Document transform(Document doc) {
+                            leftMostDer(doc.getDocumentElement().getFirstChild());
+                            return doc;
+                        }
+                    });
+        }
     }
 
     /**
@@ -173,7 +175,10 @@ public class SynAn extends Phase {
             case IF:
             case FOR:
             case WHILE:
-                prg = new Program( new Position(laSymbol.position), parseExpression());
+                Symbol copy = laSymbol;
+                Expr tmp = parseExpression();
+                prg = new Program( new Position(copy, tmp), tmp);
+//                prg = new Program( new Position(laSymbol.position), parseExpression());
                 break;
             default:
                 throw new CompilerError("[syntax error, parseProgram] invalid expression at " + laSymbol);
@@ -216,13 +221,13 @@ public class SynAn extends Phase {
         begLog("ExpressionPrime");
         switch (laSymbol.token) {
             case WHERE:
-                Symbol symWhere = nextSymbol();
+                Symbol symWhere = nextSymbol(); // shift where
                 LinkedList<Decl> decls = parseDeclarations();
                 if (laSymbol.token != Symbol.Token.END) {
                     throw new CompilerError("[syntax error] invalid expression at " + laSymbol);
                 }
-                nextSymbol(); // shift end
-                expr = new WhereExpr(symWhere.position, expr, decls);
+                Symbol symEnd = nextSymbol(); // shift end
+                expr = new WhereExpr(new Position(expr, symEnd), expr, decls);
                 expr = parseExpressionPrime(expr);
                 break;
             case END:
@@ -341,7 +346,8 @@ public class SynAn extends Phase {
                 break;
             case ASSIGN:
                 Symbol symAssign = nextSymbol(); // shift assign
-                bin = new BinExpr(symAssign.position, BinExpr.Oper.ASSIGN, op1, parseDisjunctiveExpression());
+                Expr op2 = parseDisjunctiveExpression();
+                bin = new BinExpr(new Position(op1, op2), BinExpr.Oper.ASSIGN, op1, op2);
                 break;
             default:
                 throw new CompilerError("[syntax error, parseAssignmentExpressionPrime] invalid expression at " + laSymbol);
@@ -401,7 +407,8 @@ public class SynAn extends Phase {
                 break;
             case OR:
                 Symbol symOr = nextSymbol(); // shift OR
-                bin = new BinExpr(symOr.position, BinExpr.Oper.OR, op1, parseConjunctiveExpression());
+                Expr op2 = parseConjunctiveExpression();
+                bin = new BinExpr(new Position(op1, op2), BinExpr.Oper.OR, op1, op2);
                 parseDisjunctiveExpressionPrime(bin);
                 break;
             default:
@@ -462,8 +469,9 @@ public class SynAn extends Phase {
                 bin = op1;
                 break;
             case AND:
-                Symbol symAnd = nextSymbol();
-                bin = new BinExpr(symAnd.position, BinExpr.Oper.AND, op1, parseRelationalExpression());
+                Symbol symAnd = nextSymbol(); // shift and
+                Expr op2 = parseRelationalExpression();
+                bin = new BinExpr(new Position(op1, op2), BinExpr.Oper.AND, op1, op2);
                 bin = parseConjunctiveExpressionPrime(bin);
                 break;
             default:
@@ -506,6 +514,7 @@ public class SynAn extends Phase {
     private Expr parseRelationalExpressionPrime(Expr op1) {
         begLog("RelationalExpressionPrime");
         Expr bin = null;
+        Expr op2;
         Symbol operator;
         switch (laSymbol.token) {
             case WHERE:
@@ -527,27 +536,33 @@ public class SynAn extends Phase {
                 break;
             case EQU:
                 operator = nextSymbol(); // shift ==
-                bin = new BinExpr(operator.position, BinExpr.Oper.EQU, op1, parseAdditiveExpression());
+                op2 = parseAdditiveExpression();
+                bin = new BinExpr(new Position(op1, op2), BinExpr.Oper.EQU, op1, op2);
                 break;
             case NEQ:
                 operator = nextSymbol(); // shift !=
-                bin = new BinExpr(operator.position, BinExpr.Oper.NEQ, op1, parseAdditiveExpression());
+                op2 = parseAdditiveExpression();
+                bin = new BinExpr(new Position(op1, op2), BinExpr.Oper.NEQ, op1, op2);
                 break;
             case LTH:
                 operator = nextSymbol(); // shift <
-                bin = new BinExpr(operator.position, BinExpr.Oper.LTH, op1, parseAdditiveExpression());
+                op2 = parseAdditiveExpression();
+                bin = new BinExpr(new Position(op1, op2), BinExpr.Oper.LTH, op1, op2);
                 break;
             case GTH:
                 operator = nextSymbol(); // shift >
-                bin = new BinExpr(operator.position, BinExpr.Oper.GTH, op1, parseAdditiveExpression());
+                op2 = parseAdditiveExpression();
+                bin = new BinExpr(new Position(op1, op2), BinExpr.Oper.GTH, op1, op2);
                 break;
             case LEQ:
                 operator = nextSymbol(); // shift <
-                bin = new BinExpr(operator.position, BinExpr.Oper.LEQ, op1, parseAdditiveExpression());
+                op2 = parseAdditiveExpression();
+                bin = new BinExpr(new Position(op1, op2), BinExpr.Oper.LEQ, op1, op2);
                 break;
             case GEQ:
                 operator = nextSymbol(); // shift >=
-                bin = new BinExpr(operator.position, BinExpr.Oper.GEQ, op1, parseAdditiveExpression());
+                op2 = parseAdditiveExpression();
+                bin = new BinExpr(new Position(op1, op2), BinExpr.Oper.GEQ, op1, op2);
                 break;
             default:
                 throw new CompilerError("[syntax error, parseRelationalExpressionPrime] invalid expression at " + laSymbol);
@@ -589,6 +604,7 @@ public class SynAn extends Phase {
     private Expr parseAdditiveExpressionPrime(Expr op1) {
         begLog("AdditiveExpressionPrime");
         Expr bin = null;
+        Expr op2;
         Symbol operator;
         switch (laSymbol.token) {
             case WHERE:
@@ -615,13 +631,15 @@ public class SynAn extends Phase {
                 bin = op1;
                 break;
             case ADD:
-                operator = nextSymbol();
-                bin = new BinExpr(operator.position, BinExpr.Oper.ADD, op1, parseMultiplicativeExpression());
+                operator = nextSymbol(); // shift +
+                op2 = parseMultiplicativeExpression();
+                bin = new BinExpr(new Position(op1, op2), BinExpr.Oper.ADD, op1, op2);
                 bin = parseAdditiveExpressionPrime(bin);
                 break;
             case SUB:
-                operator = nextSymbol();
-                bin = new BinExpr(operator.position, BinExpr.Oper.SUB, op1, parseMultiplicativeExpression());
+                operator = nextSymbol(); // shift -
+                op2 = parseMultiplicativeExpression();
+                bin = new BinExpr(new Position(op1, op2), BinExpr.Oper.SUB, op1, op2);
                 bin = parseAdditiveExpressionPrime(bin);
                 break;
             default:
@@ -664,6 +682,7 @@ public class SynAn extends Phase {
     private Expr parseMultiplicativeExpressionPrime(Expr op1) {
         begLog("MultiplicativeExpressionPrime");
         Expr bin = null;
+        Expr op2;
         Symbol operator;
         switch (laSymbol.token) {
             case WHERE:
@@ -693,17 +712,20 @@ public class SynAn extends Phase {
                 break;
             case MUL:
                 operator = nextSymbol();
-                bin = new BinExpr(operator.position, BinExpr.Oper.MUL, op1, parsePrefixExpression());
+                op2 = parsePrefixExpression();
+                bin = new BinExpr(new Position(op1, op2), BinExpr.Oper.MUL, op1, op2);
                 bin = parseMultiplicativeExpressionPrime(bin);
                 break;
             case DIV:
                 operator = nextSymbol();
-                bin = new BinExpr(operator.position, BinExpr.Oper.DIV, op1, parsePrefixExpression());
+                op2 = parsePrefixExpression();
+                bin = new BinExpr(new Position(op1, op2), BinExpr.Oper.DIV, op1, op2);
                 bin = parseMultiplicativeExpressionPrime(bin);
                 break;
             case MOD:
                 operator = nextSymbol();
-                bin = new BinExpr(operator.position, BinExpr.Oper.MOD, op1, parsePrefixExpression());
+                op2 = parsePrefixExpression();
+                bin = new BinExpr(new Position(op1, op2), BinExpr.Oper.MOD, op1, op2);
                 bin = parseMultiplicativeExpressionPrime(bin);
                 break;
             default:
@@ -721,19 +743,23 @@ public class SynAn extends Phase {
         switch (laSymbol.token) {
             case ADD:
                 symVal = nextSymbol(); // shift mem
-                exp = new UnExpr(symVal.position, UnExpr.Oper.ADD, parsePrefixExpression());
+                exp = parsePrefixExpression();
+                exp = new UnExpr(new Position(symVal, exp), UnExpr.Oper.ADD, exp);
                 break;
             case SUB:
                 symVal = nextSymbol(); // shift mem
-                exp = new UnExpr(symVal.position, UnExpr.Oper.SUB, parsePrefixExpression());
+                exp = parsePrefixExpression();
+                exp = new UnExpr(new Position(symVal, exp), UnExpr.Oper.SUB, exp);
                 break;
             case NOT:
                 symVal = nextSymbol(); // shift mem
-                exp = new UnExpr(symVal.position, UnExpr.Oper.NOT, parsePrefixExpression());
+                exp = parsePrefixExpression();
+                exp = new UnExpr(new Position(symVal, exp), UnExpr.Oper.NOT, exp);
                 break;
             case MEM:
                 symVal = nextSymbol(); // shift mem
-                exp = new UnExpr(symVal.position, UnExpr.Oper.MEM, parsePrefixExpression());
+                exp = parsePrefixExpression();
+                exp = new UnExpr(new Position(symVal, exp), UnExpr.Oper.MEM, exp);
                 break;
             case OPENING_BRACKET:
                 symVal = nextSymbol(); // shift opening bracket
@@ -742,7 +768,8 @@ public class SynAn extends Phase {
                     throw new CompilerError("[syntax error, parsePrefixExpression] invalid expression at " + laSymbol);
                 }
                 nextSymbol(); // shift closing bracket
-                exp = new CastExpr(symVal.position, typ, parsePrefixExpression());
+                exp = parsePrefixExpression();
+                exp = new CastExpr(new Position(symVal, exp), typ, exp);
                 break;
             case IDENTIFIER:
             case CONST_INTEGER:
@@ -791,6 +818,7 @@ public class SynAn extends Phase {
 
     private Expr parsePostfixExpressionPrime(Expr exp) {
         begLog("PostfixExpressionPrime");
+        Expr tmp;
         Symbol symVal;
         switch (laSymbol.token) {
             case WHERE:
@@ -822,12 +850,13 @@ public class SynAn extends Phase {
                 break;
             case OPENING_BRACKET:
                 symVal = nextSymbol(); // shift opening bracket
-                exp = new BinExpr(symVal.position, BinExpr.Oper.ARR, exp, parseExpression());
+                tmp = parseExpression();
                 if (laSymbol.token != Symbol.Token.CLOSING_BRACKET) {
                     throw new CompilerError("[syntax error, parsePostfixExpressionPrime] invalid expression at " + laSymbol);
 
                 }
-                nextSymbol(); // shift closing bracket
+                symVal = nextSymbol(); // shift closing bracket
+                exp = new BinExpr(new Position(exp, symVal), BinExpr.Oper.ARR, exp, tmp);
                 exp = parsePostfixExpressionPrime(exp);
                 break;
             case DOT:
@@ -836,12 +865,17 @@ public class SynAn extends Phase {
                     throw new CompilerError("[syntax error, parsePostfixExpressionPrime] invalid expression at " + laSymbol);
                 }
                 Symbol symID = nextSymbol(); // shift identifier
-                exp = new BinExpr(symVal.position, BinExpr.Oper.REC, exp, new VarName(symID.position, symID.lexeme));
+                exp = new BinExpr(new Position(exp, symID), BinExpr.Oper.REC, exp, new VarName(symID.position, symID.lexeme));
                 exp = parsePostfixExpressionPrime(exp);
                 break;
             case VAL:
                 symVal = nextSymbol(); // shift val
-                exp = new UnExpr(symVal.position, UnExpr.Oper.VAL, parsePostfixExpressionPrime(exp));
+                tmp = parsePostfixExpressionPrime(exp);
+                if(symVal.cmpEnd(tmp) == 1) {
+                    exp = new UnExpr(new Position(exp, symVal), UnExpr.Oper.VAL, tmp);
+                } else {
+                    exp = new UnExpr(new Position(exp, tmp), UnExpr.Oper.VAL, tmp);
+                }
                 break;
             default:
                 throw new CompilerError("[syntax error, parsePostfixExpressionPrime] invalid expression at " + laSymbol);
@@ -853,12 +887,13 @@ public class SynAn extends Phase {
     private Expr parseAtomicExpression() {
         begLog("AtomicExpression");
         Expr exp = null;
+        Expr tmp;
         Symbol consntant;
         switch (laSymbol.token) {
             case IDENTIFIER:
                 Symbol funID = nextSymbol();
 //                exp = new FunCall(funID.position, funID.lexeme, parseArgumentsOpt());
-                Expr tmp = parseArgumentsOpt(funID);
+                tmp = parseArgumentsOpt(funID);
                 if(tmp == null) {
                     exp = new VarName(funID.position, funID.lexeme);
                 } else {
@@ -883,18 +918,19 @@ public class SynAn extends Phase {
                 break;
             case CONST_NULL:
                 consntant = nextSymbol();
-                exp = new AtomExpr(consntant.position, AtomExpr.AtomTypes.PTR, consntant.lexeme);
+                exp = new AtomExpr(consntant.position, AtomExpr.AtomTypes.PTR, "null");
                 break;
             case CONST_NONE:
                 consntant = nextSymbol();
-                exp = new AtomExpr(consntant.position, AtomExpr.AtomTypes.VOID, consntant.lexeme);
+                exp = new AtomExpr(consntant.position, AtomExpr.AtomTypes.VOID, "none");
                 break;
             case OPENING_PARENTHESIS:
                 Symbol symPar = nextSymbol(); // shift opening parenthesis
-                exp = new Exprs(symPar.position, parseExpressions());
+                LinkedList<Expr> exprs = parseExpressions();
                 if (laSymbol.token != Symbol.Token.CLOSING_PARENTHESIS)
                     throw new CompilerError("[syntax error, parseAtomicExpression] invalid expression at " + laSymbol);
-                nextSymbol(); // shift closing parenthesis
+                Symbol symCloP = nextSymbol(); // shift closing parenthesis
+                exp = new Exprs(new Position(symPar, symCloP), exprs);
                 break;
             case IF:
                 Symbol symIf = nextSymbol(); // shift if
@@ -912,8 +948,8 @@ public class SynAn extends Phase {
                 if (laSymbol.token != Symbol.Token.END) {
                     throw new CompilerError("[syntax error, parseAtomicExpression] invalid expression at " + laSymbol);
                 }
-                nextSymbol(); // shift end
-                exp = new IfExpr(symIf.position, cond, thenExpr, elseExpr);
+                Symbol symEndif = nextSymbol(); // shift end
+                exp = new IfExpr(new Position(symIf, symEndif), cond, thenExpr, elseExpr);
                 break;
             case FOR:
                 Symbol symFor = nextSymbol(); // shift for
@@ -939,8 +975,8 @@ public class SynAn extends Phase {
                 if (laSymbol.token != Symbol.Token.END) {
                     throw new CompilerError("[syntax error, parseAtomicExpression] invalid expression at " + laSymbol);
                 }
-                nextSymbol(); // shift end
-                exp = new ForExpr(symFor.position, new VarName(var.position, var.lexeme),loBound, hiBound, body);
+                Symbol symEndFor = nextSymbol(); // shift end
+                exp = new ForExpr(new Position(symFor, symEndFor), new VarName(var.position, var.lexeme),loBound, hiBound, body);
                 break;
             case WHILE:
                 Symbol symWhile = nextSymbol(); // shift while
@@ -953,8 +989,8 @@ public class SynAn extends Phase {
                 if (laSymbol.token != Symbol.Token.END) {
                     throw new CompilerError("[syntax error, parseAtomicExpression] invalid expression at " + laSymbol);
                 }
-                nextSymbol(); // shift end
-                exp = new WhileExpr(symWhile.position, condWhile, bodyWhile);
+                Symbol endWhile = nextSymbol(); // shift end
+                exp = new WhileExpr(new Position(symWhile, endWhile), condWhile, bodyWhile);
                 break;
             default:
                 throw new CompilerError("[syntax error, parseAtomicExpression] invalid expression at " + laSymbol);
@@ -999,11 +1035,12 @@ public class SynAn extends Phase {
                 break;
             case OPENING_PARENTHESIS:
                 Symbol opPar = nextSymbol(); // shift opening parenthesis
-                expr = new FunCall(name.position, name.lexeme, parseExpressions());
+                LinkedList<Expr> tmp = parseExpressions();
                 if (laSymbol.token != Symbol.Token.CLOSING_PARENTHESIS) {
                     throw new CompilerError("[syntax error, parseArgumentsOpt] invalid expression at " + laSymbol);
                 }
-                nextSymbol(); // shift closing parenthesis
+                Symbol clPar = nextSymbol(); // shift closing parenthesis
+                expr = new FunCall(new Position(name, clPar), name.lexeme, tmp);
                 break;
             default:
                 throw new CompilerError("[syntax error, parseArgumentsOpt] invalid expression at " + laSymbol);
@@ -1082,7 +1119,8 @@ public class SynAn extends Phase {
                     throw new CompilerError("[syntax error, parseTypeDeclaration] invalid expression at " + laSymbol);
                 }
                 nextSymbol(); // shift colon
-                newTyp = new TypeDecl(typ.position, id.lexeme, parseType());
+                Type tmp = parseType();
+                newTyp = new TypeDecl(new Position(typ, tmp), id.lexeme, tmp);
                 break;
             default:
                 throw new CompilerError("[syntax error, parseTypeDeclaration] invalid expression at " + laSymbol);
@@ -1117,9 +1155,9 @@ public class SynAn extends Phase {
                 Type type = parseType();
                 Expr body = parseFunctionBodyOpt();
                 if(body != null) {
-                    func = new FunDef(fun.position, symID.lexeme, pars, type, body);
+                    func = new FunDef(new Position(fun, body), symID.lexeme, pars, type, body);
                 } else {
-                    func = new FunDecl(fun.position, symID.lexeme, pars, type);
+                    func = new FunDecl(new Position(fun, type), symID.lexeme, pars, type);
                 }
                 break;
             default:
@@ -1189,7 +1227,8 @@ public class SynAn extends Phase {
                     throw new CompilerError("[syntax error, parseParameter] invalid expression at " + laSymbol);
                 }
                 nextSymbol(); // shift colon
-                decl = new ParDecl(symID.position, symID.lexeme, parseType());
+                Type type = parseType();
+                decl = new ParDecl(new Position(symID, type), symID.lexeme, type);
                 break;
             default:
                 throw new CompilerError("[syntax error, parseParameter] invalid expression at " + laSymbol);
@@ -1234,7 +1273,7 @@ public class SynAn extends Phase {
                 }
                 nextSymbol(); // shift colon
                 Type typ = parseType();
-                vardec = new VarDecl(var.position, name.lexeme, typ);
+                vardec = new VarDecl(new Position(var, typ), name.lexeme, typ);
                 break;
             }
             default:
@@ -1283,9 +1322,9 @@ public class SynAn extends Phase {
                 if (laSymbol.token != Symbol.Token.CLOSING_BRACKET) {
                     throw new CompilerError("[syntax error, parseType] invalid expression at " + laSymbol);
                 }
-                nextSymbol(); // shift closing bracket
+                Symbol closBrack = nextSymbol(); // shift closing bracket
                 Type elemType = parseType();
-                typ = new ArrType(arr.position, size, elemType);
+                typ = new ArrType(new Position(arr, elemType), size, elemType);
                 break;
             case REC:
                 Symbol rec = nextSymbol(); // shift REC
@@ -1293,15 +1332,17 @@ public class SynAn extends Phase {
                     throw new CompilerError("[syntax error, parseType] invalid expression at " + laSymbol);
                 }
                 nextSymbol(); // shift opening brace
-                typ = new RecType(rec.position, parseComponents());
+                LinkedList<CompDecl> comps = parseComponents();
                 if (laSymbol.token != Symbol.Token.CLOSING_BRACE) {
                     throw new CompilerError("[syntax error, parseType] invalid expression at " + laSymbol);
                 }
-                nextSymbol(); // shift closing brace
+                Symbol closBrace = nextSymbol(); // shift closing brace
+                typ = new RecType(new Position(rec, closBrace), comps);
                 break;
             case PTR:
                 symVal = nextSymbol();
-                typ = new PtrType(symVal.position, parseType());
+                Type type = parseType();
+                typ = new PtrType(new Position(symVal, type), type);
                 break;
             default:
                 throw new CompilerError("[syntax error, parseType] invalid expression at " + laSymbol);
@@ -1354,7 +1395,8 @@ public class SynAn extends Phase {
                     throw new CompilerError("[syntax error, parseComponent] invalid expression at " + laSymbol);
                 }
                 nextSymbol();
-                comps = new CompDecl(symID.position, symID.lexeme, parseType());
+                Type type = parseType();
+                comps = new CompDecl(new Position(symID, type), symID.lexeme, type);
                 break;
             default:
                 throw new CompilerError("[syntax error, parseComponent] invalid expression at " + laSymbol);

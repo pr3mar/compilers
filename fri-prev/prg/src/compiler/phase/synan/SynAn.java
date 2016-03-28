@@ -409,7 +409,7 @@ public class SynAn extends Phase {
                 Symbol symOr = nextSymbol(); // shift OR
                 Expr op2 = parseConjunctiveExpression();
                 bin = new BinExpr(new Position(op1, op2), BinExpr.Oper.OR, op1, op2);
-                parseDisjunctiveExpressionPrime(bin);
+                bin = parseDisjunctiveExpressionPrime(bin);
                 break;
             default:
                 throw new CompilerError("[syntax error, parseDisjunctiveExpressionPrime] invalid expression at " + laSymbol);
@@ -853,7 +853,6 @@ public class SynAn extends Phase {
                 tmp = parseExpression();
                 if (laSymbol.token != Symbol.Token.CLOSING_BRACKET) {
                     throw new CompilerError("[syntax error, parsePostfixExpressionPrime] invalid expression at " + laSymbol);
-
                 }
                 symVal = nextSymbol(); // shift closing bracket
                 exp = new BinExpr(new Position(exp, symVal), BinExpr.Oper.ARR, exp, tmp);
@@ -865,17 +864,18 @@ public class SynAn extends Phase {
                     throw new CompilerError("[syntax error, parsePostfixExpressionPrime] invalid expression at " + laSymbol);
                 }
                 Symbol symID = nextSymbol(); // shift identifier
-                exp = new BinExpr(new Position(exp, symID), BinExpr.Oper.REC, exp, new VarName(symID.position, symID.lexeme));
+                exp = new BinExpr(new Position(exp, symID), BinExpr.Oper.REC, exp, new CompName(symID.position, symID.lexeme));
                 exp = parsePostfixExpressionPrime(exp);
                 break;
             case VAL:
                 symVal = nextSymbol(); // shift val
-                tmp = parsePostfixExpressionPrime(exp);
-                if(symVal.cmpEnd(tmp) == 1) {
-                    exp = new UnExpr(new Position(exp, symVal), UnExpr.Oper.VAL, tmp);
-                } else {
-                    exp = new UnExpr(new Position(exp, tmp), UnExpr.Oper.VAL, tmp);
-                }
+                exp = new UnExpr(new Position(exp, symVal), UnExpr.Oper.VAL, exp);
+                exp = parsePostfixExpressionPrime(exp);
+//                if(symVal.cmpEnd(tmp) == 1) {
+//                    exp = new UnExpr(new Position(exp, symVal), UnExpr.Oper.VAL, tmp);
+//                } else {
+//                    exp = new UnExpr(new Position(exp, tmp), UnExpr.Oper.VAL, tmp);
+//                }
                 break;
             default:
                 throw new CompilerError("[syntax error, parsePostfixExpressionPrime] invalid expression at " + laSymbol);
@@ -1169,13 +1169,12 @@ public class SynAn extends Phase {
 
     private LinkedList<ParDecl> parseParametersOpt() {
         begLog("ParametersOpt");
-        LinkedList<ParDecl> decls;
+        LinkedList<ParDecl> decls = new LinkedList<ParDecl>();
         switch (laSymbol.token) {
             case IDENTIFIER:
                 decls = parseParameters();
                 break;
             case CLOSING_PARENTHESIS:
-                decls = null;
                 break;
             default:
                 throw new CompilerError("[syntax error, parseParametersOpt] invalid expression at " + laSymbol);

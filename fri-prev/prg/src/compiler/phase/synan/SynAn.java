@@ -1035,18 +1035,58 @@ public class SynAn extends Phase {
                 break;
             case OPENING_PARENTHESIS:
                 Symbol opPar = nextSymbol(); // shift opening parenthesis
-                LinkedList<Expr> tmp = parseExpressions();
-                if (laSymbol.token != Symbol.Token.CLOSING_PARENTHESIS) {
-                    throw new CompilerError("[syntax error, parseArgumentsOpt] invalid expression at " + laSymbol);
-                }
-                Symbol clPar = nextSymbol(); // shift closing parenthesis
-                expr = new FunCall(new Position(name, clPar), name.lexeme, tmp);
+//                LinkedList<Expr> tmp = parseExpressions();
+//                if (laSymbol.token != Symbol.Token.CLOSING_PARENTHESIS) {
+//                    throw new CompilerError("[syntax error, parseArgumentsOpt] invalid expression at " + laSymbol);
+//                }
+//                Symbol clPar = nextSymbol(); // shift closing parenthesis
+//                expr = new FunCall(new Position(name, clPar), name.lexeme, tmp);
+                expr = parseArgumentsOptPrime(name);
                 break;
             default:
                 throw new CompilerError("[syntax error, parseArgumentsOpt] invalid expression at " + laSymbol);
 
         }
         endLog();
+        return expr;
+    }
+
+    private Expr parseArgumentsOptPrime(Symbol name) {
+        Expr expr = null;
+        LinkedList<Expr> tmp;
+        switch (laSymbol.token) {
+            case ADD:
+            case SUB:
+            case NOT:
+            case MEM:
+            case OPENING_BRACKET:
+            case IDENTIFIER:
+            case CONST_INTEGER:
+            case CONST_BOOLEAN:
+            case CONST_CHAR:
+            case CONST_STRING:
+            case CONST_NULL:
+            case CONST_NONE:
+            case OPENING_PARENTHESIS:
+            case IF:
+            case FOR:
+            case WHILE:
+//                nextSymbol(); // shift
+                tmp = parseExpressions();
+                if (laSymbol.token != Symbol.Token.CLOSING_PARENTHESIS) {
+                    throw new CompilerError("[syntax error, parseArgumentsOpt] invalid expression at " + laSymbol);
+                }
+                Symbol clPar = nextSymbol(); // shift closing parenthesis
+                expr = new FunCall(new Position(name, clPar), name.lexeme, tmp);
+                break;
+            case CLOSING_PARENTHESIS:
+                Symbol symb = nextSymbol(); // shift closing parenthesis
+                tmp = new LinkedList<>();
+                expr = new FunCall(new Position(name, symb), name.lexeme, tmp);
+                break;
+            default:
+                throw new CompilerError("[syntax error, parseArgumentsOptPrime] invalid expression at " + laSymbol);
+        }
         return expr;
     }
 

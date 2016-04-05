@@ -79,7 +79,7 @@ AtomicExpression ->
 	| FOR IDENTIFIER ASSIGN Expression COMMA Expression COLON Expression END
 	| WHILE Expression COLON Expression END
 	.
-
+ArgumentsOpt -> OPENING_PARENTHESIS CLOSING_PARENTHESSIS.
 ArgumentsOpt ->
 	  #
 	| OPENING_PARENTHESIS Expressions CLOSING_PARENTHESIS

@@ -4,6 +4,7 @@ import compiler.common.report.*;
 import compiler.phase.lexan.*;
 import compiler.phase.synan.*;
 import compiler.phase.abstr.*;
+import compiler.phase.seman.*;
 
 /**
  * The compiler's entry point.
@@ -50,6 +51,19 @@ public class Main {
 				Abstr abstr = new Abstr(task);
 				abstr.close();
 				if (task.phase.equals("abstr"))
+					break;
+
+				// ***** Semantic analysis. *****
+				SemAn seman = new SemAn(task);
+				(new EvalValue(task.prgAttrs)).visit(task.prgAST);
+				(new EvalDecl(task.prgAttrs)).visit(task.prgAST);
+				(new EvalTyp(task.prgAttrs)).visit(task.prgAST);
+				(new EvalMem(task.prgAttrs)).visit(task.prgAST);
+				seman.close();
+				if (task.phase.equals("seman"))
+					break;
+
+				if (Report.getNumWarnings() > 0)
 					break;
 
 				break;

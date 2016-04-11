@@ -63,12 +63,12 @@
 	</td>
       </tr>
     </xsl:if>
-    <xsl:if test="@addr!=''">
+    <xsl:if test="@mem!=''">
       <tr style="background-color:#D4CA90">
  	<td>
 	  <text>&#xA0;</text>
  	  <span style="white-space:nowrap">
-	    <xsl:text>addr</xsl:text>
+	    <xsl:text>mem</xsl:text>
  	  </span>
  	  <text>&#xA0;</text>
 	</td>

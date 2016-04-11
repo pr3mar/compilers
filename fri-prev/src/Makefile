@@ -2,6 +2,10 @@
 # START GOOGLE CHROME WITH --allow-file-access-from-files
 #
 
+
+%.seman.xml	: %.prev
+	java -classpath ../prg/bin compiler.Main --xsldir=../prg/xsl --phase=seman --loggedphases=seman $<
+
 %.abstr.xml	: %.prev
 	java -classpath ../prg/bin compiler.Main --xsldir=../prg/xsl --phase=abstr --loggedphases=abstr $<
 

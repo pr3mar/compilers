@@ -4,13 +4,10 @@ import compiler.*;
 import compiler.common.logger.*;
 
 /**
- * An abstract class acting as a template for each individual phase.
- * 
  * @author sliva
  */
 public abstract class Phase implements AutoCloseable {
 
-	/** The parameters of the compilation process being carried out. */
 	protected Task task;
 
 	/**
@@ -19,14 +16,6 @@ public abstract class Phase implements AutoCloseable {
 	 */
 	protected final Logger logger;
 
-	/**
-	 * Constructs a new phase: prepares the logger if requested.
-	 * 
-	 * @param task
-	 *            The parameters of the compilation process being carried out.
-	 * @param phaseName
-	 *            The name of the actual phase.
-	 */
 	public Phase(Task task, String phaseName) {
 		this.task = task;
 		if (this.task.loggedPhases.indexOf(phaseName) != -1) {

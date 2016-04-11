@@ -1,3 +1,0 @@
-# an EOF inside string constant
-# should throw an error
-"This is a string constant ending with EOF instead of double quote

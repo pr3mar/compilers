@@ -41,7 +41,7 @@ sed 's/term{val}/term{\\symbol{"5E}}/g' |\
 sed 's/term{const_integer}/term{INTEGER}/g' |\
 sed 's/term{const_boolean}/term{BOOLEAN}/g' |\
 sed 's/term{const_char}/term{CHAR}/g' |\
-sed 's/term{const_string}/term{CONST}/g' |\
+sed 's/term{const_string}/term{STRING}/g' |\
 sed 's/term{const_null}/term{null}/g' |\
 sed 's/term{const_none}/term{none}/g' |\
 sed 's/term{identifier}/term{IDENTIFIER}/g' |\

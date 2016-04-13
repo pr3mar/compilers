@@ -930,7 +930,10 @@ public class SynAn extends Phase {
                 if (laSymbol.token != Symbol.Token.CLOSING_PARENTHESIS)
                     throw new CompilerError("[syntax error, parseAtomicExpression] invalid expression at " + laSymbol);
                 Symbol symCloP = nextSymbol(); // shift closing parenthesis
-                exp = new Exprs(new Position(symPar, symCloP), exprs);
+                if(exprs.size() > 1)
+                    exp = new Exprs(new Position(symPar, symCloP), exprs);
+                else
+                    exp = exprs.get(0);
                 break;
             case IF:
                 Symbol symIf = nextSymbol(); // shift if

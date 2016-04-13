@@ -233,12 +233,12 @@ public class LexAn extends Phase {
             currentChar = readChar();
         }
         endCol--;
-        try {
-            long num = Long.parseLong(lexeme);
+//        try {
+//            long num = Long.parseLong(lexeme);
             return new Symbol(Symbol.Token.CONST_INTEGER, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
-        } catch (NumberFormatException e) {
-            throw new CompilerError("integer too big or too small at " + new Position(task.srcFName, endLine, endCol));
-        }
+//        } catch (NumberFormatException e) {
+//            throw new CompilerError("integer too big or too small at " + new Position(task.srcFName, endLine, endCol));
+//        }
     }
 
     Symbol getIdentifiers() {

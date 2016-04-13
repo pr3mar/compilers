@@ -7,13 +7,13 @@ import compiler.data.ast.*;
 
 /**
  * Symbol table.
- * 
+ *
  * <p>
  * The symbol table is used during name resolving, i.e., connecting AST nodes
  * where names are used to AST nodes where names are defined. It supports
  * handling of
  * </p>
- * 
+ *
  * <ul>
  * <li><i>scopes</i>: A new, i.e., inner, scope is created by calling
  * {@link compiler.phase.seman.SymbolTable#enterScope() enterScope}, flushing
@@ -34,22 +34,22 @@ import compiler.data.ast.*;
  * visible within the inner namespace unless replaced by a new declaration of
  * the same name within the inner namespace.</li>
  * </ul>
- * 
+ *
  * @author sliva
  */
 public class SymbolTable {
 
 	/**
 	 * Creates a new symbol table.
-	 * 
+	 *
 	 * The initial scope is entered and the default namespace is prepared.
 	 */
 	public SymbolTable() {
 		symbolTable = new HashMap<String, LinkedList<ScopedDecl>>();
 
 		scope = 0;
-		scopes = new LinkedList<LinkedList<LinkedList<ScopedDecl>>>();
-		scopes.addFirst(new LinkedList<LinkedList<ScopedDecl>>());
+		scopes = new LinkedList<LinkedList<String>>();
+		scopes.addFirst(new LinkedList<String>());
 
 		namespaces = new Stack<String>();
 		namespaces.push("");
@@ -59,7 +59,7 @@ public class SymbolTable {
 
 	/**
 	 * A declaration of a name at a particular scope.
-	 * 
+	 *
 	 * @author sliva
 	 */
 	private class ScopedDecl {
@@ -85,25 +85,21 @@ public class SymbolTable {
 	/**
 	 * A stack of spaces, i.e., a list of all declarations by scopes, used for
 	 * flushing out declarations when leaving a scope.
-	 * 
+	 *
 	 * <p>
-	 * The inner most list is a value from
-	 * {@link compiler.phase.seman.SymbolTable#symbolTable symbolTable}, i.e.,
-	 * all declarations of a single name at different scopes. The middle list
-	 * includes all declarations of all names that has been declared at a
-	 * particular scope, and the outer most list contains all declarations of
-	 * all names that has been declared at all scopes, with the most recent
-	 * scope at the head of the list.
+	 * The inner list includes all names that have been declared at a particular
+	 * scope, and thus the outer list contains all names declared at different
+	 * scopes, with the most recent scope at the head of the list.
 	 * </p>
 	 */
-	private LinkedList<LinkedList<LinkedList<ScopedDecl>>> scopes;
+	private LinkedList<LinkedList<String>> scopes;
 
 	/**
 	 * Enters a new scope.
 	 */
 	public void enterScope() {
 		scope++;
-		scopes.addFirst(new LinkedList<LinkedList<ScopedDecl>>());
+		scopes.addFirst(new LinkedList<String>());
 	}
 
 	/**
@@ -111,8 +107,12 @@ public class SymbolTable {
 	 * current scope.
 	 */
 	public void leaveScope() {
-		for (LinkedList<ScopedDecl> scopedDecls : scopes.peek())
+		for (String name : scopes.peek()) {
+			LinkedList<ScopedDecl> scopedDecls = symbolTable.get(name);
 			scopedDecls.removeFirst();
+			if (scopedDecls.isEmpty())
+				symbolTable.remove(name);
+		}
 		scopes.removeFirst();
 		scope--;
 	}
@@ -120,7 +120,7 @@ public class SymbolTable {
 	/**
 	 * Inserts a declaration of a name within the current scope and within the
 	 * specified namespace.
-	 * 
+	 *
 	 * @param nameSpace
 	 *            The namespace that the declaration of the name is made within.
 	 * @param name
@@ -140,6 +140,7 @@ public class SymbolTable {
 				scopedDecl.scope = scope;
 				scopedDecl.decl = decl;
 				scopedDecls.addFirst(scopedDecl);
+				scopes.peek().addFirst(nameSpace + name);
 			}
 			symbolTable.put(nameSpace + name, scopedDecls);
 		} else {
@@ -151,7 +152,7 @@ public class SymbolTable {
 				scopedDecl.scope = scope;
 				scopedDecl.decl = decl;
 				scopedDecls.addFirst(scopedDecl);
-				scopes.peek().addFirst(scopedDecls);
+				scopes.peek().addFirst(nameSpace + name);
 			}
 		}
 	}
@@ -159,7 +160,7 @@ public class SymbolTable {
 	/**
 	 * Inserts a declaration of a name within the current scope and within the
 	 * default namespace.
-	 * 
+	 *
 	 * @param name
 	 *            The name declared.
 	 * @param decl
@@ -175,7 +176,7 @@ public class SymbolTable {
 	/**
 	 * Returns the declaration of a name within all active scopes and within a
 	 * specified namespace.
-	 * 
+	 *
 	 * @param nameSpace
 	 *            The namespace that the declaration of the name is made within.
 	 * @param name
@@ -186,8 +187,8 @@ public class SymbolTable {
 	 */
 	public Decl fndDecl(String nameSpace, String name) throws CannotFndNameDecl {
 		LinkedList<ScopedDecl> scopedDecls = symbolTable.get(nameSpace + name);
-		if (scopedDecls == null)
-			throw new CannotFndNameDecl("");
+		if ((scopedDecls == null) || (scopedDecls.isEmpty()))
+			throw new CannotFndNameDecl(nameSpace + name);
 		else
 			return scopedDecls.peekFirst().decl;
 	}
@@ -195,7 +196,7 @@ public class SymbolTable {
 	/**
 	 * Returns the declaration of a name within all active scopes and within the
 	 * default namespace.
-	 * 
+	 *
 	 * @param name
 	 *            The name the declaration is being looked for.
 	 * @return The declaration of the name.
@@ -213,7 +214,7 @@ public class SymbolTable {
 
 	/**
 	 * Generates a new namespace name.
-	 * 
+	 *
 	 * @param name
 	 *            The name associated with this namespace.
 	 * @return A new namespace name unique within a current context.
@@ -224,7 +225,7 @@ public class SymbolTable {
 
 	/**
 	 * Enters a new namespace;
-	 * 
+	 *
 	 * @param namespace
 	 *            The namespace's name.
 	 */

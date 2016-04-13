@@ -31,4 +31,5 @@ public class EvalTyp extends FullVisitor {
 	private SymbolTable symbolTable = new SymbolTable();
 
 	// TODO
+
 }

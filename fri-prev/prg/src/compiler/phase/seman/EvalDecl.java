@@ -107,7 +107,7 @@ public class EvalDecl extends FullVisitor {
 	public void visit(FunDef funDef) {
 		if(prototyping) {
 			funDef.type.accept(this);
-			try {
+			try {// types of parameters in a separate scope
 				symbolTable.insDecl(funDef.name, funDef);
 			} catch (CannotInsNameDecl err) {
 				throw new CompilerError("[Semantic error, evalDecl]: Cannot insert new declaration of function at " + funDef);

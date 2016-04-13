@@ -30,53 +30,6 @@ public class EvalDecl extends FullVisitor {
 	/** See which run-over is 1st or second*/
 	boolean prototyping;
 
-	// TODO
-	public void visit(ArrType arrType) {
-		arrType.size.accept(this);
-		arrType.elemType.accept(this);
-	}
-
-	public void visit(AtomExpr atomExpr) {
-	}
-
-	public void visit(AtomType atomType) {
-	}
-
-	public void visit(BinExpr binExpr) {
-		binExpr.fstExpr.accept(this);
-		binExpr.sndExpr.accept(this);
-	}
-
-	public void visit(CastExpr castExpr) {
-		castExpr.type.accept(this);
-		castExpr.expr.accept(this);
-	}
-
-	public void visit(CompDecl compDecl) {
-		compDecl.type.accept(this);
-	}
-
-	public void visit(CompName compName) {
-	}
-
-	public void visit(DeclError declError) {
-	}
-
-	public void visit(Exprs exprs) {
-		for (int e = 0; e < exprs.numExprs(); e++)
-			exprs.expr(e).accept(this);
-	}
-
-	public void visit(ExprError exprError) {
-	}
-
-	public void visit(ForExpr forExpr) {
-		forExpr.var.accept(this);
-		forExpr.loBound.accept(this);
-		forExpr.hiBound.accept(this);
-		forExpr.body.accept(this);
-	}
-
 	public void visit(FunCall funCall) {
 		for (int a = 0; a < funCall.numArgs(); a++)
 			funCall.arg(a).accept(this);
@@ -122,30 +75,10 @@ public class EvalDecl extends FullVisitor {
 		}
 	}
 
-	public void visit(IfExpr ifExpr) {
-		ifExpr.cond.accept(this);
-		ifExpr.thenExpr.accept(this);
-		ifExpr.elseExpr.accept(this);
-	}
-
 	public void visit(ParDecl parDecl) {
 		try { symbolTable.insDecl(parDecl.name, parDecl); }
 		catch (CannotInsNameDecl err) { throw new CompilerError(err.getMessage()); }
 		parDecl.type.accept(this);
-	}
-
-	public void visit(Program program) {
-		program.expr.accept(this);
-	}
-
-	public void visit(PtrType ptrType) {
-		ptrType.baseType.accept(this);
-	}
-
-	public void visit(RecType recType) {
-		// TODO how to identify namespaces
-		for (int c = 0; c < recType.numComps(); c++)
-			recType.comp(c).accept(this);
 	}
 
 	public void visit(TypeDecl typDecl) {
@@ -160,9 +93,6 @@ public class EvalDecl extends FullVisitor {
 
 	}
 
-	public void visit(TypeError typeError) {
-	}
-
 	public void visit(TypeName typeName) {
 		if(!prototyping) {
 			try {
@@ -172,10 +102,6 @@ public class EvalDecl extends FullVisitor {
 				throw new CompilerError("[Semantic error, evalDecl]: Cannot find declaration of var at " + typeName);
 			}
 		}
-	}
-
-	public void visit(UnExpr unExpr) {
-		unExpr.subExpr.accept(this);
 	}
 
 	public void visit(VarDecl varDecl) {
@@ -208,11 +134,6 @@ public class EvalDecl extends FullVisitor {
 		whereExpr.expr.accept(this);
 
 		symbolTable.leaveScope();
-	}
-
-	public void visit(WhileExpr whileExpr) {
-		whileExpr.cond.accept(this);
-		whileExpr.body.accept(this);
 	}
 
 }

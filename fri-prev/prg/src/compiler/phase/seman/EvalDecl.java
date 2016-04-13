@@ -65,7 +65,7 @@ public class EvalDecl extends FullVisitor {
 			} catch (CannotInsNameDecl err) {
 				throw new CompilerError("[Semantic error, evalDecl]: Cannot insert new declaration of function at " + funDef);
 			}
-		} else { //TODO: are parameters in 1st or 2nd run?
+		} else {
 			symbolTable.enterScope();
 			for (int p = 0; p < funDef.numPars(); p++)
 				funDef.par(p).accept(this);

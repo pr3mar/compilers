@@ -102,6 +102,41 @@ public class EvalTyp extends FullVisitor {
         }
     }
 
+    public void visit(BinExpr binExpr) {
+        binExpr.fstExpr.accept(this);
+        binExpr.sndExpr.accept(this);
+        Typ fst = attrs.typAttr.get(binExpr.fstExpr);
+        Typ snd = attrs.typAttr.get(binExpr.sndExpr);
+        if(fst instanceof IntegerTyp && snd instanceof IntegerTyp) {
+            switch (binExpr.oper) {
+                case ADD: case SUB: case MUL: case MOD: case DIV:
+                    attrs.typAttr.set(binExpr, new IntegerTyp());
+                    break;
+                case EQU: case NEQ: case LTH: case GTH: case GEQ: case LEQ:
+                    attrs.typAttr.set(binExpr, new BooleanTyp());
+                    break;
+            }
+        } else if(fst instanceof BooleanTyp && snd instanceof BooleanTyp) {
+            switch (binExpr.oper) {
+                case AND: case OR:
+                    attrs.typAttr.set(binExpr, new BooleanTyp());
+                    break;
+                case EQU: case NEQ: case LTH: case GTH: case GEQ: case LEQ:
+                    attrs.typAttr.set(binExpr, new BooleanTyp());
+                    break;
+            }
+        } else if(fst instanceof CharTyp && snd instanceof CharTyp
+                || fst instanceof PtrTyp && snd instanceof PtrTyp && fst.isStructEquivTo(snd)) {
+            switch (binExpr.oper) {
+                case EQU: case NEQ: case LTH: case GTH: case GEQ: case LEQ:
+                    attrs.typAttr.set(binExpr, new BooleanTyp());
+                    break;
+            }
+        } /*else {
+            throw new CompilerError("[Semantic error, binExpr]: Ambiguous types " + binExpr);
+        }*/
+    }
+
     public void visit(CastExpr castExpr) {
         castExpr.type.accept(this);
         castExpr.expr.accept(this);
@@ -137,24 +172,39 @@ public class EvalTyp extends FullVisitor {
     }
 
     public void visit(FunCall funCall) {
-        for (int a = 0; a < funCall.numArgs(); a++)
+        Decl fun = attrs.declAttr.get(funCall);
+        Typ funTyp = attrs.typAttr.get(fun);
+//        LinkedList<Typ> params = new LinkedList<>();
+        for (int a = 0; a < funCall.numArgs(); a++) {
             funCall.arg(a).accept(this);
+//            params.add(attrs.typAttr.get(funCall.arg(a)));
+        }
+//        attrs.typAttr.set(funCall, new FunTyp(params, funTyp));
     }
 
     public void visit(FunDecl funDecl) {
-        for (int p = 0; p < funDecl.numPars(); p++)
-            funDecl.par(p).accept(this);
+        if(!first) return;
         funDecl.type.accept(this);
+        Typ type = attrs.typAttr.get(funDecl.type);
+        LinkedList<Typ> params = new LinkedList<>();
+        for (int p = 0; p < funDecl.numPars(); p++) {
+            funDecl.par(p).accept(this);
+            params.add(attrs.typAttr.get(funDecl.par(p)));
+        }
+        attrs.typAttr.set(funDecl, new FunTyp(params, type));
     }
 
     public void visit(FunDef funDef) {
-        if(first) {
-            for (int p = 0; p < funDef.numPars(); p++)
-                funDef.par(p).accept(this);
-            funDef.type.accept(this);
-        } else {
-            funDef.body.accept(this);
+        if(!first)  return;
+        funDef.type.accept(this);
+        Typ type = attrs.typAttr.get(funDef.type);
+        LinkedList<Typ> params = new LinkedList<>();
+        for (int p = 0; p < funDef.numPars(); p++) {
+            funDef.par(p).accept(this);
+            params.add(attrs.typAttr.get(funDef.par(p)));
         }
+        funDef.body.accept(this); // TODO CHECK THIS OUT!!! NO ERROR AT BINEXPR
+        attrs.typAttr.set(funDef, new FunTyp(params, type));
     }
 
     public void visit(IfExpr ifExpr) {
@@ -164,7 +214,9 @@ public class EvalTyp extends FullVisitor {
     }
 
     public void visit(ParDecl parDecl) {
+        if(!first) return;
         parDecl.type.accept(this);
+        attrs.typAttr.set(parDecl, attrs.typAttr.get(parDecl.type));
     }
 
     public void visit(Program program) {

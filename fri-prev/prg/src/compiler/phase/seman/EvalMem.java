@@ -1,5 +1,6 @@
 package compiler.phase.seman;
 
+import compiler.common.report.CompilerError;
 import compiler.data.ast.*;
 import compiler.data.ast.attr.*;
 import compiler.data.ast.code.*;
@@ -31,7 +32,20 @@ public class EvalMem extends FullVisitor {
 	public void visit(BinExpr binExpr) {
 		binExpr.fstExpr.accept(this);
 		binExpr.sndExpr.accept(this);
-		attrs.memAttr.set(binExpr, false);
+		Typ t1 = attrs.typAttr.get(binExpr.fstExpr);
+		Typ t2 = attrs.typAttr.get(binExpr.sndExpr);
+		boolean mem = attrs.memAttr.get(binExpr.fstExpr);
+		switch (binExpr.oper) {
+			case ASSIGN:
+				if(mem && t1 != null && t2 != null) {
+					attrs.typAttr.set(binExpr, new VoidTyp());
+				} else {
+					throw new CompilerError("[Semantic error, memEval] Cannot assign at " + binExpr);
+				}
+				break;
+			default:
+				attrs.memAttr.set(binExpr, false);
+		}
 	}
 
 	public void visit(CastExpr castExpr) {
@@ -124,7 +138,20 @@ public class EvalMem extends FullVisitor {
 
 	public void visit(UnExpr unExpr) {
 		unExpr.subExpr.accept(this);
-		attrs.memAttr.set(unExpr, false);
+		Typ type = attrs.typAttr.get(unExpr);
+		switch (unExpr.oper) {
+			case MEM:
+				if(type instanceof PtrTyp && attrs.memAttr.get(unExpr.subExpr)) {
+					attrs.memAttr.set(unExpr, true);
+				} else {
+					throw new CompilerError("[Semantic error, memEval] Cannot address this!!" + unExpr);
+				}
+				break;
+			default:
+				attrs.memAttr.set(unExpr, false);
+				break;
+		}
+
 	}
 
 	public void visit(VarDecl varDecl) {
@@ -132,7 +159,10 @@ public class EvalMem extends FullVisitor {
 	}
 
 	public void visit(VarName varName) {
-		attrs.memAttr.set(varName, false);
+		if(attrs.typAttr.get(varName) != null)
+			attrs.memAttr.set(varName, true);
+		else
+			attrs.memAttr.set(varName, false);
 	}
 
 	public void visit(WhereExpr whereExpr) {

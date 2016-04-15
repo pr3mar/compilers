@@ -344,6 +344,9 @@ public class EvalTyp extends FullVisitor {
                 else
                     throw new CompilerError("[Semantic Error, EvalType] Inconsistent types at " + unExpr);
                 break;
+            case MEM:
+                attrs.typAttr.set(unExpr, new PtrTyp(type));
+                break;
             case VAL:
                 if(type instanceof PtrTyp)
                     attrs.typAttr.set(unExpr, ((PtrTyp) type).baseTyp);

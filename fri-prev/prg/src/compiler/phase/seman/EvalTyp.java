@@ -23,11 +23,14 @@ public class EvalTyp extends FullVisitor {
 
     private final Attributes attrs;
     private RecType recNow;
+    private RecTyp recUse;
     boolean first;
+    int turn;
 
     public EvalTyp(Attributes attrs) {
         this.attrs = attrs;
         this.recNow = null;
+        this.recUse = null;
         this.first = true;
     }
 
@@ -39,7 +42,7 @@ public class EvalTyp extends FullVisitor {
     // TODO
 
     public void visit(ArrType arrType) {
-        if (!first) return;
+        if (turn != 0) return;
         arrType.size.accept(this);
         arrType.elemType.accept(this);
         long size;
@@ -58,7 +61,6 @@ public class EvalTyp extends FullVisitor {
     }
 
     public void visit(AtomExpr atomExpr) {
-        if (!first) return;
         switch (atomExpr.type) {
             case INTEGER:
                 attrs.typAttr.set(atomExpr, new IntegerTyp());
@@ -82,7 +84,6 @@ public class EvalTyp extends FullVisitor {
     }
 
     public void visit(AtomType atomType) {
-        if (!first) return;
         switch (atomType.type) {
             case INTEGER:
                 attrs.typAttr.set(atomType, new IntegerTyp());
@@ -104,9 +105,32 @@ public class EvalTyp extends FullVisitor {
 
     public void visit(BinExpr binExpr) {
         binExpr.fstExpr.accept(this);
-        binExpr.sndExpr.accept(this);
         Typ fst = attrs.typAttr.get(binExpr.fstExpr);
+        if(fst.actualTyp() instanceof RecTyp)
+            recUse = (RecTyp)fst;
+        binExpr.sndExpr.accept(this);
         Typ snd = attrs.typAttr.get(binExpr.sndExpr);
+
+        if(fst.actualTyp() instanceof  ArrTyp
+                && snd.actualTyp() instanceof IntegerTyp
+                    && binExpr.oper == BinExpr.Oper.ARR) {
+            attrs.typAttr.set(binExpr, ((ArrTyp)fst).elemTyp);
+            return;
+        }
+
+        if(fst.actualTyp() instanceof RecTyp) {
+            attrs.typAttr.set(binExpr, snd);
+            recUse = null;
+        }
+        if(fst.actualTyp() instanceof FunTyp)
+            fst = ((FunTyp) fst).resultTyp;
+        if(fst.actualTyp() instanceof ArrTyp)
+            fst = ((ArrTyp) fst).elemTyp;
+        if(snd.actualTyp() instanceof FunTyp)
+            snd = ((FunTyp) snd).resultTyp;
+        if(snd.actualTyp() instanceof ArrTyp)
+            snd = ((ArrTyp) snd).elemTyp;
+
         if(fst instanceof IntegerTyp && snd instanceof IntegerTyp) {
             switch (binExpr.oper) {
                 case ADD: case SUB: case MUL: case MOD: case DIV:
@@ -116,6 +140,7 @@ public class EvalTyp extends FullVisitor {
                     attrs.typAttr.set(binExpr, new BooleanTyp());
                     break;
             }
+//        } else if(fst.actualTyp() instanceof BooleanTyp && snd instanceof BooleanTyp) {
         } else if(fst instanceof BooleanTyp && snd instanceof BooleanTyp) {
             switch (binExpr.oper) {
                 case AND: case OR:
@@ -132,7 +157,9 @@ public class EvalTyp extends FullVisitor {
                     attrs.typAttr.set(binExpr, new BooleanTyp());
                     break;
             }
-        } /*else {
+        } else if(binExpr.oper == BinExpr.Oper.ASSIGN) {
+            // handle assignment!!
+        }/*else {
             throw new CompilerError("[Semantic error, binExpr]: Ambiguous types " + binExpr);
         }*/
     }
@@ -140,10 +167,18 @@ public class EvalTyp extends FullVisitor {
     public void visit(CastExpr castExpr) {
         castExpr.type.accept(this);
         castExpr.expr.accept(this);
+
+        Typ type = attrs.typAttr.get(castExpr.type);
+        Typ expr = attrs.typAttr.get(castExpr.expr);
+
+        if(!(type instanceof PtrTyp) ||
+                !(expr instanceof PtrTyp) && !(((PtrTyp) expr).baseTyp instanceof VoidTyp))
+            throw new CompilerError("[Semantic error, evalTyp]: Type missmatch at cast: " + castExpr);
+        attrs.typAttr.set(castExpr, type);
     }
 
     public void visit(CompDecl compDecl) {
-        if (!first) return;
+        if (turn != 0) return;
         try {
             symbolTable.insDecl(this.recNow.toString(), compDecl.name, compDecl);
         } catch (CannotInsNameDecl err) {
@@ -154,36 +189,63 @@ public class EvalTyp extends FullVisitor {
     }
 
     public void visit(CompName compName) {
+        try {
+            Decl dec = symbolTable.fndDecl(recUse.nameSpace, compName.name());
+            attrs.declAttr.set(compName, dec);
+            Typ type = attrs.typAttr.get(dec);
+            attrs.typAttr.set(compName, type);
+        } catch (CannotFndNameDecl cannotFndNameDecl) {
+            cannotFndNameDecl.printStackTrace();
+        }
     }
 
     public void visit(Exprs exprs) {
-        for (int e = 0; e < exprs.numExprs(); e++)
+        Typ exp = null;
+        for (int e = 0; e < exprs.numExprs(); e++) {
             exprs.expr(e).accept(this);
+            exp = attrs.typAttr.get(exprs.expr(e));
+        }
+        attrs.typAttr.set(exprs, exp);
     }
 
     public void visit(ExprError exprError) {
     }
 
     public void visit(ForExpr forExpr) {
+        Typ var, lo, hi, body;
         forExpr.var.accept(this);
         forExpr.loBound.accept(this);
         forExpr.hiBound.accept(this);
         forExpr.body.accept(this);
+
+        var = attrs.typAttr.get(forExpr.var);
+        lo = attrs.typAttr.get(forExpr.loBound);
+        hi = attrs.typAttr.get(forExpr.hiBound);
+        body = attrs.typAttr.get(forExpr.body);
+
+        if(var == null || lo == null || hi == null || body == null) {
+            throw new CompilerError("[Semantic Error, EvalTyp] Type missmatch in for loop" + forExpr);
+        }
+        attrs.typAttr.set(forExpr, new VoidTyp());
     }
 
     public void visit(FunCall funCall) {
         Decl fun = attrs.declAttr.get(funCall);
-        Typ funTyp = attrs.typAttr.get(fun);
-//        LinkedList<Typ> params = new LinkedList<>();
+        FunTyp funTyp = (FunTyp) attrs.typAttr.get(fun);
+        LinkedList<Typ> params = new LinkedList<>();
         for (int a = 0; a < funCall.numArgs(); a++) {
             funCall.arg(a).accept(this);
-//            params.add(attrs.typAttr.get(funCall.arg(a)));
+            params.add(attrs.typAttr.get(funCall.arg(a)));
         }
-//        attrs.typAttr.set(funCall, new FunTyp(params, funTyp));
+        FunTyp call = new FunTyp(params, funTyp.resultTyp);
+        if(funTyp.isStructEquivTo(call))
+            attrs.typAttr.set(funCall, call);
+        else
+            throw new CompilerError("[Semantic Error, EvalTyp] Type missmatch at function call " + funCall);
     }
 
     public void visit(FunDecl funDecl) {
-        if(!first) return;
+        if(turn != 0) return;
         funDecl.type.accept(this);
         Typ type = attrs.typAttr.get(funDecl.type);
         LinkedList<Typ> params = new LinkedList<>();
@@ -195,26 +257,35 @@ public class EvalTyp extends FullVisitor {
     }
 
     public void visit(FunDef funDef) {
-        if(!first)  return;
-        funDef.type.accept(this);
-        Typ type = attrs.typAttr.get(funDef.type);
-        LinkedList<Typ> params = new LinkedList<>();
-        for (int p = 0; p < funDef.numPars(); p++) {
-            funDef.par(p).accept(this);
-            params.add(attrs.typAttr.get(funDef.par(p)));
-        }
-        funDef.body.accept(this); // TODO CHECK THIS OUT!!! NO ERROR AT BINEXPR
-        attrs.typAttr.set(funDef, new FunTyp(params, type));
+        if(turn == 0) {
+            funDef.type.accept(this);
+            Typ type = attrs.typAttr.get(funDef.type);
+            LinkedList<Typ> params = new LinkedList<>();
+            for (int p = 0; p < funDef.numPars(); p++) {
+                funDef.par(p).accept(this);
+                params.add(attrs.typAttr.get(funDef.par(p)));
+            }
+            attrs.typAttr.set(funDef, new FunTyp(params, type));
+        } else if(turn == 2)
+            funDef.body.accept(this);
     }
 
     public void visit(IfExpr ifExpr) {
         ifExpr.cond.accept(this);
         ifExpr.thenExpr.accept(this);
         ifExpr.elseExpr.accept(this);
+
+        Typ cond = attrs.typAttr.get(ifExpr.cond);
+        Typ then = attrs.typAttr.get(ifExpr.thenExpr);
+        Typ elseExpr = attrs.typAttr.get(ifExpr.elseExpr);
+
+        if(!(cond instanceof BooleanTyp) || then == null || elseExpr == null)
+            throw new CompilerError("[Semantic Error, EvalTyp] Type missmatch at if expression " + ifExpr);
+        attrs.typAttr.set(ifExpr, new VoidTyp());
     }
 
     public void visit(ParDecl parDecl) {
-        if(!first) return;
+        if(turn != 0) return;
         parDecl.type.accept(this);
         attrs.typAttr.set(parDecl, attrs.typAttr.get(parDecl.type));
     }
@@ -224,7 +295,7 @@ public class EvalTyp extends FullVisitor {
     }
 
     public void visit(PtrType ptrType) {
-        if (!first) return;
+        if (turn != 0) return;
         ptrType.baseType.accept(this);
         Typ type;
         try {
@@ -236,7 +307,7 @@ public class EvalTyp extends FullVisitor {
     }
 
     public void visit(RecType recType) {
-        if (!first) return;
+        if (turn != 0) return;
         symbolTable.newNamespace(recType.toString());
         this.recNow = recType;
         LinkedList<Typ> compTyps = new LinkedList<Typ>();
@@ -248,27 +319,16 @@ public class EvalTyp extends FullVisitor {
         this.recNow = null;
     }
 
-    public void visit(TypeDecl typDecl) { // TODO what??
-        if (!first) return;
+    public void visit(TypeDecl typDecl) {
+        if(turn != 0) return;
         typDecl.type.accept(this);
-        try {
-            TypName type = new TypName(typDecl.name);
-            type.setType(attrs.typAttr.get(typDecl.type));
-            attrs.typAttr.set(typDecl, type);
-        } catch (Exception err) {
-            throw new CompilerError("[Semantic error, typDecl] " + typDecl);
-            // do nothing
-        }
     }
 
     public void visit(TypeName typeName) {
-        // TODO ASK SO!!!
-        if (!first) return;
-        TypName type = new TypName(typeName.name());
-        attrs.typAttr.set(typeName, type);
     }
 
     public void visit(UnExpr unExpr) {
+        if (turn != 0) return;
         unExpr.subExpr.accept(this);
         Typ type = attrs.typAttr.get(unExpr.subExpr);
         switch (unExpr.oper) {
@@ -284,37 +344,50 @@ public class EvalTyp extends FullVisitor {
                 else
                     throw new CompilerError("[Semantic Error, EvalType] Inconsistent types at " + unExpr);
                 break;
+            case VAL:
+                if(type instanceof PtrTyp)
+                    attrs.typAttr.set(unExpr, ((PtrTyp) type).baseTyp);
+                else
+                    throw new CompilerError("[Semantic Error, EvalType] Inconsistent types at " + unExpr);
         }
     }
 
     public void visit(VarDecl varDecl) {
-        if(!first) return;
+        if(turn != 0) return;
         varDecl.type.accept(this);
         Typ type = attrs.typAttr.get(varDecl.type);
         attrs.typAttr.set(varDecl, type);
     }
 
     public void visit(VarName varName) {
-        if(!first) return;
         Decl dec = attrs.declAttr.get(varName);
         attrs.typAttr.set(varName, attrs.typAttr.get(dec));
     }
 
     public void visit(WhereExpr whereExpr) {
-        boolean prev = first;
-        first = true;
-        for (int p = 0; p < 2; p++) {
+        int prevTurn = turn;
+        turn = 0;
+        for (int p = 0; p < 3; p++) {
             for (int d = 0; d < whereExpr.numDecls(); d++)
                 whereExpr.decl(d).accept(this);
             first = false;
+            turn++;
         }
-        first = prev;
+        turn = prevTurn;// TODO change @first with @turn
         whereExpr.expr.accept(this);
+        attrs.typAttr.set(whereExpr, attrs.typAttr.get(whereExpr.expr));
     }
 
     public void visit(WhileExpr whileExpr) {
         whileExpr.cond.accept(this);
         whileExpr.body.accept(this);
+
+        Typ cond = attrs.typAttr.get(whileExpr.cond);
+        Typ body = attrs.typAttr.get(whileExpr.body);
+
+        if(!(cond instanceof BooleanTyp) || body == null)
+            throw new CompilerError("[Semantic Error, EvalTyp] Type missmatch at while loop " + whileExpr);
+        attrs.typAttr.set(whileExpr, new VoidTyp());
     }
 
 

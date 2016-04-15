@@ -82,6 +82,7 @@ public class EvalDecl extends FullVisitor {
 	}
 
 	public void visit(TypeDecl typDecl) {
+		typDecl.type.accept(this);
 		if(prototyping) {
 			try {
 				symbolTable.insDecl(typDecl.name, typDecl);
@@ -89,8 +90,6 @@ public class EvalDecl extends FullVisitor {
 				throw new CompilerError(err.getMessage());
 			}
 		}
-		typDecl.type.accept(this);
-
 	}
 
 	public void visit(TypeName typeName) {

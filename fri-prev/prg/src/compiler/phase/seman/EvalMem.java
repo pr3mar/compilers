@@ -34,13 +34,28 @@ public class EvalMem extends FullVisitor {
 		binExpr.sndExpr.accept(this);
 		Typ t1 = attrs.typAttr.get(binExpr.fstExpr);
 		Typ t2 = attrs.typAttr.get(binExpr.sndExpr);
-		boolean mem = attrs.memAttr.get(binExpr.fstExpr);
 		switch (binExpr.oper) {
 			case ASSIGN:
+				boolean mem = attrs.memAttr.get(binExpr.fstExpr);
 				if(mem && t1 != null && t2 != null) {
+					attrs.memAttr.set(binExpr, true);
 					attrs.typAttr.set(binExpr, new VoidTyp());
 				} else {
 					throw new CompilerError("[Semantic error, memEval] Cannot assign at " + binExpr);
+				}
+				break;
+			case ARR:
+				if(t1 != null && t2 instanceof IntegerTyp) {
+					attrs.memAttr.set(binExpr, true);
+				} else {
+					throw new CompilerError("[Semantic error, memEval] Invalid expression " + binExpr);
+				}
+				break;
+			case REC:
+				if(t1 != null && t2 != null) {
+					attrs.memAttr.set(binExpr, true);
+				} else {
+					throw new CompilerError("[Semantic error, memEval] Invalid expression " + binExpr);
 				}
 				break;
 			default:

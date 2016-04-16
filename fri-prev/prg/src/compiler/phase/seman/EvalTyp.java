@@ -42,7 +42,7 @@ public class EvalTyp extends FullVisitor {
     // TODO
 
     public void visit(ArrType arrType) {
-        if (turn != 0) return;
+        if (turn != 1) return;
         arrType.size.accept(this);
         arrType.elemType.accept(this);
         long size;
@@ -75,7 +75,7 @@ public class EvalTyp extends FullVisitor {
                 attrs.typAttr.set(atomExpr, new StringTyp());
                 break;
             case PTR:
-                attrs.typAttr.set(atomExpr, new PtrTyp(null));
+//                attrs.typAttr.set(atomExpr, new PtrTyp(null));
                 break;
             case VOID:
                 attrs.typAttr.set(atomExpr, new VoidTyp());
@@ -131,7 +131,7 @@ public class EvalTyp extends FullVisitor {
         if(snd.actualTyp() instanceof ArrTyp)
             snd = ((ArrTyp) snd).elemTyp;
 
-        if(fst instanceof IntegerTyp && snd instanceof IntegerTyp) {
+        if(fst.actualTyp() instanceof IntegerTyp && snd.actualTyp() instanceof IntegerTyp) {
             switch (binExpr.oper) {
                 case ADD: case SUB: case MUL: case MOD: case DIV:
                     attrs.typAttr.set(binExpr, new IntegerTyp());
@@ -141,7 +141,7 @@ public class EvalTyp extends FullVisitor {
                     break;
             }
 //        } else if(fst.actualTyp() instanceof BooleanTyp && snd instanceof BooleanTyp) {
-        } else if(fst instanceof BooleanTyp && snd instanceof BooleanTyp) {
+        } else if(fst.actualTyp() instanceof BooleanTyp && snd.actualTyp() instanceof BooleanTyp) {
             switch (binExpr.oper) {
                 case AND: case OR:
                     attrs.typAttr.set(binExpr, new BooleanTyp());
@@ -150,8 +150,8 @@ public class EvalTyp extends FullVisitor {
                     attrs.typAttr.set(binExpr, new BooleanTyp());
                     break;
             }
-        } else if(fst instanceof CharTyp && snd instanceof CharTyp
-                || fst instanceof PtrTyp && snd instanceof PtrTyp && fst.isStructEquivTo(snd)) {
+        } else if(fst.actualTyp() instanceof CharTyp && snd.actualTyp() instanceof CharTyp
+                || fst.actualTyp() instanceof PtrTyp && snd.actualTyp() instanceof PtrTyp && fst.isStructEquivTo(snd)) {
             switch (binExpr.oper) {
                 case EQU: case NEQ: case LTH: case GTH: case GEQ: case LEQ:
                     attrs.typAttr.set(binExpr, new BooleanTyp());
@@ -159,9 +159,11 @@ public class EvalTyp extends FullVisitor {
             }
         } else if(binExpr.oper == BinExpr.Oper.ASSIGN) {
             // handle assignment!!
-        }/*else {
+        } else if(binExpr.oper == BinExpr.Oper.REC) {
+            //
+        } else {
             throw new CompilerError("[Semantic error, binExpr]: Ambiguous types " + binExpr);
-        }*/
+        }
     }
 
     public void visit(CastExpr castExpr) {
@@ -178,7 +180,7 @@ public class EvalTyp extends FullVisitor {
     }
 
     public void visit(CompDecl compDecl) {
-        if (turn != 0) return;
+        if (turn != 1) return;
         try {
             symbolTable.insDecl(this.recNow.toString(), compDecl.name, compDecl);
         } catch (CannotInsNameDecl err) {
@@ -245,7 +247,7 @@ public class EvalTyp extends FullVisitor {
     }
 
     public void visit(FunDecl funDecl) {
-        if(turn != 0) return;
+        if(turn != 1) return;
         funDecl.type.accept(this);
         Typ type = attrs.typAttr.get(funDecl.type);
         LinkedList<Typ> params = new LinkedList<>();
@@ -257,7 +259,7 @@ public class EvalTyp extends FullVisitor {
     }
 
     public void visit(FunDef funDef) {
-        if(turn == 0) {
+        if(turn == 1) {
             funDef.type.accept(this);
             Typ type = attrs.typAttr.get(funDef.type);
             LinkedList<Typ> params = new LinkedList<>();
@@ -285,7 +287,7 @@ public class EvalTyp extends FullVisitor {
     }
 
     public void visit(ParDecl parDecl) {
-        if(turn != 0) return;
+        if(turn != 1) return;
         parDecl.type.accept(this);
         attrs.typAttr.set(parDecl, attrs.typAttr.get(parDecl.type));
     }
@@ -295,7 +297,6 @@ public class EvalTyp extends FullVisitor {
     }
 
     public void visit(PtrType ptrType) {
-        if (turn != 0) return;
         ptrType.baseType.accept(this);
         Typ type;
         try {
@@ -307,7 +308,7 @@ public class EvalTyp extends FullVisitor {
     }
 
     public void visit(RecType recType) {
-        if (turn != 0) return;
+        if (turn != 1) return;
         symbolTable.newNamespace(recType.toString());
         this.recNow = recType;
         LinkedList<Typ> compTyps = new LinkedList<Typ>();
@@ -320,15 +321,26 @@ public class EvalTyp extends FullVisitor {
     }
 
     public void visit(TypeDecl typDecl) {
-        if(turn != 0) return;
-        typDecl.type.accept(this);
+        TypName type;
+        if(turn == 0) {
+             type = new TypName(typDecl.name);
+            attrs.typAttr.set(typDecl, type);
+        } else if(turn == 1) {
+            typDecl.type.accept(this);
+            type = (TypName) this.attrs.typAttr.get(typDecl);
+            type.setType(attrs.typAttr.get(typDecl.type));
+        }
     }
 
     public void visit(TypeName typeName) {
+        if (turn != 1) return;
+        Decl dec = attrs.declAttr.get(typeName);
+        Typ type = attrs.typAttr.get(dec);
+        attrs.typAttr.set(typeName, type);
     }
 
     public void visit(UnExpr unExpr) {
-        if (turn != 0) return;
+//        if (turn != 1) return;
         unExpr.subExpr.accept(this);
         Typ type = attrs.typAttr.get(unExpr.subExpr);
         switch (unExpr.oper) {
@@ -356,7 +368,7 @@ public class EvalTyp extends FullVisitor {
     }
 
     public void visit(VarDecl varDecl) {
-        if(turn != 0) return;
+        if(turn != 1) return;
         varDecl.type.accept(this);
         Typ type = attrs.typAttr.get(varDecl.type);
         attrs.typAttr.set(varDecl, type);

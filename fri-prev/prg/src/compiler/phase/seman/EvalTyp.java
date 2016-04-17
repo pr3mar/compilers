@@ -107,10 +107,12 @@ public class EvalTyp extends FullVisitor {
         binExpr.fstExpr.accept(this);
         Typ fst = attrs.typAttr.get(binExpr.fstExpr);
         Typ fstAct = fst;
+        RecTyp tmp = recUse;
         if(fstAct instanceof TypName && !((TypName) fst).isCircular())
-            fstAct = fst.actualTyp();
-        if(fstAct instanceof RecTyp)
-            recUse = (RecTyp)fstAct;
+            fstAct = fstAct.actualTyp();
+        if(fstAct instanceof RecTyp) {
+            recUse = (RecTyp) fstAct;
+        }
 
         binExpr.sndExpr.accept(this);
         Typ snd = attrs.typAttr.get(binExpr.sndExpr);
@@ -122,23 +124,39 @@ public class EvalTyp extends FullVisitor {
         if(fstAct instanceof  ArrTyp
                 && sndAct instanceof IntegerTyp
                     && binExpr.oper == BinExpr.Oper.ARR) {
-            attrs.typAttr.set(binExpr, ((ArrTyp)fstAct).elemTyp);
+            Typ t = ((ArrTyp)fstAct).elemTyp;
+            if(t instanceof TypName && !((TypName) t).isCircular())
+                t = t.actualTyp();
+            attrs.typAttr.set(binExpr, t);
             return;
         }
 
-//        if(fstAct instanceof RecTyp) {
-//            attrs.typAttr.set(binExpr, sndAct);
-//            recUse = null;
-//        }
-        if(fstAct instanceof FunTyp)
-            fstAct = ((FunTyp) fstAct).resultTyp;
-        if(fstAct instanceof ArrTyp)
-            fstAct = ((ArrTyp) fstAct).elemTyp;
-        if(sndAct instanceof FunTyp)
-            sndAct = ((FunTyp) sndAct).resultTyp;
-        if(sndAct instanceof ArrTyp)
-            sndAct = ((ArrTyp) sndAct).elemTyp;
+        if(fstAct instanceof RecTyp) {
+            attrs.typAttr.set(binExpr, sndAct);
+            recUse = tmp;
+            return;
+        }
 
+        if(fstAct instanceof FunTyp) {
+            fstAct = ((FunTyp) fstAct).resultTyp;
+            if(fstAct instanceof TypName && !((TypName) fst).isCircular())
+                fstAct = fstAct.actualTyp();
+        }
+        if(fstAct instanceof ArrTyp) {
+            fstAct = ((ArrTyp) fstAct).elemTyp;
+            if(fstAct instanceof TypName && !((TypName) fst).isCircular())
+                fstAct = fstAct.actualTyp();
+        }
+        if(sndAct instanceof FunTyp) {
+            sndAct = ((FunTyp) sndAct).resultTyp;
+            if(sndAct instanceof TypName && !((TypName) sndAct).isCircular())
+                sndAct = sndAct.actualTyp();
+        }
+        if(sndAct instanceof ArrTyp) {
+            sndAct = ((ArrTyp) sndAct).elemTyp;
+            if(sndAct instanceof TypName && !((TypName) sndAct).isCircular())
+                sndAct = sndAct.actualTyp();
+        }
         if(fstAct instanceof IntegerTyp && sndAct instanceof IntegerTyp) {
             switch (binExpr.oper) {
                 case ADD: case SUB: case MUL: case MOD: case DIV:
@@ -167,11 +185,11 @@ public class EvalTyp extends FullVisitor {
             }
         } else if(binExpr.oper == BinExpr.Oper.ASSIGN) {
 //            attrs.typAttr.set(binExpr, new VoidTyp());
-        } else if(fstAct != null && sndAct != null
+        }/* else if(fstAct != null && sndAct != null
                 && binExpr.oper == BinExpr.Oper.REC) {
             attrs.typAttr.set(binExpr, sndAct);
             recUse = null;
-        } else {
+        } */else {
             throw new CompilerError("[Semantic error, binExpr]: Ambiguous types " + binExpr);
         }
     }
@@ -187,7 +205,7 @@ public class EvalTyp extends FullVisitor {
         if(actExpr instanceof TypName && !((TypName) expr).isCircular() )
             actExpr = actExpr.actualTyp();
 
-        if(!(type instanceof PtrTyp) ||
+        if(!(actExpr instanceof PtrTyp) ||
                 !(actExpr instanceof PtrTyp) && !(((PtrTyp) expr).baseTyp instanceof VoidTyp))
             throw new CompilerError("[Semantic error, evalTyp-cast]: Type missmatch at cast: " + castExpr);
         attrs.typAttr.set(castExpr, type);
@@ -210,8 +228,8 @@ public class EvalTyp extends FullVisitor {
             attrs.declAttr.set(compName, dec);
             Typ type = attrs.typAttr.get(dec);
             attrs.typAttr.set(compName, type);
-        } catch (CannotFndNameDecl cannotFndNameDecl) {
-            cannotFndNameDecl.printStackTrace();
+        } catch (Exception e) {
+            throw new CompilerError("[Semantic error, evalTyp] Cannot access component." + compName);
         }
     }
 
@@ -340,6 +358,10 @@ public class EvalTyp extends FullVisitor {
 
     public void visit(Program program) {
         program.expr.accept(this);
+        Typ exprTyp = attrs.typAttr.get(program.expr);
+        if(exprTyp instanceof TypName && !((TypName)exprTyp).isCircular())
+            exprTyp = exprTyp.actualTyp();
+        attrs.typAttr.set(program, exprTyp);
     }
 
     public void visit(PtrType ptrType) {
@@ -356,6 +378,7 @@ public class EvalTyp extends FullVisitor {
     public void visit(RecType recType) {
         if (turn != 1) return;
         symbolTable.newNamespace(recType.toString());
+        RecType tmp = this.recNow;
         this.recNow = recType;
         LinkedList<Typ> compTyps = new LinkedList<Typ>();
         for (int c = 0; c < recType.numComps(); c++) {
@@ -363,7 +386,7 @@ public class EvalTyp extends FullVisitor {
             compTyps.add(attrs.typAttr.get(recType.comp(c)));
         }
         attrs.typAttr.set(recType, new RecTyp(recType.toString(), compTyps));
-        this.recNow = null;
+        this.recNow = tmp;
     }
 
     public void visit(TypeDecl typDecl) {
@@ -379,7 +402,11 @@ public class EvalTyp extends FullVisitor {
     }
 
     public void visit(TypeName typeName) {
-        if (turn != 1) return;
+        try {
+            attrs.typAttr.get(typeName);
+        } catch (Exception e) {
+            return;
+        }
         Decl dec = attrs.declAttr.get(typeName);
         Typ type = attrs.typAttr.get(dec);
         attrs.typAttr.set(typeName, type);
@@ -440,7 +467,7 @@ public class EvalTyp extends FullVisitor {
             first = false;
             turn++;
         }
-        turn = prevTurn;// TODO change @first with @turn
+        turn = prevTurn;
         whereExpr.expr.accept(this);
         if(attrs.typAttr.get(whereExpr.expr) != null) {
             Typ act = attrs.typAttr.get(whereExpr.expr);

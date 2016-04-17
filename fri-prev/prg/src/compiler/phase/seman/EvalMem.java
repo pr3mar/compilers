@@ -38,11 +38,30 @@ public class EvalMem extends FullVisitor {
 		Typ t2 = attrs.typAttr.get(binExpr.sndExpr);
 		if(t2 instanceof TypName && !((TypName) t2).isCircular())
 			t2 = t2.actualTyp();
+		if(t2 instanceof FunTyp) {
+			t2 = ((FunTyp) t2).resultTyp;
+			if(t2 instanceof TypName && !((TypName) t2).isCircular())
+				t2 = t2.actualTyp();
+		}
+		if(t2 instanceof ArrTyp) {
+			t2 = ((ArrTyp) t2).elemTyp;
+			if(t2 instanceof TypName && !((TypName) t2).isCircular())
+				t2 = t2.actualTyp();
+		}
 		switch (binExpr.oper) {
 			case ASSIGN:
 				boolean mem = attrs.memAttr.get(binExpr.fstExpr);
-				if(mem && t1 != null && t2 != null) {
-					attrs.memAttr.set(binExpr, true);
+				if(mem) {
+					if (!(t1 instanceof BooleanTyp ||  t1 instanceof IntegerTyp || t1 instanceof CharTyp || t1 instanceof StringTyp || t1 instanceof PtrTyp)) {
+						throw new CompilerError("[Semantic error, memEval] Cannot assign at " + binExpr.fstExpr);
+					}
+					if (!(t2 instanceof BooleanTyp ||  t2 instanceof IntegerTyp || t2 instanceof CharTyp || t2 instanceof StringTyp || t2 instanceof PtrTyp)){
+						throw new CompilerError("[Semantic error, memEval] Cannot assign at " + binExpr.sndExpr);
+					}
+					if(!t1.getClass().equals(t2.getClass())) {
+						throw new CompilerError("[Semantic error, memEval] Cannot assign at " + binExpr.sndExpr);
+					}
+					attrs.memAttr.set(binExpr, false);
 					attrs.typAttr.set(binExpr, new VoidTyp());
 				} else {
 					throw new CompilerError("[Semantic error, memEval] Cannot assign at " + binExpr);
@@ -164,9 +183,19 @@ public class EvalMem extends FullVisitor {
 		Typ type = attrs.typAttr.get(unExpr);
 		if(type instanceof TypName && !((TypName)type).isCircular())
 			type = type.actualTyp();
+		Typ typeSub = attrs.typAttr.get(unExpr.subExpr);
+		if(typeSub instanceof TypName && !((TypName)typeSub).isCircular())
+			typeSub = typeSub.actualTyp();
 		switch (unExpr.oper) {
 			case MEM:
 				if(type instanceof PtrTyp && attrs.memAttr.get(unExpr.subExpr)) {
+					attrs.memAttr.set(unExpr, true);
+				} else {
+					throw new CompilerError("[Semantic error, memEval] Cannot address this!!" + unExpr);
+				}
+				break;
+			case VAL:
+				if(typeSub instanceof PtrTyp) {
 					attrs.memAttr.set(unExpr, true);
 				} else {
 					throw new CompilerError("[Semantic error, memEval] Cannot address this!!" + unExpr);

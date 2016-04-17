@@ -114,7 +114,10 @@ public class EvalDecl extends FullVisitor {
 	public void visit(VarName varName) {
 		try {
 			Decl val = symbolTable.fndDecl(varName.name());
-			attrs.declAttr.set(varName, val);
+			if (!(val instanceof VarDecl))
+				throw new CompilerError("[Semantic error, evalDecl]: Cannot find declaration of var at " + varName);
+			else
+				attrs.declAttr.set(varName, val);
 		} catch (CannotFndNameDecl err) {
 			throw new CompilerError("[Semantic error, evalDecl]: Cannot find declaration of var at " + varName);
 		}

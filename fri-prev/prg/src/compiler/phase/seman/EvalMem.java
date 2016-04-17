@@ -33,7 +33,11 @@ public class EvalMem extends FullVisitor {
 		binExpr.fstExpr.accept(this);
 		binExpr.sndExpr.accept(this);
 		Typ t1 = attrs.typAttr.get(binExpr.fstExpr);
+		if(t1 instanceof TypName && !((TypName) t1).isCircular())
+			t1 = t1.actualTyp();
 		Typ t2 = attrs.typAttr.get(binExpr.sndExpr);
+		if(t2 instanceof TypName && !((TypName) t2).isCircular())
+			t2 = t2.actualTyp();
 		switch (binExpr.oper) {
 			case ASSIGN:
 				boolean mem = attrs.memAttr.get(binExpr.fstExpr);
@@ -81,12 +85,12 @@ public class EvalMem extends FullVisitor {
 	}
 
 	public void visit(Exprs exprs) {
-		Typ exp = null;
+//		Typ exp = null;
 		for (int e = 0; e < exprs.numExprs(); e++) {
 			exprs.expr(e).accept(this);
-			exp = attrs.typAttr.get(exprs.expr(e));
+//			exp = attrs.typAttr.get(exprs.expr(e));
 		}
-		attrs.typAttr.set(exprs, exp);
+//		attrs.typAttr.set(exprs, exp);
 		attrs.memAttr.set(exprs, false);
 	}
 
@@ -158,6 +162,8 @@ public class EvalMem extends FullVisitor {
 	public void visit(UnExpr unExpr) {
 		unExpr.subExpr.accept(this);
 		Typ type = attrs.typAttr.get(unExpr);
+		if(type instanceof TypName && !((TypName)type).isCircular())
+			type = type.actualTyp();
 		switch (unExpr.oper) {
 			case MEM:
 				if(type instanceof PtrTyp && attrs.memAttr.get(unExpr.subExpr)) {
@@ -189,7 +195,7 @@ public class EvalMem extends FullVisitor {
 		for (int d = 0; d < whereExpr.numDecls(); d++)
 			whereExpr.decl(d).accept(this);
 		attrs.memAttr.set(whereExpr, false);
-		attrs.typAttr.set(whereExpr, attrs.typAttr.get(whereExpr.expr).actualTyp());
+//		attrs.typAttr.set(whereExpr, attrs.typAttr.get(whereExpr.expr).actualTyp());
 	}
 
 	public void visit(WhileExpr whileExpr) {

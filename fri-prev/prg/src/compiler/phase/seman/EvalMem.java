@@ -81,8 +81,12 @@ public class EvalMem extends FullVisitor {
 	}
 
 	public void visit(Exprs exprs) {
-		for (int e = 0; e < exprs.numExprs(); e++)
+		Typ exp = null;
+		for (int e = 0; e < exprs.numExprs(); e++) {
 			exprs.expr(e).accept(this);
+			exp = attrs.typAttr.get(exprs.expr(e));
+		}
+		attrs.typAttr.set(exprs, exp);
 		attrs.memAttr.set(exprs, false);
 	}
 
@@ -185,6 +189,7 @@ public class EvalMem extends FullVisitor {
 		for (int d = 0; d < whereExpr.numDecls(); d++)
 			whereExpr.decl(d).accept(this);
 		attrs.memAttr.set(whereExpr, false);
+		attrs.typAttr.set(whereExpr, attrs.typAttr.get(whereExpr.expr).actualTyp());
 	}
 
 	public void visit(WhileExpr whileExpr) {

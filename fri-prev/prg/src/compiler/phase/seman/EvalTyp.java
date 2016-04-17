@@ -202,12 +202,12 @@ public class EvalTyp extends FullVisitor {
     }
 
     public void visit(Exprs exprs) {
-        Typ exp = null;
+//        Typ exp = null;
         for (int e = 0; e < exprs.numExprs(); e++) {
             exprs.expr(e).accept(this);
-            exp = attrs.typAttr.get(exprs.expr(e));
+
         }
-        attrs.typAttr.set(exprs, exp);
+//        attrs.typAttr.set(exprs, exp);
     }
 
     public void visit(ExprError exprError) {
@@ -390,7 +390,7 @@ public class EvalTyp extends FullVisitor {
         }
         turn = prevTurn;// TODO change @first with @turn
         whereExpr.expr.accept(this);
-        attrs.typAttr.set(whereExpr, attrs.typAttr.get(whereExpr.expr));
+//        attrs.typAttr.set(whereExpr, attrs.typAttr.get(whereExpr.expr).actualTyp());
     }
 
     public void visit(WhileExpr whileExpr) {

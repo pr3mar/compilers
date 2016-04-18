@@ -30,6 +30,13 @@ public class EvalDecl extends FullVisitor {
 	/** See which run-over is 1st or second*/
 	boolean prototyping;
 
+
+	public void visit(CompDecl compDecl) {
+		compDecl.type.accept(this);
+//		Decl type = attrs.declAttr.get(compDecl.type);
+//		attrs.declAttr.set(compDecl, type);
+	}
+
 	public void visit(FunCall funCall) {
 		for (int a = 0; a < funCall.numArgs(); a++)
 			funCall.arg(a).accept(this);
@@ -43,13 +50,13 @@ public class EvalDecl extends FullVisitor {
 
 	public void visit(FunDecl funDecl) {
 		if(prototyping) {
-			funDecl.type.accept(this);
 			try {
 				symbolTable.insDecl(funDecl.name, funDecl);
 			} catch (CannotInsNameDecl err) {
 				throw new CompilerError("[Semantic error, evalDecl]: Cannot insert new declaration of function at " + funDecl);
 			}
 		} else {
+			funDecl.type.accept(this);
 			symbolTable.enterScope();
 			for (int p = 0; p < funDecl.numPars(); p++)
 				funDecl.par(p).accept(this);
@@ -59,17 +66,16 @@ public class EvalDecl extends FullVisitor {
 
 	public void visit(FunDef funDef) {
 		if(prototyping) {
-			funDef.type.accept(this);
 			try {// types of parameters in a separate scope
 				symbolTable.insDecl(funDef.name, funDef);
 			} catch (CannotInsNameDecl err) {
 				throw new CompilerError("[Semantic error, evalDecl]: Cannot insert new declaration of function at " + funDef);
 			}
 		} else {
+			funDef.type.accept(this);
 			symbolTable.enterScope();
 			for (int p = 0; p < funDef.numPars(); p++)
 				funDef.par(p).accept(this);
-			funDef.type.accept(this);
 			funDef.body.accept(this);
 			symbolTable.leaveScope();
 		}

@@ -125,8 +125,8 @@ public class EvalTyp extends FullVisitor {
                 && sndAct instanceof IntegerTyp
                     && binExpr.oper == BinExpr.Oper.ARR) {
             Typ t = ((ArrTyp)fstAct).elemTyp;
-            if(t instanceof TypName && !((TypName) t).isCircular())
-                t = t.actualTyp();
+            /*if(t instanceof TypName && !((TypName) t).isCircular())
+                t = t.actualTyp();*/
             attrs.typAttr.set(binExpr, t);
             return;
         }
@@ -281,21 +281,29 @@ public class EvalTyp extends FullVisitor {
         }
         FunTyp call = new FunTyp(params, funTyp.resultTyp);
         if(funTyp.isStructEquivTo(call))
-            attrs.typAttr.set(funCall, call);
+            attrs.typAttr.set(funCall, call.resultTyp);
         else
             throw new CompilerError("[Semantic Error, EvalTyp, funcall] Type missmatch at function call " + funCall);
     }
 
     public void visit(FunDecl funDecl) {
-        if(turn != 1) return;
-        funDecl.type.accept(this);
-        Typ type = attrs.typAttr.get(funDecl.type);
-        LinkedList<Typ> params = new LinkedList<>();
-        for (int p = 0; p < funDecl.numPars(); p++) {
-            funDecl.par(p).accept(this);
-            params.add(attrs.typAttr.get(funDecl.par(p)));
+        if(turn == 1) {
+            funDecl.type.accept(this);
+            Typ type = attrs.typAttr.get(funDecl.type);
+            LinkedList<Typ> params = new LinkedList<>();
+            for (int p = 0; p < funDecl.numPars(); p++) {
+                funDecl.par(p).accept(this);
+                params.add(attrs.typAttr.get(funDecl.par(p)));
+            }
+            attrs.typAttr.set(funDecl, new FunTyp(params, type));
+        } else if(turn == 2) {
+            Typ type = attrs.typAttr.get(funDecl.type);
+            if(type instanceof TypName && !((TypName)type).isCircular()) {
+                type = type.actualTyp();
+            }
+            if (!(type instanceof BooleanTyp ||  type instanceof IntegerTyp || type instanceof CharTyp || type instanceof VoidTyp || type instanceof StringTyp || type instanceof PtrTyp))
+                throw new CompilerError("[Semantic error, evalTyp] Return type not allowed at " + funDecl.type);
         }
-        attrs.typAttr.set(funDecl, new FunTyp(params, type));
     }
 
     public void visit(FunDef funDef) {
@@ -308,8 +316,23 @@ public class EvalTyp extends FullVisitor {
                 params.add(attrs.typAttr.get(funDef.par(p)));
             }
             attrs.typAttr.set(funDef, new FunTyp(params, type));
-        } else if(turn == 2)
+        } else if(turn == 2) {
+            Typ type = attrs.typAttr.get(funDef.type);
+            if(type instanceof TypName && !((TypName)type).isCircular()) {
+                type = type.actualTyp();
+            }
+            if (!(type instanceof BooleanTyp ||  type instanceof IntegerTyp || type instanceof CharTyp || type instanceof VoidTyp || type instanceof StringTyp || type instanceof PtrTyp))
+                throw new CompilerError("[Semantic error, evalTyp] Return type not allowed at " + funDef.type);
             funDef.body.accept(this);
+            Typ funRet = ((FunTyp) attrs.typAttr.get(funDef)).resultTyp;
+            if(funRet instanceof TypName && !((TypName) funRet).isCircular())
+                funRet = funRet.actualTyp();
+            Typ bodyTyp = attrs.typAttr.get(funDef.body);
+            if(bodyTyp instanceof TypName && !((TypName) bodyTyp).isCircular())
+                bodyTyp = bodyTyp.actualTyp();
+            if(!bodyTyp.getClass().equals(funRet.getClass()))
+               throw new CompilerError("[Semantic error, evalTyp, fundef] Inconsistent types at " + funDef);
+        }
     }
 
     public void visit(IfExpr ifExpr) {
@@ -351,9 +374,17 @@ public class EvalTyp extends FullVisitor {
     }
 
     public void visit(ParDecl parDecl) {
-        if(turn != 1) return;
-        parDecl.type.accept(this);
-        attrs.typAttr.set(parDecl, attrs.typAttr.get(parDecl.type));
+        if(turn == 1) {
+            parDecl.type.accept(this);
+            attrs.typAttr.set(parDecl, attrs.typAttr.get(parDecl.type));
+        } else {
+            Typ parTyp = attrs.typAttr.get(parDecl.type);
+            if(parTyp instanceof TypName && !((TypName)parTyp).isCircular()) {
+                parTyp = parTyp.actualTyp();
+            }
+            if (!(parTyp instanceof BooleanTyp ||  parTyp instanceof IntegerTyp || parTyp instanceof CharTyp || parTyp instanceof StringTyp || parTyp instanceof PtrTyp))
+                throw new CompilerError("[Semantic error, evalTyp] Parameter type not allowed at " + parDecl);
+        }
     }
 
     public void visit(Program program) {

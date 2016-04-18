@@ -113,8 +113,9 @@ public class EvalDecl extends FullVisitor {
 		if(prototyping){
 			try { symbolTable.insDecl(varDecl.name, varDecl); }
 			catch (CannotInsNameDecl err) { throw new CompilerError(err.getMessage()); }
+		} else {
+			varDecl.type.accept(this);
 		}
-		varDecl.type.accept(this);
 	}
 
 	public void visit(VarName varName) {

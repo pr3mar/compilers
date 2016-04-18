@@ -49,13 +49,13 @@ public class EvalTyp extends FullVisitor {
         try {
             size = attrs.valueAttr.get(arrType.size);
         } catch (NullPointerException err) {
-            throw new CompilerError("[Semantic Error, EvalType] Array size not defined statically at" + arrType);
+            throw new CompilerError("[Semantic Error, EvalType] Array size not constant at" + arrType.size);
         }
         Typ type;
         try {
             type = attrs.typAttr.get(arrType.elemType);
         } catch (NullPointerException err) {
-            throw new CompilerError("[Semantic Error, EvalType] Array type not defined at" + arrType);
+            throw new CompilerError("[Semantic Error, EvalType] Array type not defined at" + arrType.elemType);
         }
         if(size < 1)
             throw new CompilerError("[Semantic Error, EvalType] Array size invalid at" + arrType);
@@ -77,7 +77,7 @@ public class EvalTyp extends FullVisitor {
                 attrs.typAttr.set(atomExpr, new StringTyp());
                 break;
             case PTR:
-//                attrs.typAttr.set(atomExpr, new PtrTyp(null));
+                attrs.typAttr.set(atomExpr, new PtrTyp(new VoidTyp()));
                 break;
             case VOID:
                 attrs.typAttr.set(atomExpr, new VoidTyp());
@@ -134,7 +134,7 @@ public class EvalTyp extends FullVisitor {
         }
 
         if(fstAct instanceof RecTyp) {
-            attrs.typAttr.set(binExpr, sndAct);
+            attrs.typAttr.set(binExpr, snd);
             recUse = tmp;
             return;
         }
@@ -528,8 +528,8 @@ public class EvalTyp extends FullVisitor {
         whereExpr.expr.accept(this);
         if(attrs.typAttr.get(whereExpr.expr) != null) {
             Typ act = attrs.typAttr.get(whereExpr.expr);
-            if (act instanceof TypName && !((TypName) act).isCircular())
-                act = act.actualTyp();
+            /*if (act instanceof TypName && !((TypName) act).isCircular())
+                act = act.actualTyp();*/
             attrs.typAttr.set(whereExpr, act);
         } else
             attrs.typAttr.set(whereExpr, new VoidTyp());

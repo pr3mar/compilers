@@ -57,6 +57,8 @@ public class EvalTyp extends FullVisitor {
         } catch (NullPointerException err) {
             throw new CompilerError("[Semantic Error, EvalType] Array type not defined at" + arrType);
         }
+        if(size < 1)
+            throw new CompilerError("[Semantic Error, EvalType] Array size invalid at" + arrType);
         attrs.typAttr.set(arrType, new ArrTyp(size, type));
     }
 
@@ -260,7 +262,14 @@ public class EvalTyp extends FullVisitor {
         hi = attrs.typAttr.get(forExpr.hiBound);
         body = attrs.typAttr.get(forExpr.body);
 
-        if(var == null || lo == null || hi == null || body == null) {
+        if( (var instanceof TypName) && !((TypName)var).isCircular())
+            var = var.actualTyp();
+        if( (lo instanceof TypName) && !((TypName)lo).isCircular())
+            lo = lo.actualTyp();
+        if( (hi instanceof TypName) && !((TypName)hi).isCircular())
+            hi = hi.actualTyp();
+
+        if(!(var instanceof IntegerTyp) || !(lo instanceof IntegerTyp) || !(hi instanceof IntegerTyp) || body == null) {
             throw new CompilerError("[Semantic Error, EvalTyp, for] Type missmatch in for loop" + forExpr);
         }
         attrs.typAttr.set(forExpr, new VoidTyp());
@@ -268,7 +277,12 @@ public class EvalTyp extends FullVisitor {
 
     public void visit(FunCall funCall) {
         Decl fun = attrs.declAttr.get(funCall);
-        FunTyp funTyp = (FunTyp) attrs.typAttr.get(fun);
+        FunTyp funTyp = null;
+        try {
+            funTyp = (FunTyp) attrs.typAttr.get(fun);
+        } catch (Exception e) {
+            throw new CompilerError("[Semantic error, evalDecl]: Cannot find declaration of function at " + funCall);
+        }
         LinkedList<Typ> params = new LinkedList<>();
         for (int a = 0; a < funCall.numArgs(); a++) {
             funCall.arg(a).accept(this);
@@ -392,7 +406,10 @@ public class EvalTyp extends FullVisitor {
         Typ exprTyp = attrs.typAttr.get(program.expr);
         if(exprTyp instanceof TypName && !((TypName)exprTyp).isCircular())
             exprTyp = exprTyp.actualTyp();
-        attrs.typAttr.set(program, exprTyp);
+        if(exprTyp != null)
+            attrs.typAttr.set(program, exprTyp);
+        else
+            attrs.typAttr.set(program, new VoidTyp());
     }
 
     public void visit(PtrType ptrType) {
@@ -429,6 +446,15 @@ public class EvalTyp extends FullVisitor {
             typDecl.type.accept(this);
             type = (TypName) this.attrs.typAttr.get(typDecl);
             type.setType(attrs.typAttr.get(typDecl.type));
+        } else if(turn == 2) {
+            try {
+                type = (TypName) attrs.typAttr.get(typDecl.type);
+                if(type.isCircular()) {
+                    Report.warning(typDecl, "[Semantic warning] Circular types at " + typDecl);
+                }
+            } catch (Exception e) {
+                return;
+            }
         }
     }
 
@@ -456,18 +482,18 @@ public class EvalTyp extends FullVisitor {
         switch (unExpr.oper) {
             case ADD: case SUB:
                 if(type instanceof IntegerTyp)
-                    attrs.typAttr.set(unExpr, new IntegerTyp());
+                    attrs.typAttr.set(unExpr,attrs.typAttr.get(unExpr.subExpr) );
                 else
                     throw new CompilerError("[Semantic Error, EvalType] Inconsistent types at " + unExpr);
                 break;
             case NOT:
                 if(type instanceof BooleanTyp)
-                    attrs.typAttr.set(unExpr, new BooleanTyp());
+                    attrs.typAttr.set(unExpr, attrs.typAttr.get(unExpr.subExpr));
                 else
                     throw new CompilerError("[Semantic Error, EvalType] Inconsistent types at " + unExpr);
                 break;
             case MEM:
-                attrs.typAttr.set(unExpr, new PtrTyp(type));
+                attrs.typAttr.set(unExpr, new PtrTyp(attrs.typAttr.get(unExpr.subExpr)));
                 break;
             case VAL:
                 if(type instanceof PtrTyp)
@@ -515,6 +541,9 @@ public class EvalTyp extends FullVisitor {
 
         Typ cond = attrs.typAttr.get(whileExpr.cond);
         Typ body = attrs.typAttr.get(whileExpr.body);
+
+        if( (cond instanceof TypName) && !((TypName)cond).isCircular())
+            cond = cond.actualTyp();
 
         if(!(cond instanceof BooleanTyp) || body == null)
             throw new CompilerError("[Semantic Error, EvalTyp, while] Type missmatch at while loop " + whileExpr);

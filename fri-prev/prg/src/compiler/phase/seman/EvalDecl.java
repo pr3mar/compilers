@@ -44,7 +44,7 @@ public class EvalDecl extends FullVisitor {
 			Decl val = symbolTable.fndDecl(funCall.name());
 			attrs.declAttr.set(funCall, val);
 		} catch (CannotFndNameDecl err) {
-			throw new CompilerError("[Semantic error, evalDecl]: Cannot find declaration of var at " + funCall);
+			throw new CompilerError("[Semantic error, evalDecl]: Cannot find declaration of function at " + funCall);
 		}
 	}
 
@@ -104,7 +104,7 @@ public class EvalDecl extends FullVisitor {
 				Decl val = symbolTable.fndDecl(typeName.name());
 				attrs.declAttr.set(typeName, val);
 			} catch (CannotFndNameDecl err) {
-				throw new CompilerError("[Semantic error, evalDecl]: Cannot find declaration of var at " + typeName);
+				throw new CompilerError("[Semantic error, evalDecl]: Cannot find declaration of type at " + typeName);
 			}
 		}
 	}

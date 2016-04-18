@@ -188,11 +188,10 @@ public class EvalMem extends FullVisitor {
 			typeSub = typeSub.actualTyp();
 		switch (unExpr.oper) {
 			case MEM:
-				if(type instanceof PtrTyp && attrs.memAttr.get(unExpr.subExpr)) {
-					attrs.memAttr.set(unExpr, true);
-				} else {
+				if(!(type instanceof PtrTyp && attrs.memAttr.get(unExpr.subExpr))) {
 					throw new CompilerError("[Semantic error, memEval] Cannot address this!!" + unExpr);
 				}
+				attrs.memAttr.set(unExpr, false);
 				break;
 			case VAL:
 				if(typeSub instanceof PtrTyp) {

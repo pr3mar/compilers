@@ -180,7 +180,7 @@ public class EvalTyp extends FullVisitor {
                     break;
             }
         } else if(fstAct instanceof CharTyp && sndAct instanceof CharTyp
-                || fstAct instanceof StringTyp && sndAct instanceof StringTyp
+                //|| fstAct instanceof StringTyp && sndAct instanceof StringTyp
                     || fstAct instanceof PtrTyp && sndAct instanceof PtrTyp && fstAct.isStructEquivTo(sndAct)) {
             switch (binExpr.oper) {
                 case EQU: case NEQ: case LTH: case GTH: case GEQ: case LEQ:

@@ -68,7 +68,7 @@ public class EvalMem extends FullVisitor {
 				}
 				break;
 			case ARR:
-				if(t1 != null && t2 instanceof IntegerTyp) {
+				if(t1 instanceof ArrTyp && t2 instanceof IntegerTyp) {
 					attrs.memAttr.set(binExpr, true);
 				} else {
 					throw new CompilerError("[Semantic error, memEval] Invalid expression " + binExpr);
@@ -208,6 +208,7 @@ public class EvalMem extends FullVisitor {
 	}
 
 	public void visit(VarDecl varDecl) {
+
 		varDecl.type.accept(this);
 	}
 

@@ -86,6 +86,7 @@ public class EvalValue extends FullVisitor {
 		try {
 			val = attrs.valueAttr.get(unExpr.subExpr);
 		} catch (NullPointerException err) {
+			unary = "";
 			return;
 		}
 		if(unExpr.oper.equals(UnExpr.Oper.ADD)) {

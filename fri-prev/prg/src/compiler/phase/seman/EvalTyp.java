@@ -133,7 +133,9 @@ public class EvalTyp extends FullVisitor {
             return;
         }
 
-        if(fstAct instanceof RecTyp) {
+        if(fstAct instanceof RecTyp
+                && sndAct != null
+                    && binExpr.oper == BinExpr.Oper.REC) {
             attrs.typAttr.set(binExpr, snd);
             recUse = tmp;
             return;
@@ -168,7 +170,6 @@ public class EvalTyp extends FullVisitor {
                     attrs.typAttr.set(binExpr, new BooleanTyp());
                     break;
             }
-//        } else if(fstAct instanceof BooleanTyp && sndAct instanceof BooleanTyp) {
         } else if(fstAct instanceof BooleanTyp && sndAct instanceof BooleanTyp) {
             switch (binExpr.oper) {
                 case AND: case OR:
@@ -179,7 +180,8 @@ public class EvalTyp extends FullVisitor {
                     break;
             }
         } else if(fstAct instanceof CharTyp && sndAct instanceof CharTyp
-                || fstAct instanceof PtrTyp && sndAct instanceof PtrTyp && fstAct.isStructEquivTo(sndAct)) {
+                || fstAct instanceof StringTyp && sndAct instanceof StringTyp
+                    || fstAct instanceof PtrTyp && sndAct instanceof PtrTyp && fstAct.isStructEquivTo(sndAct)) {
             switch (binExpr.oper) {
                 case EQU: case NEQ: case LTH: case GTH: case GEQ: case LEQ:
                     attrs.typAttr.set(binExpr, new BooleanTyp());
@@ -241,7 +243,7 @@ public class EvalTyp extends FullVisitor {
             exprs.expr(e).accept(this);
             exp = attrs.typAttr.get(exprs.expr(e));
         }
-        if(exp != null)
+        if(exp != null) // very unsafe!!
             attrs.typAttr.set(exprs, exp);
         else
             attrs.typAttr.set(exprs, new VoidTyp());
@@ -268,7 +270,8 @@ public class EvalTyp extends FullVisitor {
             lo = lo.actualTyp();
         if( (hi instanceof TypName) && !((TypName)hi).isCircular())
             hi = hi.actualTyp();
-
+        if( body == null)
+            body = new VoidTyp();
         if(!(var instanceof IntegerTyp) || !(lo instanceof IntegerTyp) || !(hi instanceof IntegerTyp) || body == null) {
             throw new CompilerError("[Semantic Error, EvalTyp, for] Type missmatch in for loop" + forExpr);
         }
@@ -391,7 +394,7 @@ public class EvalTyp extends FullVisitor {
         if(turn == 1) {
             parDecl.type.accept(this);
             attrs.typAttr.set(parDecl, attrs.typAttr.get(parDecl.type));
-        } else {
+        } else if(turn == 2){
             Typ parTyp = attrs.typAttr.get(parDecl.type);
             if(parTyp instanceof TypName && !((TypName)parTyp).isCircular()) {
                 parTyp = parTyp.actualTyp();
@@ -533,6 +536,7 @@ public class EvalTyp extends FullVisitor {
             attrs.typAttr.set(whereExpr, act);
         } else
             attrs.typAttr.set(whereExpr, new VoidTyp());
+            //throw new CompilerError("[Semantic error, evalTyp] No types defined at " + whereExpr);
     }
 
     public void visit(WhileExpr whileExpr) {
@@ -544,6 +548,8 @@ public class EvalTyp extends FullVisitor {
 
         if( (cond instanceof TypName) && !((TypName)cond).isCircular())
             cond = cond.actualTyp();
+        if(body == null)
+            body = new VoidTyp();
 
         if(!(cond instanceof BooleanTyp) || body == null)
             throw new CompilerError("[Semantic Error, EvalTyp, while] Type missmatch at while loop " + whileExpr);

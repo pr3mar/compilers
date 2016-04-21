@@ -58,6 +58,8 @@ public class EvalFrames extends FullVisitor {
 		}
 	}
 
+	public void visit(FunDecl funDecl) { }
+
 	public void visit(FunDef funDef) {
 		long oldParOff = this.parOffset, oldVarOff = this.varOffset;
 		this.parOffset = 8;

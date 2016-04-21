@@ -5,7 +5,7 @@ import compiler.data.ast.*;
 import compiler.data.ast.attr.*;
 
 /**
- * The parameters of the compilation process.
+ * The parameters and internal data of the compilation process.
  * 
  * @author sliva
  */
@@ -21,7 +21,7 @@ public class Task {
 	public final String xslDName;
 
 	/** A regular expression describing all phases of the compiler. */
-	private static final String allPhases = "(lexan|synan|abstr|seman)";
+	private static final String allPhases = "(lexan|synan|abstr|seman|frames)";
 
 	/** A list of phases logging should be performed for. */
 	public final String loggedPhases;
@@ -29,6 +29,12 @@ public class Task {
 	/** The last phase of the compiler to be performed. */
 	public final String phase;
 
+	/**
+	 * Construct a new compilation task based on the command-line agruments.
+	 * 
+	 * @param args
+	 *            Command-line arguments.
+	 */
 	public Task(String[] args) {
 
 		String srcFName = "";
@@ -99,8 +105,14 @@ public class Task {
 			throw new CompilerError("Source file name not specified.");
 	}
 
+	/**
+	 * The abstract syntax tree representing the program that is being compiled.
+	 */
 	public Program prgAST = null;
-	
+
+	/**
+	 * The attributes of the AST nodes.
+	 */
 	public Attributes prgAttrs = new Attributes();
 
 }

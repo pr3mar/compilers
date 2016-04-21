@@ -21,4 +21,9 @@ public class VoidTyp extends AtomTyp implements ReturnableTyp {
 		logger.endElement();
 	}
 
+	@Override
+	public long size() {
+		return 0;
+	}
+
 }

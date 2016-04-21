@@ -43,6 +43,14 @@ public class RecTyp extends Typ {
 		} else
 			return false;
 	}
+	
+	@Override
+	public long size() {
+		long size = 0;
+		for (int c = 0; c < this.compTyps.length; c++)
+			size = size + this.compTyps[c].size();
+		return size;
+	}
 
 	@Override
 	public void log(Logger logger) {

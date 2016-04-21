@@ -21,4 +21,9 @@ public class CharTyp extends AtomTyp implements AssignableTyp, ComparableTyp, Pa
 		logger.endElement();
 	}
 
+	@Override
+	public long size() {
+		return 1;
+	}
+
 }

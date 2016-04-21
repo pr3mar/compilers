@@ -15,6 +15,11 @@ public class IntegerTyp extends AtomTyp implements AssignableTyp, ComparableTyp,
 	}
 
 	@Override
+	public long size() {
+		return 8;
+	}
+
+	@Override
 	public void log(Logger logger) {
 		logger.begElement("typ");
 		logger.addAttribute("kind", "INTEGER");

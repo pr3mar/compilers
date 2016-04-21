@@ -1,7 +1,9 @@
 package compiler.data.ast.attr;
 
+import compiler.data.acc.*;
 import compiler.data.ast.*;
 import compiler.data.typ.*;
+import compiler.data.frm.*;
 
 /**
  * @author sliva
@@ -42,5 +44,15 @@ public class Attributes {
 	 * an assignment).
 	 */
 	public Attribute<Expr, Boolean> memAttr = new Attribute<Expr, Boolean>();
+
+	/**
+	 * A function's stack frame.
+	 */
+	public Attribute<FunDecl, Frame> frmAttr = new Attribute<FunDecl, Frame>();
+
+	/**
+	 * A variable's access.
+	 */
+	public Attribute<VarDecl, Access> accAttr = new Attribute<VarDecl, Access>();
 
 }

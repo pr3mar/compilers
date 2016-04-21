@@ -3,6 +3,7 @@ package compiler.data.typ;
 import java.util.*;
 
 import compiler.common.logger.*;
+import compiler.common.report.*;
 
 /**
  * @author sliva
@@ -43,6 +44,11 @@ public class FunTyp extends Typ {
 			return isEquiv;
 		} else
 			return false;
+	}
+	
+	@Override
+	public long size() {
+		throw new InternalCompilerError();
 	}
 
 	@Override

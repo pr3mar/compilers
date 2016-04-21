@@ -81,6 +81,11 @@ public class TypName extends Typ {
 	}
 
 	@Override
+	public long size() {
+		return this.actualTyp.size();
+	}
+	
+	@Override
 	public void log(Logger logger) {
 		logger.begElement("typ");
 		logger.addAttribute("kind", "NAME(" + name + ")");

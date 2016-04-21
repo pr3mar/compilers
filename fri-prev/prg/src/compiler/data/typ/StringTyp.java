@@ -21,4 +21,9 @@ public class StringTyp extends AtomTyp implements AssignableTyp, PassableTyp, Re
 		logger.endElement();
 	}
 
+	@Override
+	public long size() {
+		return 8;
+	}
+
 }

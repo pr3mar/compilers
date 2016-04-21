@@ -75,7 +75,6 @@ public class LexAn extends Phase {
 	 * @return The next lexical symbol.
 	 */
 	public Symbol lexAn() {
-		// TODO
 		// glavna metoda, ki jo moram dopolniti!
 		// return log(symobl)
         if(!read) {

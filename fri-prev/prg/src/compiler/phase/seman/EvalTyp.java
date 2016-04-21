@@ -39,8 +39,6 @@ public class EvalTyp extends FullVisitor {
      */
     private SymbolTable symbolTable = new SymbolTable();
 
-    // TODO
-
     public void visit(ArrType arrType) {
         if (turn != 1) return;
         arrType.size.accept(this);

@@ -24,6 +24,11 @@ public class ArrTyp extends Typ {
 		return (typ.actualTyp() instanceof ArrTyp) && (this.size == ((ArrTyp) (typ.actualTyp())).size)
 				&& (this.elemTyp.isStructEquivTo(((ArrTyp) (typ.actualTyp())).elemTyp));
 	}
+	
+	@Override
+	public long size() {
+		return size * elemTyp.size();
+	}
 
 	@Override
 	public void log(Logger logger) {

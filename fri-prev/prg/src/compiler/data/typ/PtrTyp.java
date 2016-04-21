@@ -32,4 +32,9 @@ public class PtrTyp extends Typ implements AssignableTyp, CastableTyp, Comparabl
 		logger.endElement();
 	}
 
+	@Override
+	public long size() {
+		return 8;
+	}
+
 }

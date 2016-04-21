@@ -119,14 +119,4 @@ public class Position implements Loggable {
 		logger.endElement();
 	}
 
-	public int cmpEnd(Position pos) {
-		if(this.endColumn > pos.endColumn) {
-			return 1;
-		} else if(this.endColumn == pos.endColumn) {
-			return 0;
-		} else {
-			return -1;
-		}
-	}
-
 }

@@ -3,11 +3,8 @@
 #
 
 
-%.seman.xml	: %.prev
-	java -classpath ../prg/bin compiler.Main --xsldir=../prg/xsl --phase=seman --loggedphases=seman $<
-
-%.abstr.xml	: %.prev
-	java -classpath ../prg/bin compiler.Main --xsldir=../prg/xsl --phase=abstr --loggedphases=abstr $<
+%.frames.xml	: %.prev
+	java -classpath ../prg/bin compiler.Main --xsldir=../prg/xsl --phase=frames --loggedphases=frames $<
 
 %.synan.xml	: %.prev
 	java -classpath ../prg/bin compiler.Main --xsldir=../prg/xsl --phase=synan --loggedphases=synan $<

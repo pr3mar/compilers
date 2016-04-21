@@ -83,7 +83,9 @@ public class EvalDecl extends FullVisitor {
 
 	public void visit(ParDecl parDecl) {
 		try { symbolTable.insDecl(parDecl.name, parDecl); }
-		catch (CannotInsNameDecl err) { throw new CompilerError(err.getMessage()); }
+		catch (CannotInsNameDecl err) {
+			throw new CompilerError("[Semantic error] Parameter name already declared at " + parDecl);
+		}
 		parDecl.type.accept(this);
 	}
 
@@ -93,7 +95,7 @@ public class EvalDecl extends FullVisitor {
 			try {
 				symbolTable.insDecl(typDecl.name, typDecl);
 			} catch (CannotInsNameDecl err) {
-				throw new CompilerError(err.getMessage());
+				throw new CompilerError("[Semantic error] Type name already declared at " + typDecl);
 			}
 		}
 	}
@@ -112,7 +114,9 @@ public class EvalDecl extends FullVisitor {
 	public void visit(VarDecl varDecl) {
 		if(prototyping){
 			try { symbolTable.insDecl(varDecl.name, varDecl); }
-			catch (CannotInsNameDecl err) { throw new CompilerError(err.getMessage()); }
+			catch (CannotInsNameDecl err) {
+				throw new CompilerError("[Semantic error] Variable name already declared at " + varDecl);
+			}
 		} else {
 			varDecl.type.accept(this);
 		}

@@ -312,6 +312,9 @@ public class EvalTyp extends FullVisitor {
             }
             attrs.typAttr.set(funDecl, new FunTyp(params, type));
         } else if(turn == 2) {
+            for (int p = 0; p < funDecl.numPars(); p++) {
+                funDecl.par(p).accept(this);
+            }
             Typ type = attrs.typAttr.get(funDecl.type);
             if(type instanceof TypName && !((TypName)type).isCircular()) {
                 type = type.actualTyp();
@@ -332,6 +335,9 @@ public class EvalTyp extends FullVisitor {
             }
             attrs.typAttr.set(funDef, new FunTyp(params, type));
         } else if(turn == 2) {
+            for (int p = 0; p < funDef.numPars(); p++) {
+                funDef.par(p).accept(this);
+            }
             Typ type = attrs.typAttr.get(funDef.type);
             if(type instanceof TypName && !((TypName)type).isCircular()) {
                 type = type.actualTyp();

@@ -4,6 +4,8 @@ import compiler.data.acc.*;
 import compiler.data.ast.*;
 import compiler.data.typ.*;
 import compiler.data.frm.*;
+import compiler.data.imc.*;
+import compiler.data.frg.*;
 
 /**
  * @author sliva
@@ -54,5 +56,15 @@ public class Attributes {
 	 * A variable's access.
 	 */
 	public Attribute<VarDecl, Access> accAttr = new Attribute<VarDecl, Access>();
+	
+	/**
+	 * Intermediate code - expressions.
+	 */
+	public Attribute<ASTNode, IMC> imcAttr = new Attribute<ASTNode, IMC>();
+	
+	/**
+	 * Intermediate code fragments.
+	 */
+	public Attribute<ASTNode, Fragment> frgAttr = new Attribute<ASTNode, Fragment>();
 
 }

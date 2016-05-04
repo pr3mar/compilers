@@ -26,7 +26,6 @@ public class EvalFrames extends FullVisitor {
 	private long outSize;
 	private int funCount;
 	private String parentFuns;
-	private String parentRec;
 
 	private HashMap<String, Integer> globals = new HashMap<String, Integer>();
 
@@ -37,14 +36,11 @@ public class EvalFrames extends FullVisitor {
 		this.levels = 0;
 		this.funCount = 0;
 		this.parentFuns = "";
-		this.parentRec = "";
 		this.parOffset = 0;
 		this.varOffset = 0;
 		this.recOffset = 0;
 		this.outSize = 0;
 	}
-
-	// TODO
 
 	private String getLabel(Decl dec) {
 		if(this.levels == 0) {
@@ -71,6 +67,7 @@ public class EvalFrames extends FullVisitor {
 		this.parOffset = 8;
 		this.varOffset = 0;
 		//long locSize = 0;
+		this.levels++;
 		for (int p = 0; p < funDef.numPars(); p++) {
 			funDef.par(p).accept(this);
 			//locSize += this.attrs.typAttr.get(funDef.par(p)).size();
@@ -81,7 +78,6 @@ public class EvalFrames extends FullVisitor {
 		String label = getLabel(funDef);
 		String oldParents = this.parentFuns;
 		this.parentFuns += funDef.name + "_";
-		this.levels++;
 		long oldOut = this.outSize;
 		this.outSize = 0;
 		funDef.body.accept(this);
@@ -96,7 +92,7 @@ public class EvalFrames extends FullVisitor {
 	public void visit(ParDecl parDecl) {
 		parDecl.type.accept(this);
 		long size = this.attrs.typAttr.get(parDecl).size();
-		OffsetAccess off = new OffsetAccess(parOffset, size);
+		OffsetAccess off = new OffsetAccess(this.levels - 1, parOffset, size);
 		this.parOffset += size;
 		this.attrs.accAttr.set(parDecl, off);
 	}
@@ -110,7 +106,7 @@ public class EvalFrames extends FullVisitor {
 			acc= new StaticAccess(getLabel(varDecl), size);
 		else {
 			this.varOffset -= size;
-			acc = new OffsetAccess(this.varOffset, size);
+			acc = new OffsetAccess(this.levels - 1, this.varOffset, size);
 		}
 		this.attrs.accAttr.set(varDecl, acc);
 	}
@@ -128,7 +124,7 @@ public class EvalFrames extends FullVisitor {
 		compDecl.type.accept(this);
 		long size = this.attrs.typAttr.get(compDecl).size();
 		Access acc;
-		acc = new OffsetAccess(this.recOffset, size);
+		acc = new OffsetAccess(-1, this.recOffset, size);
 		this.recOffset += size;
 		this.attrs.accAttr.set(compDecl, acc);
 	}

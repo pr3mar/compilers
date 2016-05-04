@@ -162,6 +162,11 @@
       <td>
 	<text>&#xA0;</text>
  	<span style="white-space:nowrap">
+	  <xsl:if test="@level!=''">
+	    <xsl:text>level=</xsl:text>
+	    <xsl:value-of select="@level"/>
+	    <text>&#xA0;</text>
+	  </xsl:if>
 	  <xsl:if test="@label!=''">
 	    <xsl:text>label=</xsl:text>
 	    <xsl:value-of select="@label"/>

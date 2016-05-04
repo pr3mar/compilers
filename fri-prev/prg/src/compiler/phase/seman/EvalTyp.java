@@ -349,6 +349,8 @@ public class EvalTyp extends FullVisitor {
             if(funRet instanceof TypName && !((TypName) funRet).isCircular())
                 funRet = funRet.actualTyp();
             Typ bodyTyp = attrs.typAttr.get(funDef.body);
+            if(bodyTyp == null)
+                bodyTyp = new VoidTyp();
             if(bodyTyp instanceof TypName && !((TypName) bodyTyp).isCircular())
                 bodyTyp = bodyTyp.actualTyp();
             if(!bodyTyp.getClass().equals(funRet.getClass()))

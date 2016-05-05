@@ -69,7 +69,7 @@ public class EvalImcode extends FullVisitor {
 		}
 	}
 
-    @Override // TODO
+    @Override
     public void visit(BinExpr binExpr) {
         binExpr.fstExpr.accept(this);
         binExpr.sndExpr.accept(this);
@@ -128,13 +128,13 @@ public class EvalImcode extends FullVisitor {
             case REC:
                 VarDecl dec =  (VarDecl) this.attrs.declAttr.get((VarName) binExpr.sndExpr);
                 OffsetAccess acc = (OffsetAccess) this.attrs.accAttr.get(dec);
-                binop = new MEM(new BINOP(BINOP.Oper.ADD, fst,new CONST(acc.offset)), acc.size);
+                binop = new MEM(new BINOP(BINOP.Oper.ADD, ((MEM)fst).addr,new CONST(acc.offset)), acc.size);
                 break;
             /* access array element */
             case ARR:
                 long size = ((ArrTyp) this.attrs.typAttr.get(binExpr.fstExpr)).elemTyp.size();
                 IMCExpr tmp = new BINOP(BINOP.Oper.MUL, snd, new CONST(size));
-                tmp = new BINOP(BINOP.Oper.ADD, fst, tmp);
+                tmp = new BINOP(BINOP.Oper.ADD, ((MEM)fst).addr, tmp);
                 binop = new MEM(tmp, size);
                 break;
             default:
@@ -155,7 +155,7 @@ public class EvalImcode extends FullVisitor {
     public void visit(Exprs exprs) {
         IMC expr = null;
         Vector<IMCStmt> tmp = new Vector<IMCStmt>();
-        for (int e = 0; e < exprs.numExprs(); e++) {
+        for (int e = 0; e < exprs.numExprs() - 1; e++) {
             exprs.expr(e).accept(this);
             IMC exp = this.attrs.imcAttr.get(exprs.expr(e));
             if(exp instanceof IMCExpr)
@@ -163,7 +163,8 @@ public class EvalImcode extends FullVisitor {
             else
                 tmp.add((IMCStmt)exp);
         }
-        this.attrs.imcAttr.set(exprs, new SEXPR(new STMTS(tmp), new NOP()));
+        exprs.expr(exprs.numExprs() - 1).accept(this);
+        this.attrs.imcAttr.set(exprs, new SEXPR(new STMTS(tmp), (IMCExpr) this.attrs.imcAttr.get(exprs.expr(exprs.numExprs() - 1))));
     }
 
     @Override
@@ -173,16 +174,16 @@ public class EvalImcode extends FullVisitor {
         forExpr.hiBound.accept(this);
         forExpr.body.accept(this);
 
-        LABEL begin = new LABEL(LABEL.newLabelName());
-        LABEL body = new LABEL(LABEL.newLabelName());
-        LABEL exit = new LABEL(LABEL.newLabelName());
+//        LABEL begin = new LABEL("for_begin" + LABEL.newLabelName());
+        LABEL body = new LABEL("for_body" + LABEL.newLabelName());
+        LABEL exit = new LABEL("for_exit" + LABEL.newLabelName());
 
         IMCExpr var = (IMCExpr) this.attrs.imcAttr.get(forExpr.var);
         IMCExpr lo = (IMCExpr) this.attrs.imcAttr.get(forExpr.loBound);
         IMCExpr hi = (IMCExpr) this.attrs.imcAttr.get(forExpr.hiBound);
         IMCExpr bodyExpr = (IMCExpr) this.attrs.imcAttr.get(forExpr.body);
 
-        IMC jump = new BINOP(BINOP.Oper.GTH, var, hi);
+        IMC jump = new BINOP(BINOP.Oper.LEQ, var, hi);
         jump = new CJUMP((IMCExpr) jump, body.label, exit.label);
 
         IMCStmt increment = new MOVE(var, new BINOP(BINOP.Oper.ADD, var, new CONST(1)));
@@ -190,10 +191,11 @@ public class EvalImcode extends FullVisitor {
 
         Vector<IMCStmt> stmts = new Vector<IMCStmt>();
         stmts.add(new MOVE(var, lo));
-        stmts.add(begin);
+//        stmts.add(begin);
         stmts.add((IMCStmt) jump);
         stmts.add(body);
         stmts.add(new ESTMT(bodyExpr));
+        stmts.add((IMCStmt) jump);
         stmts.add(increment);
         stmts.add(exit);
         this.attrs.imcAttr.set(forExpr, new SEXPR(new STMTS(stmts), new NOP()));
@@ -300,10 +302,10 @@ public class EvalImcode extends FullVisitor {
                 code = new UNOP(UNOP.Oper.NOT, (IMCExpr) this.attrs.imcAttr.get(unExpr.subExpr));
                 break;
             case VAL:
-                code = new MEM((IMCExpr) this.attrs.imcAttr.get(unExpr.subExpr), 8L); // TODO check this \/
+                code = new MEM((IMCExpr) this.attrs.imcAttr.get(unExpr.subExpr), 8L);
                 break;
             case MEM:
-                code = ((MEM) this.attrs.imcAttr.get(unExpr.subExpr)).addr; // TODO check this shit again ^
+                code = ((MEM) this.attrs.imcAttr.get(unExpr.subExpr)).addr;
                 break;
         }
         this.attrs.imcAttr.set(unExpr, code);
@@ -367,7 +369,7 @@ public class EvalImcode extends FullVisitor {
         stmts.add((IMCStmt) ex);
         stmts.add(body);
         stmts.add( new ESTMT( (IMCExpr)this.attrs.imcAttr.get(whileExpr.body)) );
-        stmts.add(begin);
+        stmts.add(new JUMP(begin.label));
         stmts.add(exit);
         this.attrs.imcAttr.set(whileExpr, new SEXPR(new STMTS(stmts), new NOP()));
     }

@@ -174,8 +174,9 @@ public class EvalImcode extends FullVisitor {
         forExpr.hiBound.accept(this);
         forExpr.body.accept(this);
 
-//        LABEL begin = new LABEL("for_begin" + LABEL.newLabelName());
+        LABEL begin = new LABEL("for_begin" + LABEL.newLabelName());
         LABEL body = new LABEL("for_body" + LABEL.newLabelName());
+        LABEL sndCheck = new LABEL("for_check" + LABEL.newLabelName());
         LABEL exit = new LABEL("for_exit" + LABEL.newLabelName());
 
         IMCExpr var = (IMCExpr) this.attrs.imcAttr.get(forExpr.var);
@@ -183,20 +184,24 @@ public class EvalImcode extends FullVisitor {
         IMCExpr hi = (IMCExpr) this.attrs.imcAttr.get(forExpr.hiBound);
         IMCExpr bodyExpr = (IMCExpr) this.attrs.imcAttr.get(forExpr.body);
 
-        IMC jump = new BINOP(BINOP.Oper.LEQ, var, hi);
-        jump = new CJUMP((IMCExpr) jump, body.label, exit.label);
+        IMC cjump_begin = new BINOP(BINOP.Oper.LEQ, var, hi);
+        IMC cjump_end = new BINOP(BINOP.Oper.LTH, var, hi);
+        cjump_begin = new CJUMP((IMCExpr) cjump_begin, body.label, exit.label);
+        cjump_end = new CJUMP((IMCExpr) cjump_end, sndCheck.label, exit.label);
 
         IMCStmt increment = new MOVE(var, new BINOP(BINOP.Oper.ADD, var, new CONST(1)));
 
 
         Vector<IMCStmt> stmts = new Vector<IMCStmt>();
         stmts.add(new MOVE(var, lo));
-//        stmts.add(begin);
-        stmts.add((IMCStmt) jump);
+        stmts.add(begin);
+        stmts.add((IMCStmt) cjump_begin);
         stmts.add(body);
         stmts.add(new ESTMT(bodyExpr));
-        stmts.add((IMCStmt) jump);
+        stmts.add((IMCStmt) cjump_end);
+        stmts.add(sndCheck);
         stmts.add(increment);
+        stmts.add(new JUMP(body.label));
         stmts.add(exit);
         this.attrs.imcAttr.set(forExpr, new SEXPR(new STMTS(stmts), new NOP()));
     }
@@ -211,8 +216,8 @@ public class EvalImcode extends FullVisitor {
             throw new CompilerError("[Imcode] no frame found @ " + funCall);
         }
         int diff = topFrame.level - callFragment.level;
-        IMCExpr expr = new MEM(new TEMP(topFrag.FP), 8);
-        for(int i = 0; i < diff; i++) {
+        IMCExpr expr = new TEMP(topFrag.FP);
+        for(int i = 0; i <= diff; i++) {
             expr = new MEM(expr, 8);
         }
         Vector<IMCExpr> args = new Vector<IMCExpr>();
@@ -276,14 +281,14 @@ public class EvalImcode extends FullVisitor {
 
     @Override
     public void visit(Program program) {
-        Frame frame = new Frame(0, "_", 0, 0, 0, 0, 0);
+        Frame frame = new Frame(-1, "_", 0, 0, 0, 0, 0);
         int FP = TEMP.newTempName();
         int RV = TEMP.newTempName();
         CodeFragment tmpFragment = new CodeFragment(frame, FP, RV, null);
         this.codeFragments.push(tmpFragment);
-
         program.expr.accept(this);
-
+        IMCExpr code = (IMCExpr) this.attrs.imcAttr.get(program.expr);
+        this.attrs.frgAttr.set(program, new CodeFragment(frame, FP, RV, new ESTMT(code)));
         this.codeFragments.pop();
     }
 

@@ -3,6 +3,9 @@
 #
 
 
+%.lincode.xml	: %.prev
+	java -classpath ../prg/bin compiler.Main --xsldir=../prg/xsl --phase=lincode --loggedphases=lincode $<
+
 %.imcode.xml	: %.prev
 	java -classpath ../prg/bin compiler.Main --xsldir=../prg/xsl --phase=imcode --loggedphases=imcode $<
 

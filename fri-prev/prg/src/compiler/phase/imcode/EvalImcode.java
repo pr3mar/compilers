@@ -48,8 +48,24 @@ public class EvalImcode extends FullVisitor {
 				attrs.imcAttr.set(atomExpr, new CONST(0));
 			break;
 		case CHAR:
-			if (atomExpr.value.charAt(1) == '\'' || atomExpr.value.charAt(1) == '\\')
-				attrs.imcAttr.set(atomExpr, new CONST(atomExpr.value.charAt(2)));
+			if (atomExpr.value.charAt(1) == '\\')
+                switch (atomExpr.value.charAt(2)) {
+                    case 'n':
+                        attrs.imcAttr.set(atomExpr, new CONST('\n'));
+                        break;
+                    case 't':
+                        attrs.imcAttr.set(atomExpr, new CONST('\t'));
+                        break;
+                    case '\\':
+                        attrs.imcAttr.set(atomExpr, new CONST('\\'));
+                        break;
+                    case '\'':
+                        attrs.imcAttr.set(atomExpr, new CONST('\''));
+                        break;
+                    case '\"':
+                        attrs.imcAttr.set(atomExpr, new CONST('\"'));
+                        break;
+                }
 			else
 				attrs.imcAttr.set(atomExpr, new CONST(atomExpr.value.charAt(1)));
 			break;
@@ -174,7 +190,7 @@ public class EvalImcode extends FullVisitor {
         forExpr.hiBound.accept(this);
         forExpr.body.accept(this);
 
-        LABEL begin = new LABEL("for_begin" + LABEL.newLabelName());
+//        LABEL begin = new LABEL("for_begin" + LABEL.newLabelName());
         LABEL body = new LABEL("for_body" + LABEL.newLabelName());
         LABEL sndCheck = new LABEL("for_check" + LABEL.newLabelName());
         LABEL exit = new LABEL("for_exit" + LABEL.newLabelName());
@@ -184,9 +200,10 @@ public class EvalImcode extends FullVisitor {
         IMCExpr hi = (IMCExpr) this.attrs.imcAttr.get(forExpr.hiBound);
         IMCExpr bodyExpr = (IMCExpr) this.attrs.imcAttr.get(forExpr.body);
 
-        IMC cjump_begin = new BINOP(BINOP.Oper.LEQ, var, hi);
-        IMC cjump_end = new BINOP(BINOP.Oper.LTH, var, hi);
+        IMC cjump_begin, cjump_end;
+        cjump_begin = new BINOP(BINOP.Oper.LEQ, var, hi);
         cjump_begin = new CJUMP((IMCExpr) cjump_begin, body.label, exit.label);
+        cjump_end = new BINOP(BINOP.Oper.LTH, var, hi);
         cjump_end = new CJUMP((IMCExpr) cjump_end, sndCheck.label, exit.label);
 
         IMCStmt increment = new MOVE(var, new BINOP(BINOP.Oper.ADD, var, new CONST(1)));
@@ -194,7 +211,7 @@ public class EvalImcode extends FullVisitor {
 
         Vector<IMCStmt> stmts = new Vector<IMCStmt>();
         stmts.add(new MOVE(var, lo));
-        stmts.add(begin);
+//        stmts.add(begin);
         stmts.add((IMCStmt) cjump_begin);
         stmts.add(body);
         stmts.add(new ESTMT(bodyExpr));
@@ -210,12 +227,13 @@ public class EvalImcode extends FullVisitor {
     public void visit(FunCall funCall) {
         CodeFragment topFrag = this.codeFragments.peek();
         Frame topFrame = topFrag.frame;
-        Frame callFragment = null;
-        callFragment = this.attrs.frmAttr.get((FunDecl) this.attrs.declAttr.get(funCall));
-        if(callFragment == null) {
-            throw new CompilerError("[Imcode] no frame found @ " + funCall);
+        Frame callFrame = null;
+        callFrame = this.attrs.frmAttr.get((FunDecl) this.attrs.declAttr.get(funCall));
+        if(callFrame == null) {
+//            throw new CompilerError("[Imcode] no frame found @ " + funCall);
+            callFrame = new Frame(-1, "_" + funCall.name(), 0, 0, 0, 0, 0);
         }
-        int diff = topFrame.level - callFragment.level;
+        int diff = topFrame.level - callFrame.level;
         IMCExpr expr = new TEMP(topFrag.FP);
         for(int i = 0; i <= diff; i++) {
             expr = new MEM(expr, 8);
@@ -228,7 +246,7 @@ public class EvalImcode extends FullVisitor {
             args.add((IMCExpr)this.attrs.imcAttr.get(funCall.arg(a)));
             lengths.add(this.attrs.typAttr.get(funCall.arg(a)).size());
         }
-        expr = new CALL(callFragment.label, args, lengths);
+        expr = new CALL(callFrame.label, args, lengths);
         this.attrs.imcAttr.set(funCall, expr);
     }
 
@@ -260,20 +278,21 @@ public class EvalImcode extends FullVisitor {
         ifExpr.thenExpr.accept(this);
         ifExpr.elseExpr.accept(this);
 
-        LABEL exitLabel = new LABEL(LABEL.newLabelName());
-        IMCExpr cond = (IMCExpr) this.attrs.imcAttr.get(ifExpr.cond);
+        LABEL thenLabel = new LABEL("if_then_" + LABEL.newLabelName());
+        LABEL elseLabel = new LABEL("if_else_" + LABEL.newLabelName());
+        LABEL exitLabel = new LABEL("if_end_" + LABEL.newLabelName());
+
+        IMCExpr cond   = (IMCExpr) this.attrs.imcAttr.get(ifExpr.cond);
+        IMCExpr thenEx = (IMCExpr) this.attrs.imcAttr.get(ifExpr.thenExpr);
+        IMCExpr elseEx = (IMCExpr) this.attrs.imcAttr.get(ifExpr.elseExpr);
+
         Vector<IMCStmt> condStms = new Vector<IMCStmt>();
-
-
-        LABEL thenLabel = new LABEL(LABEL.newLabelName());
-        LABEL elseLabel = new LABEL(LABEL.newLabelName());
-
         condStms.add(new CJUMP(cond, thenLabel.label, elseLabel.label));
         condStms.add(thenLabel);
-        condStms.add( new ESTMT((IMCExpr)this.attrs.imcAttr.get(ifExpr.thenExpr)) );
-        condStms.add(exitLabel);
+        condStms.add( new ESTMT(thenEx));
+        condStms.add( new JUMP(exitLabel.label));
         condStms.add(elseLabel);
-        condStms.add( new ESTMT((IMCExpr)this.attrs.imcAttr.get(ifExpr.elseExpr)) );
+        condStms.add( new ESTMT(elseEx));
         condStms.add(exitLabel);
 
         this.attrs.imcAttr.set(ifExpr, new SEXPR(new STMTS(condStms), new NOP()));
@@ -288,8 +307,9 @@ public class EvalImcode extends FullVisitor {
         this.codeFragments.push(tmpFragment);
         program.expr.accept(this);
         IMCExpr code = (IMCExpr) this.attrs.imcAttr.get(program.expr);
-        this.attrs.frgAttr.set(program, new CodeFragment(frame, FP, RV, new ESTMT(code)));
-        this.codeFragments.pop();
+        Fragment prog = new CodeFragment(frame, FP, RV, new ESTMT(code));
+        this.fragments.put("_", prog);
+        this.attrs.frgAttr.set(program, prog);
     }
 
     @Override
@@ -321,7 +341,9 @@ public class EvalImcode extends FullVisitor {
         varDecl.type.accept(this);
         if(this.codeFragments.size() == 1) {
             StaticAccess acc = (StaticAccess) this.attrs.accAttr.get(varDecl);
-            this.attrs.frgAttr.set(varDecl, new DataFragment(acc.label, acc.size));
+            Fragment frag = new DataFragment(acc.label, acc.size);
+            this.fragments.put(acc.label, frag);
+            this.attrs.frgAttr.set(varDecl, frag);
         }
     }
 
@@ -378,40 +400,4 @@ public class EvalImcode extends FullVisitor {
         stmts.add(exit);
         this.attrs.imcAttr.set(whileExpr, new SEXPR(new STMTS(stmts), new NOP()));
     }
-
-    /*@Override
-	public void visit(FunDef funDef) {
-		Frame frame = attrs.frmAttr.get(funDef);
-		int FP = TEMP.newTempName();
-		int RV = TEMP.newTempName();
-		CodeFragment tmpFragment = new CodeFragment(frame, FP, RV, null);
-		codeFragments.push(tmpFragment);
-
-		for (int p = 0; p < funDef.numPars(); p++)
-			funDef.par(p).accept(this);
-		funDef.type.accept(this);
-		funDef.body.accept(this);
-
-		codeFragments.pop();
-
-        IMC expr = attrs.imcAttr.get(funDef.body);
-        MOVE move = null;
-		if(expr instanceof IMCExpr)
-            move = new MOVE(new TEMP(RV), (IMCExpr) expr);
-        else if(expr instanceof STMTS) {
-            STMTS tmp = ((STMTS) expr);
-            IMC tmp2 = tmp.stmts(tmp.numStmts() - 1);
-            if(tmp2 instanceof IMCExpr)
-                move = new MOVE(new TEMP(RV), (IMCExpr) tmp2);
-            else
-                move = new MOVE(new TEMP(RV), new CONST(0));
-        } else
-            move = new MOVE(new TEMP(RV), new CONST(0));
-
-
-		Fragment fragment = new CodeFragment(tmpFragment.frame, tmpFragment.FP, tmpFragment.RV, move);
-		attrs.frgAttr.set(funDef, fragment);
-		attrs.imcAttr.set(funDef, move);
-		fragments.put(fragment.label, fragment);
-	}*/
 }

@@ -44,6 +44,7 @@ public class LinCode extends Phase {
 	// ----- INTERPRETER -----
 
 	private boolean debug = false;
+//	private boolean debug = true;
 
 	// STACK SEGMENT TOP: 0xF000000000000000l
 	// HEAP SEGMENT BOT: 0x2000000000000000l

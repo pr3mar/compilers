@@ -48,7 +48,7 @@ public class BINOP extends IMCExpr {
 		if (expr2 != null) expr2.toXML(logger);
 		logger.endElement();
 	}
-		
+			
 	@Override
 	public SEXPR linCode() {
 		int result = TEMP.newTempName();

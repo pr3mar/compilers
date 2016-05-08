@@ -63,6 +63,10 @@ public class CALL extends IMCExpr {
 		return args[arg];
 	}
 
+	public long widths(int arg) {
+		return widths[arg];
+	}
+	
 	@Override
 	public void toXML(Logger logger) {
 		logger.begElement("imc");

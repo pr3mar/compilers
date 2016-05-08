@@ -6,5 +6,4 @@ package compiler.data.ast;
  * @author sliva
  */
 public interface Typeable extends AST {
-	
 }

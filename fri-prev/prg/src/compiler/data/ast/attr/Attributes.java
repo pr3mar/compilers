@@ -50,7 +50,7 @@ public class Attributes {
 	/**
 	 * A function's stack frame.
 	 */
-	public Attribute<FunDecl, Frame> frmAttr = new Attribute<FunDecl, Frame>();
+	public Attribute<ASTNode, Frame> frmAttr = new Attribute<ASTNode, Frame>();
 
 	/**
 	 * A variable's access.

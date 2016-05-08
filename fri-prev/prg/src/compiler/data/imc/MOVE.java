@@ -39,7 +39,7 @@ public class MOVE extends IMCStmt {
 		if (src != null) src.toXML(logger);
 		logger.endElement();
 	}
-	
+		
 	@Override
 	public STMTS linCode() {
 		SEXPR dstLC;

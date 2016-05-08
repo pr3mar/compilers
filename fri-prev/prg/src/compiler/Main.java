@@ -7,6 +7,7 @@ import compiler.phase.abstr.*;
 import compiler.phase.seman.*;
 import compiler.phase.frames.*;
 import compiler.phase.imcode.*;
+import compiler.phase.lincode.*;
 
 /**
  * The compiler's entry point.
@@ -80,6 +81,13 @@ public class Main {
 				(new EvalImcode(task.prgAttrs, task.fragments)).visit(task.prgAST);
 				imcode.close();
 				if (task.phase.equals("imcode"))
+					break;
+				
+				// Linearization of the intermediate code.
+				LinCode linCode = new LinCode(task);
+				//(new EvalLinCode(task.fragments)).visit(task.prgAST);
+				linCode.close();
+				if (task.phase.equals("lincode"))
 					break;
 				
 				break;

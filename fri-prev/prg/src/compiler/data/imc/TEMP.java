@@ -32,7 +32,7 @@ public class TEMP extends IMCExpr {
 	}
 
 	/** The number of all temporary register names. */
-	private static int tempNameCount = 0;
+	public static int tempNameCount = 0;
 
 	/**
 	 * Returns a new temporary register name.

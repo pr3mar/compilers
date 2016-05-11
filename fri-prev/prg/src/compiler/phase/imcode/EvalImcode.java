@@ -148,7 +148,7 @@ public class EvalImcode extends FullVisitor {
                 break;
             /* access array element */
             case ARR:
-                long size = ((ArrTyp) this.attrs.typAttr.get(binExpr.fstExpr)).elemTyp.size();
+                long size = ((ArrTyp) this.attrs.typAttr.get(binExpr.fstExpr).actualTyp()).elemTyp.size();
                 IMCExpr tmp = new BINOP(BINOP.Oper.MUL, snd, new CONST(size));
                 tmp = new BINOP(BINOP.Oper.ADD, ((MEM)fst).addr, tmp);
                 binop = new MEM(tmp, size);
@@ -191,9 +191,9 @@ public class EvalImcode extends FullVisitor {
         forExpr.body.accept(this);
 
 //        LABEL begin = new LABEL("for_begin" + LABEL.newLabelName());
-        LABEL body = new LABEL("for_body" + LABEL.newLabelName());
-        LABEL sndCheck = new LABEL("for_check" + LABEL.newLabelName());
-        LABEL exit = new LABEL("for_exit" + LABEL.newLabelName());
+        LABEL body = new LABEL("for_body_" + LABEL.newLabelName());
+        LABEL sndCheck = new LABEL("for_check_" + LABEL.newLabelName());
+        LABEL exit = new LABEL("for_exit_" + LABEL.newLabelName());
 
         IMCExpr var = (IMCExpr) this.attrs.imcAttr.get(forExpr.var);
         IMCExpr lo = (IMCExpr) this.attrs.imcAttr.get(forExpr.loBound);
@@ -384,9 +384,9 @@ public class EvalImcode extends FullVisitor {
         whileExpr.cond.accept(this);
         whileExpr.body.accept(this);
 
-        LABEL begin = new LABEL(LABEL.newLabelName());
-        LABEL body = new LABEL(LABEL.newLabelName());
-        LABEL exit = new LABEL(LABEL.newLabelName());
+        LABEL begin = new LABEL("while_begin_" + LABEL.newLabelName());
+        LABEL body = new LABEL("while_body_" +LABEL.newLabelName());
+        LABEL exit = new LABEL("while_exit_" + LABEL.newLabelName());
 
         IMC ex = this.attrs.imcAttr.get(whileExpr.cond);
         ex = new CJUMP((IMCExpr) ex, body.label, exit.label);

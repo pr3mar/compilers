@@ -1,13 +1,16 @@
 package compiler.phase.lincode;
 
-import java.util.*;
-
-import compiler.*;
-import compiler.common.report.*;
-import compiler.phase.*;
-
-import compiler.data.frg.*;
+import compiler.Task;
+import compiler.common.report.InternalCompilerError;
+import compiler.data.frg.CodeFragment;
+import compiler.data.frg.ConstFragment;
+import compiler.data.frg.DataFragment;
+import compiler.data.frg.Fragment;
 import compiler.data.imc.*;
+import compiler.phase.Phase;
+
+import java.util.HashMap;
+import java.util.Vector;
 
 /**
  * Linearization of the intermediate code.
@@ -130,7 +133,7 @@ public class LinCode extends Phase {
 	private void execute(CodeFragment codeFrg) {
 
 		if (codeFrg == null)
-			new InternalCompilerError();
+			throw new InternalCompilerError();
 
 		if (debug)
 			System.err.printf("BEG CODE FRAGMENT %s\n", codeFrg.label);
@@ -289,6 +292,17 @@ public class LinCode extends Phase {
 					addr++;
 				}
 				return 0;
+			}
+
+			if (call.label.equals("_randomInt")) {
+				long value = (long) (Math.random() * 100);
+				return value;
+			}
+
+			if (call.label.equals("_randomChr")) {
+				String alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+				long value = (long) alphabet.charAt((int)(Math.random() * alphabet.length()));
+				return value;
 			}
 			
 			long d = 0;

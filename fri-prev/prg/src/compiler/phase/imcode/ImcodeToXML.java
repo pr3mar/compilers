@@ -15,7 +15,7 @@ public class ImcodeToXML extends FramesToXML {
 	private final Attributes attrs;
 
 	/**
-	 * Constructs a new visitor for printing out the XML description of the
+	 * Constructs a new imcVisitor for printing out the XML description of the
 	 * abstract syntax tree including the information computed during semantic
 	 * analysis, frame and access evaluation, and intermediate code generation.
 	 * 

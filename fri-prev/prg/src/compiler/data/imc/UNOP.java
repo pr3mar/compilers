@@ -3,6 +3,7 @@ package compiler.data.imc;
 import java.util.*;
 
 import compiler.common.logger.*;
+import compiler.data.cod.imcVisitor.IMCVisitor;
 
 /**
  * UNOP represents a unary operation.
@@ -52,4 +53,7 @@ public class UNOP extends IMCExpr {
 		return new SEXPR(new STMTS(lc), new TEMP(result));
 	}
 
+	public void accept(IMCVisitor visitor) {
+		visitor.visit(this);
+	}
 }

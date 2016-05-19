@@ -3,6 +3,7 @@ package compiler.data.imc;
 import java.util.*;
 
 import compiler.common.logger.*;
+import compiler.data.cod.imcVisitor.IMCVisitor;
 
 /**
  * NAME represents a symbolic constant.
@@ -36,4 +37,7 @@ public class NAME extends IMCExpr {
 		return new SEXPR(new STMTS(new Vector<IMCStmt>()), new NAME(name));
 	}
 
+	public void accept(IMCVisitor visitor) {
+		visitor.visit(this);
+	}
 }

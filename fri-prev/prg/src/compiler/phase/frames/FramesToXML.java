@@ -6,7 +6,7 @@ import compiler.data.ast.attr.*;
 import compiler.phase.seman.*;
 
 /**
- * A visitor for printing out the XML description of the abstract syntax tree
+ * A imcVisitor for printing out the XML description of the abstract syntax tree
  * including the information computed during semantic analysis and frame
  * construction.
  * 
@@ -25,7 +25,7 @@ public class FramesToXML extends SemAnToXML {
 	private final Attributes attrs;
 
 	/**
-	 * Constructs a new visitor for printing out the XML description of the
+	 * Constructs a new imcVisitor for printing out the XML description of the
 	 * abstract syntax tree including the information computed during semantic
 	 * analysis.
 	 * 

@@ -3,7 +3,7 @@ package compiler.data.ast.code;
 import compiler.data.ast.*;
 
 /**
- * A visitor that does nothing.
+ * A imcVisitor that does nothing.
  * 
  * @author sliva
  */

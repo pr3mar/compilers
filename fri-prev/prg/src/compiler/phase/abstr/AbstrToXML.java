@@ -6,7 +6,7 @@ import compiler.data.ast.*;
 import compiler.data.ast.code.*;
 
 /**
- * A visitor for printing out the XML description of the abstract syntax tree.
+ * A imcVisitor for printing out the XML description of the abstract syntax tree.
  * 
  * <p>
  * Traverses the abstract syntax tree in a depth-first manner and produces the
@@ -27,7 +27,7 @@ public class AbstrToXML implements Visitor {
 	private boolean boxed;
 
 	/**
-	 * Constructs a new visitor for printing out the XML description of the
+	 * Constructs a new imcVisitor for printing out the XML description of the
 	 * abstract syntax tree.
 	 * 
 	 * @param logger

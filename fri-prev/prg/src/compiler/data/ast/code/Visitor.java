@@ -3,7 +3,7 @@ package compiler.data.ast.code;
 import compiler.data.ast.*;
 
 /**
- * Abstract syntax tree visitor.
+ * Abstract syntax tree imcVisitor.
  * 
  * <p>
  * An object implementing interface {@link compiler.data.ast.code.Visitor} can
@@ -14,12 +14,12 @@ import compiler.data.ast.*;
  * <p>
  * Every concrete class in package {@link compiler.data.ast} implements a
  * method {@link compiler.data.ast.AST#accept(Visitor) accept} which
- * calls back the visitor:
+ * calls back the imcVisitor:
  * <ul>
  * <li>All code that must be executed at each particular node is implemented in
  * the corresponding visiting method.</li>
  * <li>To follow an edge in the abstract syntax tree, the object reachable by
- * the edge should be asked to accept the visitor instead of visiting an object
+ * the edge should be asked to accept the imcVisitor instead of visiting an object
  * directly.</li>
  * </ul>
  * 

@@ -3,6 +3,7 @@ package compiler.data.imc;
 import java.util.*;
 
 import compiler.common.logger.*;
+import compiler.data.cod.imcVisitor.IMCVisitor;
 
 /**
  * CONST represents a constant.
@@ -34,5 +35,8 @@ public class CONST extends IMCExpr {
 	public SEXPR linCode() {
 		return new SEXPR(new STMTS(new Vector<IMCStmt>()), new CONST(value));
 	}
-	
+
+	public void accept(IMCVisitor visitor) {
+		visitor.visit(this);
+	}
 }

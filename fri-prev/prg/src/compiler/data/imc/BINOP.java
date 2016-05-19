@@ -3,6 +3,7 @@ package compiler.data.imc;
 import java.util.*;
 
 import compiler.common.logger.*;
+import compiler.data.cod.imcVisitor.IMCVisitor;
 
 /**
  * BINOP represents a binary operation.
@@ -59,6 +60,10 @@ public class BINOP extends IMCExpr {
 		lc.addAll(((STMTS)(expr2LC.stmt)).stmts());
 		lc.add(new MOVE(new TEMP(result), new BINOP(oper, expr1LC.expr, expr2LC.expr)));
 		return new SEXPR(new STMTS(lc), new TEMP(result));
+	}
+
+	public void accept(IMCVisitor visitor) {
+		visitor.visit(this);
 	}
 
 }

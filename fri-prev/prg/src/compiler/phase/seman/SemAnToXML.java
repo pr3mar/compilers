@@ -8,7 +8,7 @@ import compiler.data.typ.*;
 import compiler.phase.abstr.*;
 
 /**
- * A visitor for printing out the XML description of the abstract syntax tree
+ * A imcVisitor for printing out the XML description of the abstract syntax tree
  * including the information computed during semantic analysis.
  * 
  * <p>
@@ -26,7 +26,7 @@ public class SemAnToXML extends AbstrToXML {
 	private final Attributes attrs;
 
 	/**
-	 * Constructs a new visitor for printing out the XML description of the
+	 * Constructs a new imcVisitor for printing out the XML description of the
 	 * abstract syntax tree including the information computed during semantic
 	 * analysis.
 	 * 

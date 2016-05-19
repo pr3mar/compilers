@@ -3,7 +3,7 @@ package compiler.data.ast.code;
 import compiler.data.ast.*;
 
 /**
- * A visitor that traverses the entire abstract syntax tree but does nothing.
+ * A imcVisitor that traverses the entire abstract syntax tree but does nothing.
  * 
  * @author sliva
  */

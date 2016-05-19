@@ -3,6 +3,7 @@ package compiler.data.imc;
 import java.util.*;
 
 import compiler.common.logger.*;
+import compiler.data.cod.imcVisitor.IMCVisitor;
 
 /**
  * NOP represents no operation.
@@ -26,5 +27,8 @@ public class NOP extends IMCExpr {
 		return new SEXPR(new STMTS(new Vector<IMCStmt>()), new NOP());
 	}
 
-	
+	public void accept(IMCVisitor visitor) {
+		visitor.visit(this);
+	}
+
 }

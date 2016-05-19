@@ -1,6 +1,7 @@
 package compiler;
 
 import compiler.common.report.*;
+import compiler.phase.codegen.CodeGen;
 import compiler.phase.lexan.*;
 import compiler.phase.synan.*;
 import compiler.phase.abstr.*;
@@ -89,7 +90,13 @@ public class Main {
 				linCode.close();
 				if (task.phase.equals("lincode"))
 					break;
-				
+
+				// Code generation of the linearized code
+				CodeGen code = new CodeGen(task);
+				code.close();
+				if(task.phase.equals("codegen"))
+					break;
+
 				break;
 			}
 		} catch (CompilerError errorReport) {

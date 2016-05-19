@@ -3,6 +3,7 @@ package compiler.data.imc;
 import java.util.*;
 
 import compiler.common.logger.*;
+import compiler.data.cod.imcVisitor.IMCVisitor;
 
 /**
  * CJUMP represents a conditional jump.
@@ -51,6 +52,10 @@ public class CJUMP extends IMCStmt {
 		lc.addAll(((STMTS)(condLC.stmt)).stmts());
 		lc.add(new CJUMP(condLC.expr, posLabel, negLabel));
 		return new STMTS(lc);
+	}
+
+	public void accept(IMCVisitor visitor) {
+		visitor.visit(this);
 	}
 
 }

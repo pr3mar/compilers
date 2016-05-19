@@ -32,7 +32,8 @@ public class LinCode extends Phase {
 		super(task, "lincode");
 
 		this.task = task;
-		interpreter();
+		if(task.phase.equals("lincode"))
+			interpreter();
 	}
 
 	/**

@@ -3,6 +3,7 @@ package compiler.data.imc;
 import java.util.*;
 
 import compiler.common.logger.*;
+import compiler.data.cod.imcVisitor.IMCVisitor;
 
 /**
  * TEMP represents a temporary register.
@@ -49,4 +50,12 @@ public class TEMP extends IMCExpr {
 		return new SEXPR(new STMTS(new Vector<IMCStmt>()), new TEMP(name));
 	}
 
+	@Override
+	public String toString() {
+		return "T" + this.name;
+	}
+
+	public void accept(IMCVisitor visitor) {
+		visitor.visit(this);
+	}
 }

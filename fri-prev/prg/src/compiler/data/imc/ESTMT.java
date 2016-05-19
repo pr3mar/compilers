@@ -3,6 +3,7 @@ package compiler.data.imc;
 import java.util.*;
 
 import compiler.common.logger.*;
+import compiler.data.cod.imcVisitor.IMCVisitor;
 
 /**
  * ESTMT represents an expression when the result is thrown away.
@@ -41,4 +42,7 @@ public class ESTMT extends IMCStmt {
 		return new STMTS(lc);
 	}
 
+	public void accept(IMCVisitor visitor) {
+		visitor.visit(this);
+	}
 }

@@ -3,6 +3,7 @@ package compiler.data.imc;
 import java.util.*;
 
 import compiler.common.logger.*;
+import compiler.data.cod.imcVisitor.IMCVisitor;
 
 /**
  * SEXPR represents an expression prefixed by a statement.
@@ -49,4 +50,7 @@ public class SEXPR extends IMCExpr {
 		return new SEXPR(new STMTS(lc), exprLC.expr);
 	}
 
+	public void accept(IMCVisitor visitor) {
+		visitor.visit(this);
+	}
 }

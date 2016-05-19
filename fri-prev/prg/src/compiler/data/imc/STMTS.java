@@ -3,6 +3,7 @@ package compiler.data.imc;
 import java.util.*;
 
 import compiler.common.logger.*;
+import compiler.data.cod.imcVisitor.IMCVisitor;
 
 /**
  * STSMS represents a sequence of statements.
@@ -56,4 +57,7 @@ public class STMTS extends IMCStmt {
 		return new STMTS(lc);
 	}
 
+	public void accept(IMCVisitor visitor) {
+		visitor.visit(this);
+	}
 }

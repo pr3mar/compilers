@@ -4,6 +4,7 @@ import java.util.*;
 
 import compiler.common.report.*;
 import compiler.common.logger.*;
+import compiler.data.cod.imcVisitor.IMCVisitor;
 
 /**
  * MOVE represents a data move.
@@ -66,4 +67,7 @@ public class MOVE extends IMCStmt {
 		throw new InternalCompilerError();
 	}
 
+	public void accept(IMCVisitor visitor) {
+		visitor.visit(this);
+	}
 }

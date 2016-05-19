@@ -4,6 +4,7 @@ import java.util.*;
 
 import compiler.common.logger.*;
 import compiler.common.report.*;
+import compiler.data.cod.imcVisitor.IMCVisitor;
 
 /**
  * CALL represents a function call.
@@ -95,6 +96,10 @@ public class CALL extends IMCExpr {
 		}
 		lc.add(new MOVE(new TEMP(result), new CALL(label, newargs, newwidths)));
 		return new SEXPR(new STMTS(lc), new TEMP(result));
+	}
+
+	public void accept(IMCVisitor visitor) {
+		visitor.visit(this);
 	}
 
 }

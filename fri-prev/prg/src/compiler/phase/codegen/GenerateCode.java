@@ -1,7 +1,7 @@
 package compiler.phase.codegen;
 
 
-import compiler.data.cod.Code;
+import compiler.data.cod.*;
 import compiler.data.cod.imcVisitor.IMCFullVIsitor;
 import compiler.data.frg.CodeFragment;
 import compiler.data.imc.TEMP;
@@ -42,6 +42,44 @@ public class GenerateCode extends IMCFullVIsitor {
     public void visit(BINOP binop) {
         binop.expr1.accept(this);
         binop.expr2.accept(this);
+        TEMP left = this.result.pop();
+        TEMP right = this.result.pop();
+        switch (binop.oper) {
+            /* arithmetical operations */
+            case ADD:
+                this.code.add(new ADD(left, right));
+                break;
+            case SUB:
+                this.code.add(new SUB(left, right));
+                break;
+            case MUL:
+                this.code.add(new MUL(left, right));
+                break;
+            case DIV:
+                this.code.add(new DIV(left, right));
+                break;
+            case MOD:
+//                this.code.add(new ADD(left, right));
+                break;
+
+            /* logical operations */
+            case AND:
+                break;
+            case OR:
+                break;
+            case EQU:
+                break;
+            case NEQ:
+                break;
+            case GEQ:
+                break;
+            case GTH:
+                break;
+            case LEQ:
+                break;
+            case LTH:
+                break;
+        }
     }
 
     @Override
@@ -84,6 +122,8 @@ public class GenerateCode extends IMCFullVIsitor {
     public void visit(MOVE move) {
         move.dst.accept(this);
         move.src.accept(this);
+        this.result.pop();
+        this.result.pop();
     }
 
     @Override
@@ -112,6 +152,7 @@ public class GenerateCode extends IMCFullVIsitor {
     public void visit(TEMP temp) {
         if(!this.mapping.containsKey(temp))
             this.mapping.put(temp, temp.toString());
+        this.result.push(temp);
     }
 
     @Override

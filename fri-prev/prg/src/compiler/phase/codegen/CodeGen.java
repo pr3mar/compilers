@@ -29,8 +29,8 @@ public class CodeGen extends Phase{
         this.fragments = task.fragments;
         this.allCode = new LinkedList<>();
         iterate();
-        PrintCode print = new PrintCode(allCode);
-        print.print();
+//        PrintCode print = new PrintCode(allCode);
+//        print.print();
     }
 
     void iterate() {

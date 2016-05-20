@@ -6,6 +6,7 @@ import compiler.common.report.*;
 import compiler.data.ast.*;
 import compiler.data.ast.attr.*;
 import compiler.data.frg.*;
+import compiler.phase.codegen.FragmentCode;
 
 /**
  * The parameters and internal data of the compilation process.
@@ -122,5 +123,9 @@ public class Task {
 	 * Fragments of the program (indexed by entry labels).
 	 */
     public HashMap<String, Fragment> fragments = new HashMap<String, Fragment>();
-    
+
+	/**
+	 *
+	 */
+    public LinkedList<FragmentCode> generatedCode;
 }

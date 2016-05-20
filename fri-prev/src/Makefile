@@ -1,7 +1,10 @@
 #
-# START GOOGLE CHROME WITH --allow-file-access-from-files
+# START GOOGLE CHROME WITH google-chrome --allow-file-access-from-files
 #
 
+
+%.codegen.xml	: %.prev
+	java -classpath ../prg/bin compiler.Main --xsldir=../prg/xsl --phase=codegen --loggedphases=codegen $<
 
 %.lincode.xml	: %.prev
 	java -classpath ../prg/bin compiler.Main --xsldir=../prg/xsl --phase=lincode --loggedphases=lincode $<

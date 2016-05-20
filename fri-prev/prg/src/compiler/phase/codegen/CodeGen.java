@@ -1,14 +1,13 @@
 package compiler.phase.codegen;
 
 import compiler.Task;
-import compiler.data.cod.*;
+import compiler.data.cod.print.PrintCode;
 import compiler.data.frg.CodeFragment;
 import compiler.data.frg.Fragment;
 import compiler.phase.Phase;
 
 
 import java.util.HashMap;
-import java.util.LinkedList;
 
 
 /**
@@ -21,16 +20,13 @@ public class CodeGen extends Phase{
 
     private final HashMap<String, Fragment> fragments;
 
-    private LinkedList<Holder> allCode;
-
     public CodeGen(Task task) {
         super(task, "codegen");
         this.task = task;
         this.fragments = task.fragments;
-        this.allCode = new LinkedList<>();
         iterate();
-//        PrintCode print = new PrintCode(allCode);
-//        print.print();
+        PrintCode print = new PrintCode(task.generatedCode);
+        print.print();
     }
 
     void iterate() {
@@ -38,9 +34,9 @@ public class CodeGen extends Phase{
             if(fragment instanceof CodeFragment) {
                 GenerateCode generate = new GenerateCode((CodeFragment) fragment);
                 generate.generate();
-                Holder codeNow = generate.get();
+                FragmentCode codeNow = generate.get();
                 // TODO: generate interference graph here, or make it a new phase
-                allCode.add(codeNow);
+                this.task.generatedCode.add(codeNow);
             }
         }
     }

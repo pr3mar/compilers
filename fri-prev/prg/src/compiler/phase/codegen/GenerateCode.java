@@ -1,6 +1,5 @@
 package compiler.phase.codegen;
 
-
 import compiler.data.cod.*;
 import compiler.data.cod.imcVisitor.IMCFullVIsitor;
 import compiler.data.frg.CodeFragment;
@@ -28,8 +27,8 @@ public class GenerateCode extends IMCFullVIsitor {
         mapping = new HashMap<>();
     }
 
-    public Holder get() {
-        return new Holder(this.code, this.mapping);
+    public FragmentCode get() {
+        return new FragmentCode(this.code, this.mapping);
     }
 
     public void generate() {
@@ -44,19 +43,20 @@ public class GenerateCode extends IMCFullVIsitor {
         binop.expr2.accept(this);
         TEMP left = this.result.pop();
         TEMP right = this.result.pop();
+        TEMP res = new TEMP(TEMP.newTempName());
         switch (binop.oper) {
             /* arithmetical operations */
             case ADD:
-                this.code.add(new ADD(left, right));
+                this.code.add(new ADD(res, left, right));
                 break;
             case SUB:
-                this.code.add(new SUB(left, right));
+                this.code.add(new SUB(res, left, right));
                 break;
             case MUL:
-                this.code.add(new MUL(left, right));
+                this.code.add(new MUL(res, left, right));
                 break;
             case DIV:
-                this.code.add(new DIV(left, right));
+                this.code.add(new DIV(res, left, right));
                 break;
             case MOD:
 //                this.code.add(new ADD(left, right));
@@ -80,6 +80,7 @@ public class GenerateCode extends IMCFullVIsitor {
             case LTH:
                 break;
         }
+        result.push(res);
     }
 
     @Override
@@ -128,7 +129,7 @@ public class GenerateCode extends IMCFullVIsitor {
 
     @Override
     public void visit(NAME name) {
-
+        this.result.push(new TEMP(TEMP.newTempName()));
     }
 
     @Override
@@ -158,6 +159,19 @@ public class GenerateCode extends IMCFullVIsitor {
     @Override
     public void visit(UNOP unop) {
         unop.expr.accept(this);
+        TEMP operand = this.result.pop();
+        switch (unop.oper) {
+            case ADD:
+                this.result.push(operand);
+                break;
+            case NOT:
+                break;
+            case SUB:
+                TEMP res = new TEMP(TEMP.newTempName());
+                this.code.add(new NEG(res, 0, operand));
+                this.result.push(res);
+                break;
+        }
     }
 
 }

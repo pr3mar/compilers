@@ -127,5 +127,5 @@ public class Task {
 	/**
 	 *
 	 */
-    public LinkedList<FragmentCode> generatedCode;
+    public LinkedList<FragmentCode> generatedCode = new LinkedList<>();
 }

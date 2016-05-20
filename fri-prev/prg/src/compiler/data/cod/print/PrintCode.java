@@ -1,6 +1,7 @@
 package compiler.data.cod.print;
 
-import compiler.data.cod.print.Print;
+import compiler.data.cod.Code;
+import compiler.data.frg.Fragment;
 import compiler.data.imc.TEMP;
 import compiler.phase.codegen.FragmentCode;
 
@@ -20,11 +21,10 @@ public class PrintCode {
     }
 
     public void print() {
-        for(int i = 0; i < allCode.size(); i++) {
-            FragmentCode current = this.allCode.get(i);
-            for(int j = 0; j < current.code.size(); i++) {
-                Print tmp = current.code.get(i).getPrint();
-                System.out.print(tmp.toString(current.temps));
+        for(FragmentCode current : allCode) {
+            for(Code code : current.code) {
+                Print tmp = code.getPrint();
+                System.out.println(tmp.toString(current.temps));
             }
         }
     }

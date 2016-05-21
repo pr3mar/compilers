@@ -33,7 +33,7 @@ public class CodeGen extends Phase{
     void iterate() {
         for(Fragment fragment : this.fragments.values()) {
             if(fragment instanceof CodeFragment) {
-                GenerateCode generate = new GenerateCode((CodeFragment) fragment);
+                GenerateCode generate = new GenerateCode((CodeFragment) fragment, task.fragments);
                 generate.generate();
                 FragmentCode codeNow = generate.get();
                 // TODO: generate interference graph here, or make it a new phase

@@ -22,10 +22,12 @@ public class PrintCode {
 
     public void print() {
         for(FragmentCode current : allCode) {
+            System.out.println(current.fragment.label + ":");
             for(Code code : current.code) {
                 Print tmp = code.getPrint();
-                System.out.println(tmp.toString(current.temps));
+                System.out.println("\t" + tmp.toString(current.temps));
             }
+            System.out.println();
         }
     }
 
@@ -34,7 +36,7 @@ public class PrintCode {
             FragmentCode current = this.allCode.get(i);
             for(int j = 0; j < current.code.size(); i++) {
                 Print tmp = current.code.get(i).getPrint();
-                System.out.print(tmp.toString(useThis));
+                System.out.print("\t" + tmp.toString(useThis));
             }
         }
     }

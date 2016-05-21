@@ -23,7 +23,7 @@ public class CharTyp extends AtomTyp implements AssignableTyp, ComparableTyp, Pa
 
 	@Override
 	public long size() {
-		return 1;
+		return 8; // 1
 	}
 
 }

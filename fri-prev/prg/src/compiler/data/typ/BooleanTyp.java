@@ -16,7 +16,7 @@ public class BooleanTyp extends AtomTyp implements AssignableTyp, ComparableTyp,
 
 	@Override
 	public long size() {
-		return 1;
+		return 8; // 1
 	}
 
 	@Override

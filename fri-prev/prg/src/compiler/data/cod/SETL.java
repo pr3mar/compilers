@@ -11,5 +11,6 @@ public class SETL extends Expression {
     public SETL(TEMP res, long val) {
         super(res, val);
         this.print = new Print("SETL %s," + val, res);
+        this.def.add(res);
     }
 }

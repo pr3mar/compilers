@@ -11,5 +11,6 @@ public class INCMH extends Expression {
     public INCMH(TEMP res, long val) {
         super(res, val);
         this.print = new Print("INCMH %s," + val, res);
+        this.def.add(res);
     }
 }

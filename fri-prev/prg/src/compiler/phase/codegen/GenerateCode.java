@@ -27,7 +27,7 @@ public class GenerateCode extends IMCFullVIsitor {
 
     private CodeFragment fragment;
     private HashMap<String, Fragment> allFrags;
-    private LinkedList<Code> code;
+    private LinkedList<Expression> code;
     private Stack<TEMP> result;
     private HashMap<TEMP, String> mapping;
 
@@ -206,7 +206,9 @@ public class GenerateCode extends IMCFullVIsitor {
     public void visit(MEM mem) {
         TEMP res = newTEMP();
         if( mem.addr instanceof NAME) {
-            this.code.add(new LDA(res, ((NAME)mem.addr).name));
+            TEMP tmp = newTEMP();
+            this.code.add(new LDA(tmp, ((NAME)mem.addr).name));
+            this.code.add(new LDO(res, tmp, 0));
         } else {
             mem.addr.accept(this);
             TEMP op = this.result.pop();

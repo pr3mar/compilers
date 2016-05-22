@@ -10,6 +10,8 @@ import compiler.data.imc.TEMP;
 public class LDA extends Expression {
     public LDA(TEMP result, String source) {
         super(result);
+        this.label = source;
         print = new Print("LDA %s," + source, result);
+        this.def.add(result);
     }
 }

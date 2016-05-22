@@ -11,6 +11,8 @@ public class GETA extends Expression {
 
     public GETA(TEMP result, String special) {
         super(result);
+        this.label = special;
         print = new Print("GETA %s," + special, result);
+        this.def.add(result);
     }
 }

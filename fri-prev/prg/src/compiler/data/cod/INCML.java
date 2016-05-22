@@ -11,5 +11,6 @@ public class INCML extends Expression{
     public INCML(TEMP res, long val) {
         super(res, val);
         this.print = new Print("INCML %s," + val, res);
+        this.def.add(res);
     }
 }

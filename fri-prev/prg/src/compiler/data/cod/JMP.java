@@ -8,6 +8,7 @@ import compiler.data.cod.print.Print;
 public class JMP extends Expression {
     public JMP(String lab) {
         super();
+        this.label = lab;
         this.print = new Print("JMP " + lab);
     }
 }

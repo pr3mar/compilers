@@ -12,5 +12,6 @@ public class GET extends Expression {
     public GET(TEMP result, String special) {
         super(result);
         print = new Print("GET %s," + special, result);
+        this.def.add(result);
     }
 }

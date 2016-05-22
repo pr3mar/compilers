@@ -8,6 +8,7 @@ import compiler.data.cod.print.Print;
 public class PUSHJ extends Expression {
     public PUSHJ(long allRegs, String label) {
         super(allRegs);
+        this.label = label;
         this.print = new Print("PUSHJ " + allRegs + "," + label);
     }
 }

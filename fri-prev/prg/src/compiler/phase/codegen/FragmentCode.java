@@ -1,6 +1,7 @@
 package compiler.phase.codegen;
 
 import compiler.data.cod.Code;
+import compiler.data.cod.Expression;
 import compiler.data.frg.CodeFragment;
 import compiler.data.imc.TEMP;
 
@@ -13,14 +14,20 @@ import java.util.LinkedList;
  */
 public class FragmentCode {
 
-    public LinkedList<Code> code;
+    public LinkedList<Expression> code;
 
     public HashMap<TEMP, String> temps;
 
     public CodeFragment fragment;
 
-    public FragmentCode(CodeFragment fragment, LinkedList<Code> code, HashMap<TEMP, String> temps) {
+    public FragmentCode(CodeFragment fragment, LinkedList<Expression> code, HashMap<TEMP, String> temps) {
         this.fragment = fragment;
+        this.code = code;
+        this.temps = temps;
+    }
+
+    public FragmentCode(LinkedList<Expression> code, HashMap<TEMP, String> temps) {
+        this.fragment = null;
         this.code = code;
         this.temps = temps;
     }

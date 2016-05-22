@@ -11,11 +11,16 @@ public class LDO extends Expression{
 
     public LDO(TEMP dst, TEMP src, TEMP offset) {
         super(dst, src);
-        this.print = new Print("LDO %s,%s,%s", src, dst, offset);
+        this.print = new Print("LDO %s,%s,%s", dst, src, offset);
+        this.def.add(dst);
+        this.use.add(src);
+        this.use.add(offset);
     }
 
     public LDO(TEMP dst, TEMP src, long offset) {
         super(dst, src, offset);
-        this.print = new Print("LDO %s,%s," + offset, src, dst);
+        this.print = new Print("LDO %s,%s," + offset, dst, src);
+        this.def.add(dst);
+        this.use.add(src);
     }
 }

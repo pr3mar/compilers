@@ -9,6 +9,8 @@ import compiler.data.imc.TEMP;
 public class BP extends Expression {
     public BP(TEMP result, String posLabel) {
         super(result);
+        this.label = posLabel;
         print = new Print("BP %s," + posLabel, result);
+        this.use.add(result);
     }
 }

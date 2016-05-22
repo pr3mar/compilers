@@ -7,6 +7,7 @@ import compiler.data.imc.TEMP;
 
 import compiler.phase.codegen.FragmentCode;
 import compiler.phase.lexan.Symbol;
+import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -37,9 +38,20 @@ public class Graph {
     }
 
     void interfere() {
-        for(int j = 0; j < 10; j++) {
-            int st = 0;
-            for (GraphNode node : this.nodes) {
+        boolean equal = true;
+        int st = 0;
+        do {
+            equal = true;
+//            for (GraphNode node : this.nodes) {
+            for (int n = (this.nodes.size() - 1); n >= 0; n--) {
+                GraphNode node = this.nodes.get(n);
+                Set<TEMP> oldIn = new HashSet<>(node.in);
+                Set<TEMP> oldOut = new HashSet<>(node.out);
+
+                node.out = new HashSet<>();
+                for (int i = 0; i < node.getOutEdges().size(); i++) {
+                    node.out.addAll(node.getOutEdges().get(i).to.in);
+                }
 
                 Expression instruction = node.getInstruction();
                 Set<TEMP> diff = new HashSet<>(node.out);
@@ -49,17 +61,18 @@ public class Graph {
                 tmp2.addAll(diff);
 
                 node.in = new HashSet<>(tmp2);
-
-                node.out = new HashSet<>();
-                for (int i = 0; i < node.getOutEdges().size(); i++) {
-                    node.out.addAll(node.getOutEdges().get(i).to.in);
-                }
-                st++;
+                equal = equal && equalSets(node.in, oldIn);
+                equal = equal && equalSets(node.out, oldOut);
             }
-        }
+            st++;
+        } while(!equal);
+        System.out.println("iterations = " +  st);
         print();
     }
 
+    boolean equalSets(Set<TEMP> first, Set<TEMP> second) {
+        return first.size() == second.size() && first.containsAll(second);
+    }
 
     void print() {
         for (GraphNode node : this.nodes) {

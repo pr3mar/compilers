@@ -27,11 +27,15 @@ public class RegGraph {
 
     private void buildGraph() {
         for(GraphNode node : this.fragmentCode.codeGraph.getNodes()) {
-            if(node.getInstruction().getMove()) {
+            if(!node.getInstruction().getMove()) {
                 for (TEMP def : node.def) {
                     Set<TEMP> update = this.nodes.get(def);
                     for(TEMP out : node.out) {
+                        if(out.equals(def)) continue;
                         update.add(out);
+                        Set<TEMP> outUpdate = this.nodes.get(out);
+                        outUpdate.add(def);
+                        this.nodes.put(out, outUpdate);
                     }
                     this.nodes.put(def, update);
                 }
@@ -40,8 +44,11 @@ public class RegGraph {
                 for (TEMP def : node.def) {
                     Set<TEMP> update = this.nodes.get(def);
                     for(TEMP out : node.out) {
-//                        if(out.equals(dont)) continue;
+                        if(out.equals(def)) continue;
                         update.add(out);
+                        Set<TEMP> outUpdate = this.nodes.get(out);
+                        outUpdate.add(def);
+                        this.nodes.put(out, outUpdate);
                     }
                     update.remove(dont);
                     this.nodes.put(def, update);
@@ -54,9 +61,9 @@ public class RegGraph {
     public String toString() {
         String ret = "";
         for(TEMP reg : this.nodes.keySet()) {
-            ret += reg.toString() + ": ";
+            ret += this.fragmentCode.temps.get(reg) + ": ";
             for(TEMP ints : this.nodes.get(reg)) {
-                ret += ints.toString() + ", ";
+                ret += this.fragmentCode.temps.get(ints) + ", ";
             }
             ret += "\n";
         }

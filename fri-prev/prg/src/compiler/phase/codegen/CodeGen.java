@@ -36,22 +36,21 @@ public class CodeGen extends Phase{
     }
 
     void iterate() {
-        /*for(Fragment fragment : this.fragments.values()) {
+        for(Fragment fragment : this.fragments.values()) {
             if(fragment instanceof CodeFragment) {
                 GenerateCode generate = new GenerateCode((CodeFragment) fragment, task.fragments);
                 generate.generate();
                 FragmentCode codeNow = generate.get();
-                Graph interfere = new Graph(codeNow);
-                codeNow.codeGraph = interfere;
+                codeNow.codeGraph = new Graph(codeNow);
                 RegGraph regGraph = new RegGraph(codeNow);
                 regGraph.print();
                 // TODO: generate interference graph here, or make it a new phase
                 this.task.generatedCode.add(codeNow);
             }
-        }*/
+        }
 
         /* test starts here */
-        CodeFragment test_frag = new CodeFragment(new Frame(0,"_test", 0,0,0,0,0), 253, 255, null);
+        /*CodeFragment test_frag = new CodeFragment(new Frame(0,"_test", 0,0,0,0,0), 253, 255, null);
         LinkedList<Expression> test_code = new LinkedList<>();
         TEMP t1 = new TEMP(1);
         TEMP t2 = new TEMP(2);
@@ -72,7 +71,7 @@ public class CodeGen extends Phase{
         test.codeGraph = interfere;
         RegGraph regGraph = new RegGraph(test);
         regGraph.print();
-        this.task.generatedCode.add(test);
+        this.task.generatedCode.add(test);*/
     }
 
 //    void generate(CodeFragment fragment) {

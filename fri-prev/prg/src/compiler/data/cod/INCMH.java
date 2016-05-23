@@ -10,7 +10,7 @@ import compiler.data.imc.TEMP;
 public class INCMH extends Expression {
     public INCMH(TEMP res, long val) {
         super(res, val);
-        this.print = new Print("INCMH %s," + val, res);
+        this.print = new Print("\tINCMH %s," + val + "\n", res);
         this.def.add(res);
     }
 }

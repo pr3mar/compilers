@@ -12,7 +12,7 @@ public class GETA extends Expression {
     public GETA(TEMP result, String special) {
         super(result);
         this.label = special;
-        print = new Print("GETA %s," + special, result);
+        print = new Print("\tGETA %s," + special + "\n", result);
         this.def.add(result);
     }
 }

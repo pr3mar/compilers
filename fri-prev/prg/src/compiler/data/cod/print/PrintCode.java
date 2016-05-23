@@ -22,11 +22,14 @@ public class PrintCode {
 
     public void print() {
         for(FragmentCode current : allCode) {
+            System.out.println("Generated code for fragment: " + current.fragment.label);
             System.out.println(current.fragment.label + ":");
             for(Code code : current.code) {
                 Print tmp = code.getPrint();
-                System.out.println("\t" + tmp.toString(current.temps));
+                System.out.print(tmp.toString(current.temps));
             }
+            System.out.println("\nInterference graph for fragment: " + current.fragment.label);
+            current.regGraph.print();
             System.out.println();
         }
     }
@@ -35,9 +38,13 @@ public class PrintCode {
         for(int i = 0; i < allCode.size(); i++) {
             FragmentCode current = this.allCode.get(i);
             for(int j = 0; j < current.code.size(); i++) {
+                System.out.println("Generated code for fragment: " + current.fragment.label);
                 Print tmp = current.code.get(i).getPrint();
-                System.out.print("\t" + tmp.toString(useThis));
+                System.out.print(tmp.toString(useThis));
             }
+            System.out.println("\nInterference graph for fragment: " + current.fragment.label);
+            current.regGraph.print();
+            System.out.println();
         }
     }
 

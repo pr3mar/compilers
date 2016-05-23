@@ -10,7 +10,7 @@ import compiler.data.imc.TEMP;
 public class INCH extends Expression{
     public INCH(TEMP res, long val) {
         super(res, val);
-        this.print = new Print("INCH %s," + val, res);
+        this.print = new Print("\tINCH %s," + val + "\n", res);
         this.def.add(res);
     }
 }

@@ -10,7 +10,7 @@ import compiler.data.imc.TEMP;
 public class INCML extends Expression{
     public INCML(TEMP res, long val) {
         super(res, val);
-        this.print = new Print("INCML %s," + val, res);
+        this.print = new Print("\tINCML %s," + val + "\n", res);
         this.def.add(res);
     }
 }

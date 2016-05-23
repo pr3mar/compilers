@@ -42,9 +42,7 @@ public class CodeGen extends Phase{
                 generate.generate();
                 FragmentCode codeNow = generate.get();
                 codeNow.codeGraph = new Graph(codeNow);
-                RegGraph regGraph = new RegGraph(codeNow);
-                regGraph.print();
-                // TODO: generate interference graph here, or make it a new phase
+                codeNow.regGraph = new RegGraph(codeNow);
                 this.task.generatedCode.add(codeNow);
             }
         }

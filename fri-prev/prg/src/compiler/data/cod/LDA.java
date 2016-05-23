@@ -11,7 +11,7 @@ public class LDA extends Expression {
     public LDA(TEMP result, String source) {
         super(result);
         this.label = source;
-        print = new Print("LDA %s," + source, result);
+        print = new Print("\tLDA %s," + source + "\n", result);
         this.def.add(result);
     }
 }

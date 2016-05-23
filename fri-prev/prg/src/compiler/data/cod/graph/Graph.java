@@ -1,5 +1,6 @@
 package compiler.data.cod.graph;
 
+import compiler.common.report.CompilerError;
 import compiler.data.ast.Expr;
 import compiler.data.cod.*;
 import compiler.data.frg.Fragment;
@@ -54,6 +55,8 @@ public class Graph {
 
                 node.out = new HashSet<>();
                 for (int i = 0; i < node.getOutEdges().size(); i++) {
+                    if(node.getOutEdges().get(i) == null)
+                        continue;
                     node.out.addAll(node.getOutEdges().get(i).to.in);
                 }
 
@@ -70,8 +73,8 @@ public class Graph {
             }
             st++;
         } while(!equal);
-        System.out.println("iterations = " +  st);
-        print();
+//        System.out.println("iterations = " +  st);
+//        print();
     }
 
     boolean equalSets(Set<TEMP> first, Set<TEMP> second) {
@@ -130,6 +133,8 @@ public class Graph {
                 break;
             }
         }
+        if(ret == null)
+            throw new CompilerError("[codegen] nothing after the label? hm...");
         return ret;
     }
 }

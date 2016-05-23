@@ -10,6 +10,6 @@ public class LAB extends Expression{
     public LAB(String lab) {
         super();
         this.label = lab;
-        this.print = new Print(lab + ":");
+        this.print = new Print(lab + ":\n");
     }
 }

@@ -65,6 +65,7 @@ public class GenerateCode extends IMCFullVIsitor {
             this.fragment.linCode.stmts(i).accept(this);
             this.result = new Stack<>();
         }
+        this.code.add(new SWYM());
     }
 
     @Override

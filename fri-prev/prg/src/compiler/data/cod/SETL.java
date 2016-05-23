@@ -10,7 +10,7 @@ import compiler.data.imc.TEMP;
 public class SETL extends Expression {
     public SETL(TEMP res, long val) {
         super(res, val);
-        this.print = new Print("SETL %s," + val, res);
+        this.print = new Print("\tSETL %s," + val + "\n", res);
         this.def.add(res);
     }
 }

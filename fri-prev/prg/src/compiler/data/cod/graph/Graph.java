@@ -37,6 +37,10 @@ public class Graph {
         interfere();
     }
 
+    public LinkedList<GraphNode> getNodes() {
+        return this.nodes;
+    }
+
     void interfere() {
         boolean equal = true;
         int st = 0;

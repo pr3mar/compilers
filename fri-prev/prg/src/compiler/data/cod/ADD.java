@@ -22,5 +22,8 @@ public class ADD extends Expression {
         print = new Print("ADD %s,%s," + op2_const, result, op1);
         this.def.add(result);
         this.use.add(op1);
+        if(op2_const == 0) {
+            this.move = true;
+        }
     }
 }

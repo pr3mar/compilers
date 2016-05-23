@@ -18,6 +18,8 @@ public class GraphNode {
 
     public Set<TEMP> in;
     public Set<TEMP> out;
+    public Set<TEMP> def;
+    public Set<TEMP> use;
 
     public GraphNode(Expression instruction) {
         this.instruction = instruction;
@@ -25,6 +27,8 @@ public class GraphNode {
         this.outEdges = new LinkedList<>();
         this.in = new HashSet<>();
         this.out = new HashSet<>();
+        this.def = instruction.getDef();
+        this.use = instruction.getUse();
     }
 
     public void addInEdge(GraphNode from) {

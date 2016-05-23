@@ -3,6 +3,7 @@ package compiler.phase.codegen;
 import compiler.Task;
 import compiler.data.cod.*;
 import compiler.data.cod.graph.Graph;
+import compiler.data.cod.graph.RegGraph;
 import compiler.data.cod.print.PrintCode;
 import compiler.data.frg.CodeFragment;
 import compiler.data.frg.Fragment;
@@ -41,6 +42,9 @@ public class CodeGen extends Phase{
                 generate.generate();
                 FragmentCode codeNow = generate.get();
                 Graph interfere = new Graph(codeNow);
+                codeNow.codeGraph = interfere;
+                RegGraph regGraph = new RegGraph(codeNow);
+                regGraph.print();
                 // TODO: generate interference graph here, or make it a new phase
                 this.task.generatedCode.add(codeNow);
             }
@@ -65,6 +69,9 @@ public class CodeGen extends Phase{
         test_hash.put(t3, "c");
         FragmentCode test = new FragmentCode(test_frag, test_code, test_hash);
         Graph interfere = new Graph(test);
+        test.codeGraph = interfere;
+        RegGraph regGraph = new RegGraph(test);
+        regGraph.print();
         this.task.generatedCode.add(test);
     }
 

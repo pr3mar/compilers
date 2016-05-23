@@ -32,6 +32,11 @@ public class TEMP extends IMCExpr {
 		logger.endElement();
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		return this.name == ((TEMP) o).name;
+	}
+
 	/** The number of all temporary register names. */
 	public static int tempNameCount = 0;
 

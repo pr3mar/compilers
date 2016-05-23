@@ -157,7 +157,7 @@ public class GenerateCode extends IMCFullVIsitor {
         TEMP res = newTEMP();
         long[] bytes = devideConst(constant.value);
         int noInstr = 3;
-        for(; noInstr >= 0; noInstr--) {
+        for(; noInstr > 0; noInstr--) {
             if(bytes[noInstr] != 0) {
                 break;
             }
@@ -214,6 +214,7 @@ public class GenerateCode extends IMCFullVIsitor {
             TEMP op = this.result.pop();
             this.code.add(new LDO(res, op, 0));
         }
+        this.result.push(res);
     }
 
     @Override
@@ -234,7 +235,7 @@ public class GenerateCode extends IMCFullVIsitor {
         if(mem) {
             this.code.add(new STO(src, dst, 0));
         } else {
-            this.code.add(new LDO(dst, src, 0));
+            this.code.add(new ADD(dst, src, 0));
         }
     }
 

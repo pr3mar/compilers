@@ -2,6 +2,8 @@ package compiler.phase.codegen;
 
 import compiler.data.cod.Code;
 import compiler.data.cod.Expression;
+import compiler.data.cod.graph.Graph;
+import compiler.data.cod.graph.RegGraph;
 import compiler.data.frg.CodeFragment;
 import compiler.data.imc.TEMP;
 
@@ -20,15 +22,31 @@ public class FragmentCode {
 
     public CodeFragment fragment;
 
+    public Graph codeGraph;
+
+    public RegGraph regGraph;
+
     public FragmentCode(CodeFragment fragment, LinkedList<Expression> code, HashMap<TEMP, String> temps) {
         this.fragment = fragment;
         this.code = code;
         this.temps = temps;
     }
 
-    public FragmentCode(LinkedList<Expression> code, HashMap<TEMP, String> temps) {
-        this.fragment = null;
+    public FragmentCode(CodeFragment fragment, LinkedList<Expression> code, HashMap<TEMP, String> temps, Graph codeGraph) {
+        this.fragment = fragment;
         this.code = code;
         this.temps = temps;
+        this.codeGraph = codeGraph;
     }
+
+    public FragmentCode(CodeFragment fragment, LinkedList<Expression> code, HashMap<TEMP, String> temps, Graph codeGraph, RegGraph regGraph) {
+        this.fragment = fragment;
+        this.code = code;
+        this.temps = temps;
+        this.codeGraph = codeGraph;
+        this.regGraph = regGraph;
+    }
+
+
+
 }

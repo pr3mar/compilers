@@ -21,5 +21,8 @@ public class MUL extends Expression {
         print = new Print("MUL %s,%s," + op2_const, result, op1);
         this.def.add(result);
         this.use.add(op1);
+        if(op2_const == 1) {
+            this.move = true;
+        }
     }
 }

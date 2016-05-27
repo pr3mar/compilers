@@ -23,4 +23,11 @@ public class STO extends Expression {
         this.use.add(dst);
         this.use.add(offset);
     }
+
+
+    public STO(TEMP dst, String src, long offset) {
+        super(dst, offset);
+        this.print = new Print("\tSTO %s," + src + "," + offset + "\n", dst);
+        this.def.add(dst);
+    }
 }

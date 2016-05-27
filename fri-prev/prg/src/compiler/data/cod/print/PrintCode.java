@@ -1,9 +1,8 @@
 package compiler.data.cod.print;
 
 import compiler.data.cod.Code;
-import compiler.data.frg.Fragment;
 import compiler.data.imc.TEMP;
-import compiler.phase.codegen.FragmentCode;
+import compiler.data.cod.wrapper.FragmentCode;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -34,7 +33,21 @@ public class PrintCode {
         }
     }
 
-    public void print(HashMap<TEMP, String> useThis) {
+    public void printColored() {
+        for(FragmentCode current : allCode) {
+            System.out.println("Generated code for fragment: " + current.fragment.label);
+            System.out.println(current.fragment.label + ":");
+            for(Code code : current.code) {
+                Print tmp = code.getPrint();
+                System.out.print(tmp.toString(current.coloredMap));
+            }
+//            System.out.println("\nInterference graph for fragment: " + current.fragment.label);
+//            current.regGraph.print();
+            System.out.println();
+        }
+    }
+
+    /*public void print(HashMap<TEMP, String> useThis) {
         for(int i = 0; i < allCode.size(); i++) {
             FragmentCode current = this.allCode.get(i);
             for(int j = 0; j < current.code.size(); i++) {
@@ -46,6 +59,6 @@ public class PrintCode {
             current.regGraph.print();
             System.out.println();
         }
-    }
+    }*/
 
 }

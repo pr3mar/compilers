@@ -1,14 +1,10 @@
 package compiler.data.cod.graph;
 
 import compiler.common.report.CompilerError;
-import compiler.data.ast.Expr;
 import compiler.data.cod.*;
-import compiler.data.frg.Fragment;
 import compiler.data.imc.TEMP;
 
-import compiler.phase.codegen.FragmentCode;
-import compiler.phase.lexan.Symbol;
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
+import compiler.data.cod.wrapper.FragmentCode;
 
 import java.util.HashSet;
 import java.util.LinkedList;

@@ -1,6 +1,5 @@
-package compiler.phase.codegen;
+package compiler.data.cod.wrapper;
 
-import compiler.data.cod.Code;
 import compiler.data.cod.Expression;
 import compiler.data.cod.graph.Graph;
 import compiler.data.cod.graph.RegGraph;
@@ -25,6 +24,11 @@ public class FragmentCode {
     public Graph codeGraph;
 
     public RegGraph regGraph;
+
+    public RegGraph coloredGraph; // do I really need this?
+
+    public HashMap<TEMP, String> coloredMap;
+
 
     public FragmentCode(CodeFragment fragment, LinkedList<Expression> code, HashMap<TEMP, String> temps) {
         this.fragment = fragment;

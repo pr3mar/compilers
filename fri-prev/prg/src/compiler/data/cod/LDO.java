@@ -23,4 +23,10 @@ public class LDO extends Expression{
         this.def.add(dst);
         this.use.add(src);
     }
+
+    public LDO(TEMP dst, String src, long offset) {
+        super(dst, offset);
+        this.print = new Print("\tLDO %s," + src + "," + offset + "\n", dst);
+        this.def.add(dst);
+    }
 }

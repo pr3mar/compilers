@@ -6,7 +6,7 @@ import compiler.common.report.*;
 import compiler.data.ast.*;
 import compiler.data.ast.attr.*;
 import compiler.data.frg.*;
-import compiler.phase.codegen.FragmentCode;
+import compiler.data.cod.wrapper.*;
 
 /**
  * The parameters and internal data of the compilation process.
@@ -25,7 +25,7 @@ public class Task {
 	public final String xslDName;
 
 	/** A regular expression describing all phases of the compiler. */
-	private static final String allPhases = "(lexan|synan|abstr|seman|frames|imcode|lincode|codegen)";
+	private static final String allPhases = "(lexan|synan|abstr|seman|frames|imcode|lincode|codegen|regalloc)";
 
 	/** A list of phases logging should be performed for. */
 	public final String loggedPhases;
@@ -125,7 +125,7 @@ public class Task {
     public HashMap<String, Fragment> fragments = new HashMap<String, Fragment>();
 
 	/**
-	 *
+	 * Code of the fragments, hash map for printing and interference graph
 	 */
     public LinkedList<FragmentCode> generatedCode = new LinkedList<>();
 }

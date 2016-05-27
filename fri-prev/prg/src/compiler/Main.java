@@ -3,6 +3,7 @@ package compiler;
 import compiler.common.report.*;
 import compiler.phase.codegen.CodeGen;
 import compiler.phase.lexan.*;
+import compiler.phase.regalloc.RegAlloc;
 import compiler.phase.synan.*;
 import compiler.phase.abstr.*;
 import compiler.phase.seman.*;
@@ -97,6 +98,12 @@ public class Main {
 				if(task.phase.equals("codegen"))
 					break;
 
+				// Register allocation
+				int maxNumReg = 8;
+				RegAlloc regAlloc = new RegAlloc(task, maxNumReg);
+				regAlloc.close();
+				if(task.phase.equals("regalloc"))
+					break;
 				break;
 			}
 		} catch (CompilerError errorReport) {

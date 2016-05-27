@@ -1,7 +1,7 @@
 package compiler.data.cod.graph;
 
 import compiler.data.imc.TEMP;
-import compiler.phase.codegen.FragmentCode;
+import compiler.data.cod.wrapper.FragmentCode;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,6 +20,7 @@ public class RegGraph {
         this.fragmentCode = fragmentCode;
         this.nodes = new HashMap<>();
         for(TEMP temp : this.fragmentCode.temps.keySet()) {
+//            if(this.fragmentCode.temps.get(temp).equals("SP")) continue;
             this.nodes.put(temp, new HashSet<TEMP>());
         }
         buildGraph();
@@ -71,6 +72,12 @@ public class RegGraph {
     }
 
     public void print() {
-        System.out.println(this.toString());
+        for(TEMP reg : this.nodes.keySet()) {
+            System.out.print(this.fragmentCode.temps.get(reg) + ": ");
+            for(TEMP ints : this.nodes.get(reg)) {
+                System.out.print(this.fragmentCode.temps.get(ints) + ", ");
+            }
+            System.out.println();
+        }
     }
 }

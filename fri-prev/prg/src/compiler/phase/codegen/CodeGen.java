@@ -5,6 +5,7 @@ import compiler.data.cod.*;
 import compiler.data.cod.graph.Graph;
 import compiler.data.cod.graph.RegGraph;
 import compiler.data.cod.print.PrintCode;
+import compiler.data.cod.wrapper.FragmentCode;
 import compiler.data.frg.CodeFragment;
 import compiler.data.frg.Fragment;
 import compiler.data.frm.Frame;
@@ -32,7 +33,8 @@ public class CodeGen extends Phase{
         this.fragments = task.fragments;
         iterate();
         PrintCode print = new PrintCode(task.generatedCode);
-        print.print();
+        if(task.phase.equals("codegen"))
+            print.print();
     }
 
     void iterate() {
@@ -65,10 +67,8 @@ public class CodeGen extends Phase{
         test_hash.put(t2, "b");
         test_hash.put(t3, "c");
         FragmentCode test = new FragmentCode(test_frag, test_code, test_hash);
-        Graph interfere = new Graph(test);
-        test.codeGraph = interfere;
-        RegGraph regGraph = new RegGraph(test);
-        regGraph.print();
+        test.codeGraph = new Graph(test);
+        test.regGraph = new RegGraph(test);
         this.task.generatedCode.add(test);*/
     }
 

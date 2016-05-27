@@ -3,6 +3,7 @@ package compiler.phase.codegen;
 import compiler.common.report.CompilerError;
 import compiler.data.cod.*;
 import compiler.data.cod.imcVisitor.IMCFullVIsitor;
+import compiler.data.cod.wrapper.FragmentCode;
 import compiler.data.frg.CodeFragment;
 import compiler.data.frg.Fragment;
 import compiler.data.imc.TEMP;
@@ -30,6 +31,8 @@ public class GenerateCode extends IMCFullVIsitor {
     private LinkedList<Expression> code;
     private Stack<TEMP> result;
     private HashMap<TEMP, String> mapping;
+    private TEMP RV;
+    private String FP;
 
     public GenerateCode(CodeFragment fragment, HashMap<String, Fragment> allFrags) {
         this.fragment = fragment;
@@ -37,6 +40,11 @@ public class GenerateCode extends IMCFullVIsitor {
         this.result = new Stack<>();
         this.mapping = new HashMap<>();
         this.code = new LinkedList<>();
+        this.FP = "FP";
+        this.RV = new TEMP(this.fragment.RV);
+        this.mapping.put(this.RV, this.RV.toString());
+//        this.SP = new TEMP(-1);
+//        this.mapping.put(this.SP, "SP");
     }
 
     private long[] devideConst(Long val) {
@@ -46,12 +54,14 @@ public class GenerateCode extends IMCFullVIsitor {
         ret[1] = (val & (mask << 2 * BYTE_SIZE)) >> 2 * BYTE_SIZE;
         ret[2] = (val & (mask << 4 * BYTE_SIZE)) >> 4 * BYTE_SIZE;
         ret[3] = ((val & (mask << 6 * BYTE_SIZE)) >> 6 * BYTE_SIZE) & mask;
-
         return ret;
     }
 
     private TEMP newTEMP() {
-        TEMP ret = new TEMP(TEMP.newTempName());
+        int tempName = TEMP.newTempName();
+        if(tempName == this.fragment.FP || tempName == this.fragment.RV)
+            tempName = TEMP.newTempName();
+        TEMP ret = new TEMP(tempName);
         this.mapping.put(ret, ret.toString());
         return ret;
     }
@@ -65,6 +75,9 @@ public class GenerateCode extends IMCFullVIsitor {
             this.fragment.linCode.stmts(i).accept(this);
             this.result = new Stack<>();
         }
+        Expression exp = this.code.get(this.code.size() - 1);//.getResult();
+        if(exp.getResult() != null)
+            this.code.add(new ADD(this.RV, exp.getResult(), 0));
         this.code.add(new SWYM());
     }
 
@@ -131,18 +144,19 @@ public class GenerateCode extends IMCFullVIsitor {
 
     @Override
     public void visit(CALL call) {
-        TEMP SP = new TEMP(this.fragment.RV);
-        if(!this.mapping.containsKey(SP))
-            this.mapping.put(SP, "SP");
+//        TEMP SP = new TEMP(this.fragment.RV);
+//        if(!this.mapping.containsKey(SP))
+//            this.mapping.put(SP, "SP");
         TEMP res;
         for(int i = 0; i < call.numArgs(); i++) {
             call.args(i).accept(this);
             res = this.result.pop();
-            this.code.add(new STO(res, SP, i * WIDTH_BYTES));
+            this.code.add(new STO(res, "SP", i * WIDTH_BYTES)); // may be a difficulty??
         }
         this.code.add(new PUSHJ(NUM_REGS, call.label));
         res = newTEMP();
-        this.code.add(new LDO(res, SP, 0));
+        this.code.add(new LDO(res, "SP", 0)); // may be a difficulty??
+        this.result.push(res);
     }
 
     @Override
@@ -266,11 +280,12 @@ public class GenerateCode extends IMCFullVIsitor {
 
     @Override
     public void visit(TEMP temp) {
-        if(this.fragment.FP == temp.name && !this.mapping.containsKey(temp))
-            this.mapping.put(temp, "FP");
-        if(!this.mapping.containsKey(temp))
+        if(this.fragment.FP == temp.name)
+            return;
+        if(!this.mapping.containsKey(temp)) {
             this.mapping.put(temp, temp.toString());
-        this.result.push(temp);
+            this.result.push(temp);
+        }
     }
 
     @Override

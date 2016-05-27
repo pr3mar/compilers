@@ -2,6 +2,8 @@
 # START GOOGLE CHROME WITH google-chrome --allow-file-access-from-files
 #
 
+%.regalloc.xml	: %.prev
+	java -classpath ../prg/bin compiler.Main --xsldir=../prg/xsl --phase=regalloc --loggedphases=regalloc $<
 
 %.codegen.xml	: %.prev
 	java -classpath ../prg/bin compiler.Main --xsldir=../prg/xsl --phase=codegen --loggedphases=codegen $<

@@ -33,14 +33,10 @@ public class RegAlloc extends Phase {
     void color() {
         for(int i = 0; i < this.fragCode.size(); i++) {
             FragmentCode code = this.fragCode.get(i);
-            Coloring color = new Coloring(code);
+            Coloring color = new Coloring(code, this.maxNumReg);
             color.color();
             code = color.getResult();
             this.fragCode.set(i, code);
         }
-    }
-
-    void print() {
-        // TODO: print the code
     }
 }

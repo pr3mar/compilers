@@ -13,8 +13,8 @@ import java.util.Set;
  */
 public class RegGraph {
 
-    HashMap<TEMP, Set<TEMP>> nodes;
-    FragmentCode fragmentCode;
+    public HashMap<TEMP, Set<TEMP>> nodes;
+    private FragmentCode fragmentCode;
 
     public RegGraph(FragmentCode fragmentCode) {
         this.fragmentCode = fragmentCode;

@@ -41,8 +41,13 @@ public class PrintCode {
                 Print tmp = code.getPrint();
                 System.out.print(tmp.toString(current.coloredMap));
             }
-//            System.out.println("\nInterference graph for fragment: " + current.fragment.label);
-//            current.regGraph.print();
+            System.out.println("\nInterference graph for fragment: " + current.fragment.label);
+            current.regGraph.print();
+            System.out.println();
+
+            System.out.println("\nColoring of the graph for fragment: " + current.fragment.label);
+            for(TEMP t : current.coloredMap.keySet())
+                System.out.println(t + " = " + current.coloredMap.get(t));
             System.out.println();
         }
     }

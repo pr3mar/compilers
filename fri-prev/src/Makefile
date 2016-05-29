@@ -1,5 +1,5 @@
-#
-# START GOOGLE CHROME WITH google-chrome --allow-file-access-from-files
+# 
+# START GOOGLE CHROME WITH google-chrome --allow-file-access-from-files &
 #
 
 %.regalloc.xml	: %.prev

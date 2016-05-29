@@ -1,5 +1,6 @@
 package compiler.data.cod;
 
+import compiler.data.cod.print.Print;
 import compiler.data.imc.TEMP;
 
 import java.util.HashSet;
@@ -18,6 +19,7 @@ public class Expression extends Code {
     private TEMP op2; long op2_const;
     protected String label;
     protected boolean move;
+    protected String special;
 
     protected Set<TEMP> def;
     protected Set<TEMP> use;
@@ -27,6 +29,7 @@ public class Expression extends Code {
         def = new HashSet<>();
         use = new HashSet<>();
         this.move = false;
+        this.special = null;
     }
 
     public Expression(TEMP result) { // 1 ops: ret
@@ -35,6 +38,7 @@ public class Expression extends Code {
         def = new HashSet<>();
         use = new HashSet<>();
         this.move = false;
+        this.special = null;
     }
 
     public Expression(long op1_const) { // 1 ops: ret
@@ -43,6 +47,7 @@ public class Expression extends Code {
         def = new HashSet<>();
         use = new HashSet<>();
         this.move = false;
+        this.special = null;
     }
 
     public Expression(TEMP result, TEMP op1) { // 2 ops: ret tmp
@@ -52,6 +57,7 @@ public class Expression extends Code {
         def = new HashSet<>();
         use = new HashSet<>();
         this.move = false;
+        this.special = null;
     }
 
     public Expression(TEMP result, long op1_const) { // 2 ops: ret int
@@ -61,6 +67,7 @@ public class Expression extends Code {
         def = new HashSet<>();
         use = new HashSet<>();
         this.move = false;
+        this.special = null;
     }
 
     public Expression(TEMP result, long op1_const, TEMP op2) { // 3 ops: ret int temp
@@ -71,6 +78,7 @@ public class Expression extends Code {
         def = new HashSet<>();
         use = new HashSet<>();
         this.move = false;
+        this.special = null;
     }
 
     public Expression(TEMP result, TEMP op1, long op2_const) { // 3 ops: ret temp int
@@ -81,6 +89,7 @@ public class Expression extends Code {
         def = new HashSet<>();
         use = new HashSet<>();
         this.move = false;
+        this.special = null;
     }
     public Expression(TEMP result, long op1_const, long op2_const) { // 3 ops: ret int int
         this.constructorUsed = 7;
@@ -90,6 +99,7 @@ public class Expression extends Code {
         def = new HashSet<>();
         use = new HashSet<>();
         this.move = false;
+        this.special = null;
     }
 
     public Expression(TEMP result, TEMP op1, TEMP op2) { // 3 ops: ret temp temp
@@ -100,6 +110,7 @@ public class Expression extends Code {
         def = new HashSet<>();
         use = new HashSet<>();
         this.move = false;
+        this.special = null;
     }
 
     public String getLabel() { return this.label; }
@@ -115,4 +126,19 @@ public class Expression extends Code {
     public TEMP getOp1() { return this.op1; }
 
     public TEMP getOp2() { return this.op2; }
+
+    public void setResult(TEMP res) { this.result = res; }
+
+    public void setOp1(TEMP op1) { this.op1 = op1; }
+
+    public void setOp2(TEMP op2) { this.op2 = op2; }
+
+    public String getSpecial() {return this.special;}
+
+    public void setUse(Set<TEMP> use) {this.use = use;}
+
+    public void setDef(Set<TEMP> def) {this.def = def;}
+
+    public void setPrint(Print print) {this.print = print;}
+
 }

@@ -12,7 +12,8 @@ import compiler.data.imc.*;
 public class CodeFragment extends Fragment {
 
 	/** The function's stack frame. */
-	public final Frame frame;
+//	public final Frame frame;
+	public Frame frame; // I need this for the spilled registers
 
 	/** A temporary register used as the frame pointer. */
 	public final int FP;

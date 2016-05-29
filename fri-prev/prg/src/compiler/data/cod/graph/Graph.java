@@ -37,6 +37,9 @@ public class Graph {
     public LinkedList<GraphNode> getNodes() {
         return this.nodes;
     }
+    public void setNodes(LinkedList<GraphNode> nodes) {
+        this.nodes = nodes;
+    }
 
     void interfere() {
         boolean equal = true;
@@ -70,14 +73,14 @@ public class Graph {
             st++;
         } while(!equal);
 //        System.out.println("iterations = " +  st);
-//        print();
+//        printString();
     }
 
     boolean equalSets(Set<TEMP> first, Set<TEMP> second) {
         return first.size() == second.size() && first.containsAll(second);
     }
 
-    void print() {
+    public void print() {
         for (GraphNode node : this.nodes) {
             if(node.getInstruction() instanceof LAB) continue;
             System.out.println(node.getInstruction().getPrint().toString(fragmentCode.temps));
@@ -88,6 +91,16 @@ public class Graph {
             System.out.println();
             System.out.print("OUTS: ");
             for(TEMP t : node.out){
+                System.out.print(t + ", ");
+            }
+            System.out.println();
+            System.out.print("DEF: ");
+            for(TEMP t : node.def){
+                System.out.print(t + ", ");
+            }
+            System.out.println();
+            System.out.print("USE: ");
+            for(TEMP t : node.use){
                 System.out.print(t + ", ");
             }
             System.out.println();
@@ -133,4 +146,14 @@ public class Graph {
             throw new CompilerError("[codegen] nothing after the label? hm...");
         return ret;
     }
+
+    /*public void printString() {
+        for(GraphNode n : this.nodes) {
+            System.out.printString(n.getInstruction().getPrint().toString(this.fragmentCode.temps));
+            System.out.println("def: " + n.def);
+            System.out.println("use: " + n.use);
+            System.out.println("in: " + n.in);
+            System.out.println("out: " + n.out);
+        }
+    }*/
 }

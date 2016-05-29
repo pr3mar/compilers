@@ -99,7 +99,7 @@ public class Main {
 					break;
 
 				// Register allocation
-				int maxNumReg = 8;
+				int maxNumReg = 4;
 				RegAlloc regAlloc = new RegAlloc(task, maxNumReg);
 				regAlloc.close();
 				if(task.phase.equals("regalloc"))
@@ -122,5 +122,4 @@ public class Main {
 			System.exit(0);
 		}
 	}
-
 }

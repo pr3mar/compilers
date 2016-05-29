@@ -38,7 +38,8 @@ public class Frame implements Loggable {
 	/**
 	 * The size of block containing temporary variables.
 	 */
-	public final long tmpVarsSize;
+//	public final long tmpVarsSize; // I need this to set the spilled registers
+	public long tmpVarsSize;
 
 	/**
 	 * The size of block containing hidden registers.

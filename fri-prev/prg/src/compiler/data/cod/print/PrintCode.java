@@ -1,5 +1,6 @@
 package compiler.data.cod.print;
 
+import compiler.common.report.CompilerError;
 import compiler.data.cod.Code;
 import compiler.data.imc.TEMP;
 import compiler.data.cod.wrapper.FragmentCode;
@@ -46,22 +47,26 @@ public class PrintCode {
             System.out.println();
 
             System.out.println("\nColoring of the graph for fragment: " + current.fragment.label);
-            for(TEMP t : current.coloredMap.keySet())
+            for(TEMP t : current.coloredMap.keySet()) {
+                if(current.coloredMap.get(t) == null) {
+                    throw new CompilerError("printString colored error!");
+                }
                 System.out.println(t + " = " + current.coloredMap.get(t));
+            }
             System.out.println();
         }
     }
 
-    /*public void print(HashMap<TEMP, String> useThis) {
+    /*public void printString(HashMap<TEMP, String> useThis) {
         for(int i = 0; i < allCode.size(); i++) {
             FragmentCode current = this.allCode.get(i);
             for(int j = 0; j < current.code.size(); i++) {
                 System.out.println("Generated code for fragment: " + current.fragment.label);
                 Print tmp = current.code.get(i).getPrint();
-                System.out.print(tmp.toString(useThis));
+                System.out.printString(tmp.toString(useThis));
             }
             System.out.println("\nInterference graph for fragment: " + current.fragment.label);
-            current.regGraph.print();
+            current.regGraph.printString();
             System.out.println();
         }
     }*/

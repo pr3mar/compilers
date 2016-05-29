@@ -21,21 +21,24 @@ public class RegAlloc extends Phase {
         super(task, "regalloc");
         this.task = task;
         this.fragCode = task.generatedCode;
-        if(4 > maxNumReg || maxNumReg > 64)
-            throw new CompilerError("[RegAlloc] Invalid number of max registers");
+        /*if(4 > maxNumReg || maxNumReg > 64)
+            throw new CompilerError("[RegAlloc] Invalid number of max registers");*/
         this.maxNumReg = maxNumReg;
         color();
         PrintCode print = new PrintCode(task.generatedCode);
-        if(task.phase.equals("regalloc"))
+        if(task.phase.equals("regalloc")) {
+            print.print();
             print.printColored();
+        }
     }
 
     void color() {
         for(int i = 0; i < this.fragCode.size(); i++) {
             FragmentCode code = this.fragCode.get(i);
             Coloring color = new Coloring(code, this.maxNumReg);
-            color.color();
+            color.assign();
             code = color.getResult();
+//            System.out.println(color.maxUsed);
             this.fragCode.set(i, code);
         }
     }

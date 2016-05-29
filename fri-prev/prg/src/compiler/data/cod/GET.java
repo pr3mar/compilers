@@ -13,5 +13,6 @@ public class GET extends Expression {
         super(result);
         print = new Print("\tGET %s," + special + "\n", result);
         this.def.add(result);
+        this.special = special;
     }
 }

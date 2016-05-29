@@ -2,7 +2,7 @@
  * Printing out an info, debug, warning and error messages.
  * 
  * <p>
- * All messages (except the banner) that the compiler must print out must be
+ * All messages (except the banner) that the compiler must printString out must be
  * sent through package {@link compiler.common.report}.
  * </p>
  * 

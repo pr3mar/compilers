@@ -59,8 +59,17 @@ public class GenerateCode extends IMCFullVIsitor {
 
     private TEMP newTEMP() {
         int tempName = TEMP.newTempName();
-        if(tempName == this.fragment.FP || tempName == this.fragment.RV)
-            tempName = TEMP.newTempName();
+        boolean unique = true;
+        while(true) {
+            for(TEMP key : this.mapping.keySet()) {
+                if(this.mapping.get(key).equals("T" + tempName)) {
+                    tempName = TEMP.newTempName();
+                    unique = false;
+                    break;
+                }
+            }
+            if(unique) break;
+        }
         TEMP ret = new TEMP(tempName);
         this.mapping.put(ret, ret.toString());
         return ret;
@@ -280,12 +289,20 @@ public class GenerateCode extends IMCFullVIsitor {
 
     @Override
     public void visit(TEMP temp) {
-        if(this.fragment.FP == temp.name)
+        if (this.fragment.FP == temp.name)
             return;
-        if(!this.mapping.containsKey(temp)) {
-            this.mapping.put(temp, temp.toString());
-            this.result.push(temp);
+        if (this.fragment.RV == temp.name) {
+            this.result.push(this.RV);
+            return;
         }
+        for (TEMP t : this.mapping.keySet()) {
+            if (t.equals(temp)) {
+                this.result.push(t);
+                return;
+            }
+        }
+        this.mapping.put(temp, temp.toString());
+        this.result.push(temp);
     }
 
     @Override

@@ -28,7 +28,8 @@ public class Main {
 	public static void main(String args[]) {
 		// OK, start at the very beginning.
 		System.out.println("This is PREV compiler (2016):");
-
+		int maxNumReg = 8;
+		System.out.println("Number of registers to allocate: " + maxNumReg);
 		try {
 			// Parse the command line.
 			Task task = new Task(args);
@@ -99,7 +100,6 @@ public class Main {
 					break;
 
 				// Register allocation
-				int maxNumReg = 4;
 				RegAlloc regAlloc = new RegAlloc(task, maxNumReg);
 				regAlloc.close();
 				if(task.phase.equals("regalloc"))

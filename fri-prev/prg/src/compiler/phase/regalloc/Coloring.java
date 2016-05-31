@@ -50,16 +50,16 @@ public class Coloring {
         boolean can = true;
         int iters = 1;
         while(can) {
-            this.spilled = new HashSet<>();
-            color();
 //            this.fragment.codeGraph.print();
 //            this.regGraph.print();
-//            System.out.println();
+//            System.out.println("iteration: " + iters);
+            color();
             insert();
             can = check();
             iters++;
+            this.spilled = new HashSet<>();
         }
-        System.out.println("Iterations = " + iters);
+//        System.out.println("Iterations = " + iters);
     }
 
     private void color() {
@@ -169,7 +169,7 @@ public class Coloring {
                 TEMP tmp = null;
                 if (exp.getResult() == null) continue;
                 if (t.name == exp.getResult().name) {
-                    tmp = new TEMP(TEMP.newTempName());
+                    tmp = newTEMP();//new TEMP(TEMP.newTempName());
                     this.fragment.temps.put(tmp, tmp.toString());
                     this.colored.put(tmp, "-1");
                     offset = -(this.fragment.fragment.frame.locVarsSize + 2 * 8 + this.fragment.fragment.frame.tmpVarsSize + 8);
@@ -180,7 +180,8 @@ public class Coloring {
                 }
                 if (exp.getOp1() != null && t.name == exp.getOp1().name) {
                     if (tmp == null) {
-                        tmp = new TEMP(TEMP.newTempName());
+//                        tmp = new TEMP(TEMP.newTempName());
+                        tmp = newTEMP();
                         this.fragment.temps.put(tmp, tmp.toString());
                         this.colored.put(tmp, "-1");
                         offset = -(this.fragment.fragment.frame.locVarsSize + 2 * 8 + this.fragment.fragment.frame.tmpVarsSize + 8);
@@ -193,7 +194,8 @@ public class Coloring {
                 }
                 if (exp.getOp2() != null && t.name == exp.getOp2().name) {
                     if (tmp == null) {
-                        tmp = new TEMP(TEMP.newTempName());
+//                        tmp = new TEMP(TEMP.newTempName());
+                        tmp = newTEMP();
                         this.fragment.temps.put(tmp, tmp.toString());
                         this.colored.put(tmp, "-1");
                         offset = -(this.fragment.fragment.frame.locVarsSize + 2 * 8 + this.fragment.fragment.frame.tmpVarsSize + 8);
@@ -249,6 +251,24 @@ public class Coloring {
                 break;
         }
         return exp;
+    }
+
+    private TEMP newTEMP() {
+        int tempName = TEMP.newTempName();
+        boolean unique = true;
+        while(true) {
+            for(TEMP key : this.fragment.temps.keySet()) {
+                if(this.fragment.temps.get(key).equals("T" + tempName)) {
+                    tempName = TEMP.newTempName();
+                    unique = false;
+                    break;
+                }
+            }
+            if(unique) break;
+        }
+        TEMP ret = new TEMP(tempName);
+        this.fragment.temps.put(ret, ret.toString());
+        return ret;
     }
 
 }

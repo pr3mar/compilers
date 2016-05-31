@@ -27,7 +27,7 @@ public class RegAlloc extends Phase {
         color();
         PrintCode print = new PrintCode(task.generatedCode);
         if(task.phase.equals("regalloc")) {
-            print.print();
+//            print.print();
             print.printColored();
         }
     }

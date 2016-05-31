@@ -50,6 +50,7 @@ public class Coloring {
         boolean can = true;
         int iters = 1;
         while(can) {
+            this.spilled = new HashSet<>();
             color();
 //            this.fragment.codeGraph.print();
 //            this.regGraph.print();
@@ -156,12 +157,13 @@ public class Coloring {
     private void insert() {
         if (this.spilled.size() == 0)
             return;
-        System.out.print("spilled: ");
-        for(TEMP t : this.spilled) System.out.print(t + ", ");
-        System.out.println();
+//        System.out.print("spilled: ");
+//        for(TEMP t : this.spilled) System.out.print(t + ", ");
+//        System.out.println();
         for (TEMP t : this.spilled) {
 //            for(Expression exp : this.fragment.code) {
             for (int i = 0; i < this.fragment.code.size(); i++) {
+//                System.out.println(i + ", " + this.fragment.code.size());
                 Expression exp = this.fragment.code.get(i);
                 long offset = Long.MAX_VALUE;
                 TEMP tmp = null;
@@ -173,16 +175,8 @@ public class Coloring {
                     offset = -(this.fragment.fragment.frame.locVarsSize + 2 * 8 + this.fragment.fragment.frame.tmpVarsSize + 8);
                     this.fragment.fragment.frame.tmpVarsSize += 8;
                     exp = update(exp, tmp, 1);
-//                    exp.setResult(tmp);
-//                    Print ttt = exp.getPrint();
-//                    ttt.op1 = tmp;
-//                    exp.printString = ttt;
-//                    this.fragment.code.set(i, exp);
                     this.fragment.code.add(i + 1, new STO(tmp, "FP", offset));
-//                    this.fragment.temps.remove(t);
-//                    if(this.fragment.temps.get(t) != null) {
-//                        throw new CompilerError("OMG!!!");
-//                    }
+                    i++;
                 }
                 if (exp.getOp1() != null && t.name == exp.getOp1().name) {
                     if (tmp == null) {
@@ -191,19 +185,11 @@ public class Coloring {
                         this.colored.put(tmp, "-1");
                         offset = -(this.fragment.fragment.frame.locVarsSize + 2 * 8 + this.fragment.fragment.frame.tmpVarsSize + 8);
                         this.fragment.fragment.frame.tmpVarsSize += 8;
-//                        this.fragment.temps.remove(t);
-//                        if(this.fragment.temps.get(t) != null) {
-//                            throw new CompilerError("OMG!!!");
-//                        }
                     }
                     exp = update(exp, tmp, 2);
-//                    exp.setOp1(tmp);
-//                    Print ttt = exp.getPrint();
-//                    ttt.op2 = tmp;
-//                    exp.print = ttt;
                     this.fragment.code.set(i, exp);
                     this.fragment.code.add(i, new LDO(tmp, "FP", offset));
-                    // insert code
+                    i++;
                 }
                 if (exp.getOp2() != null && t.name == exp.getOp2().name) {
                     if (tmp == null) {
@@ -212,18 +198,11 @@ public class Coloring {
                         this.colored.put(tmp, "-1");
                         offset = -(this.fragment.fragment.frame.locVarsSize + 2 * 8 + this.fragment.fragment.frame.tmpVarsSize + 8);
                         this.fragment.fragment.frame.tmpVarsSize += 8;
-//                        this.fragment.temps.remove(t);
-//                        if(this.fragment.temps.get(t) != null) {
-//                            throw new CompilerError("OMG!!!");
-//                        }
                     }
-                    exp = update(exp, tmp, 2);
-//                    Print ttt = exp.getPrint();
-//                    ttt.op3 = tmp;
-//                    exp.print = ttt;
-//                    exp.setOp2(tmp);
+                    exp = update(exp, tmp, 3);
                     this.fragment.code.set(i, exp);
                     this.fragment.code.add(i, new LDO(tmp, "FP", offset));
+                    i++;
                 }
             }
             this.fragment.temps.remove(t);
@@ -231,13 +210,13 @@ public class Coloring {
         this.fragment.coloredMap = this.colored;
         this.fragment.codeGraph = new Graph(this.fragment);
         this.fragment.codeGraph.setNodes(this.fragment.codeGraph.getNodes());
-//        this.fragment.temps = this.
         this.fragment.regGraph = new RegGraph(this.fragment, this.spilled);
         this.regGraph = this.fragment.regGraph;
         this.colored = new HashMap<>();
         for (TEMP curr : fragment.temps.keySet()) {
             this.colored.put(curr, "-1");
         }
+//        System.out.println("End of spill");
     }
 
     private Expression update(Expression exp, TEMP newReg, int arg) {
@@ -248,7 +227,7 @@ public class Coloring {
                 exp.getDef().remove(exp.getResult());
                 exp.getDef().add(newReg);
                 exp.setResult(newReg);
-                prt =  exp.getPrint();
+                prt = exp.getPrint();
                 prt.op1 = newReg;
                 exp.setPrint(prt);
                 break;
@@ -256,355 +235,20 @@ public class Coloring {
                 exp.getUse().remove(exp.getOp1());
                 exp.getUse().add(newReg);
                 exp.setOp1(newReg);
-                exp.getPrint().op2 = newReg;
+                prt = exp.getPrint();
+                prt.op2 = newReg;
+                exp.setPrint(prt);
                 break;
             case 3:
                 exp.getUse().remove(exp.getOp2());
                 exp.getUse().add(newReg);
                 exp.setOp2(newReg);
-                exp.getPrint().op3 = newReg;
+                prt = exp.getPrint();
+                prt.op3 = newReg;
+                exp.setPrint(prt);
                 break;
         }
         return exp;
-        /*switch (type) {
-            case "ADD":
-                switch (arg) {
-                    case 1:
-                        ret = new ADD(newReg, exp.getOp1(), exp.getOp2());
-                        break;
-                    case 2:
-                        ret = new ADD(exp.getResult(), newReg, exp.getOp2());
-                        break;
-                    case 3:
-                        ret = new ADD(exp.getResult(), exp.getOp1(), newReg);
-                        break;
-                }
-                break;
-            case "AND":
-                switch (arg) {
-                    case 1:
-                        ret = new AND(newReg, exp.getOp1(), exp.getOp2());
-                        break;
-                    case 2:
-                        ret = new AND(exp.getResult(), newReg, exp.getOp2());
-                        break;
-                    case 3:
-                        ret = new AND(exp.getResult(), exp.getOp1(), newReg);
-                        break;
-                }
-                break;
-            case "BP":
-                switch (arg) {
-                    case 1:
-                        ret = new BP(newReg, exp.getLabel());
-                        break;
-                    case 2:
-                        throw new CompilerError("[insert update]oh come oon");
-                    case 3:
-                        throw new CompilerError("[insert update]oh come oon");
-                }
-                break;
-            case "CMP":
-                switch (arg) {
-                    case 1:
-                        ret = new CMP(newReg, exp.getOp1(), exp.getOp2());
-                        break;
-                    case 2:
-                        ret = new CMP(exp.getResult(), newReg, exp.getOp2());
-                        break;
-                    case 3:
-                        ret = new CMP(exp.getResult(), exp.getOp1(), newReg);
-                        break;
-                }
-                break;
-            case "DIV":
-                switch (arg) {
-                    case 1:
-                        ret = new DIV(newReg, exp.getOp1(), exp.getOp2());
-                        break;
-                    case 2:
-                        ret = new DIV(exp.getResult(), newReg, exp.getOp2());
-                        break;
-                    case 3:
-                        ret = new DIV(exp.getResult(), exp.getOp1(), newReg);
-                        break;
-                }
-                break;
-            case "GET":
-                switch (arg) {
-                    case 1:
-                        ret = new GET(newReg, exp.);
-                        break;
-                    case 2:
-                        ret = new ADD(exp.getResult(), newReg, exp.getOp2());
-                        break;
-                    case 3:
-                        ret = new ADD(exp.getResult(), exp.getOp1(), newReg);
-                        break;
-                }
-                break;
-            case "GETA":
-                switch (arg) {
-                    case 1:
-                        ret = new ADD(newReg, exp.getOp1(), exp.getOp2());
-                        break;
-                    case 2:
-                        ret = new ADD(exp.getResult(), newReg, exp.getOp2());
-                        break;
-                    case 3:
-                        ret = new ADD(exp.getResult(), exp.getOp1(), newReg);
-                        break;
-                }
-                break;
-            case "INCH":
-                switch (arg) {
-                    case 1:
-                        ret = new ADD(newReg, exp.getOp1(), exp.getOp2());
-                        break;
-                    case 2:
-                        ret = new ADD(exp.getResult(), newReg, exp.getOp2());
-                        break;
-                    case 3:
-                        ret = new ADD(exp.getResult(), exp.getOp1(), newReg);
-                        break;
-                }
-                break;
-            case "INCMH":
-                switch (arg) {
-                    case 1:
-                        ret = new ADD(newReg, exp.getOp1(), exp.getOp2());
-                        break;
-                    case 2:
-                        ret = new ADD(exp.getResult(), newReg, exp.getOp2());
-                        break;
-                    case 3:
-                        ret = new ADD(exp.getResult(), exp.getOp1(), newReg);
-                        break;
-                }
-                break;
-            case "JMP":
-                switch (arg) {
-                    case 1:
-                        ret = new ADD(newReg, exp.getOp1(), exp.getOp2());
-                        break;
-                    case 2:
-                        ret = new ADD(exp.getResult(), newReg, exp.getOp2());
-                        break;
-                    case 3:
-                        ret = new ADD(exp.getResult(), exp.getOp1(), newReg);
-                        break;
-                }
-                break;
-            case "LAB":
-                switch (arg) {
-                    case 1:
-                        ret = new ADD(newReg, exp.getOp1(), exp.getOp2());
-                        break;
-                    case 2:
-                        ret = new ADD(exp.getResult(), newReg, exp.getOp2());
-                        break;
-                    case 3:
-                        ret = new ADD(exp.getResult(), exp.getOp1(), newReg);
-                        break;
-                }
-                break;
-            case "LDA":
-                switch (arg) {
-                    case 1:
-                        ret = new ADD(newReg, exp.getOp1(), exp.getOp2());
-                        break;
-                    case 2:
-                        ret = new ADD(exp.getResult(), newReg, exp.getOp2());
-                        break;
-                    case 3:
-                        ret = new ADD(exp.getResult(), exp.getOp1(), newReg);
-                        break;
-                }
-                break;
-            case "LDO":
-                switch (arg) {
-                    case 1:
-                        ret = new ADD(newReg, exp.getOp1(), exp.getOp2());
-                        break;
-                    case 2:
-                        ret = new ADD(exp.getResult(), newReg, exp.getOp2());
-                        break;
-                    case 3:
-                        ret = new ADD(exp.getResult(), exp.getOp1(), newReg);
-                        break;
-                }
-                break;
-            case "MUL":
-                switch (arg) {
-                    case 1:
-                        ret = new ADD(newReg, exp.getOp1(), exp.getOp2());
-                        break;
-                    case 2:
-                        ret = new ADD(exp.getResult(), newReg, exp.getOp2());
-                        break;
-                    case 3:
-                        ret = new ADD(exp.getResult(), exp.getOp1(), newReg);
-                        break;
-                }
-                break;
-            case "NEG":
-                switch (arg) {
-                    case 1:
-                        ret = new ADD(newReg, exp.getOp1(), exp.getOp2());
-                        break;
-                    case 2:
-                        ret = new ADD(exp.getResult(), newReg, exp.getOp2());
-                        break;
-                    case 3:
-                        ret = new ADD(exp.getResult(), exp.getOp1(), newReg);
-                        break;
-                }
-                break;
-            case "OR":
-                switch (arg) {
-                    case 1:
-                        ret = new ADD(newReg, exp.getOp1(), exp.getOp2());
-                        break;
-                    case 2:
-                        ret = new ADD(exp.getResult(), newReg, exp.getOp2());
-                        break;
-                    case 3:
-                        ret = new ADD(exp.getResult(), exp.getOp1(), newReg);
-                        break;
-                }
-                break;
-            case "PUSHJ":
-                switch (arg) {
-                    case 1:
-                        ret = new ADD(newReg, exp.getOp1(), exp.getOp2());
-                        break;
-                    case 2:
-                        ret = new ADD(exp.getResult(), newReg, exp.getOp2());
-                        break;
-                    case 3:
-                        ret = new ADD(exp.getResult(), exp.getOp1(), newReg);
-                        break;
-                }
-                break;
-            case "SETL":
-                switch (arg) {
-                    case 1:
-                        ret = new ADD(newReg, exp.getOp1(), exp.getOp2());
-                        break;
-                    case 2:
-                        ret = new ADD(exp.getResult(), newReg, exp.getOp2());
-                        break;
-                    case 3:
-                        ret = new ADD(exp.getResult(), exp.getOp1(), newReg);
-                        break;
-                }
-                break;
-            case "STO":
-                switch (arg) {
-                    case 1:
-                        ret = new ADD(newReg, exp.getOp1(), exp.getOp2());
-                        break;
-                    case 2:
-                        ret = new ADD(exp.getResult(), newReg, exp.getOp2());
-                        break;
-                    case 3:
-                        ret = new ADD(exp.getResult(), exp.getOp1(), newReg);
-                        break;
-                }
-                break;
-            case "SUB":
-                switch (arg) {
-                    case 1:
-                        ret = new ADD(newReg, exp.getOp1(), exp.getOp2());
-                        break;
-                    case 2:
-                        ret = new ADD(exp.getResult(), newReg, exp.getOp2());
-                        break;
-                    case 3:
-                        ret = new ADD(exp.getResult(), exp.getOp1(), newReg);
-                        break;
-                }
-                break;
-            case "SWYM":
-                switch (arg) {
-                    case 1:
-                        ret = new ADD(newReg, exp.getOp1(), exp.getOp2());
-                        break;
-                    case 2:
-                        ret = new ADD(exp.getResult(), newReg, exp.getOp2());
-                        break;
-                    case 3:
-                        ret = new ADD(exp.getResult(), exp.getOp1(), newReg);
-                        break;
-                }
-                break;
-            case "ZSN":
-                switch (arg) {
-                    case 1:
-                        ret = new ADD(newReg, exp.getOp1(), exp.getOp2());
-                        break;
-                    case 2:
-                        ret = new ADD(exp.getResult(), newReg, exp.getOp2());
-                        break;
-                    case 3:
-                        ret = new ADD(exp.getResult(), exp.getOp1(), newReg);
-                        break;
-                }
-                break;
-            case "ZSNN":
-                switch (arg) {
-                    case 1:
-                        ret = new ADD(newReg, exp.getOp1(), exp.getOp2());
-                        break;
-                    case 2:
-                        ret = new ADD(exp.getResult(), newReg, exp.getOp2());
-                        break;
-                    case 3:
-                        ret = new ADD(exp.getResult(), exp.getOp1(), newReg);
-                        break;
-                }
-                break;
-            case "ZSNZ":
-                switch (arg) {
-                    case 1:
-                        ret = new ADD(newReg, exp.getOp1(), exp.getOp2());
-                        break;
-                    case 2:
-                        ret = new ADD(exp.getResult(), newReg, exp.getOp2());
-                        break;
-                    case 3:
-                        ret = new ADD(exp.getResult(), exp.getOp1(), newReg);
-                        break;
-                }
-                break;
-            case "ZSP":
-                switch (arg) {
-                    case 1:
-                        ret = new ADD(newReg, exp.getOp1(), exp.getOp2());
-                        break;
-                    case 2:
-                        ret = new ADD(exp.getResult(), newReg, exp.getOp2());
-                        break;
-                    case 3:
-                        ret = new ADD(exp.getResult(), exp.getOp1(), newReg);
-                        break;
-                }
-                break;
-            case "ZSZ":
-                switch (arg) {
-                    case 1:
-                        ret = new ADD(newReg, exp.getOp1(), exp.getOp2());
-                        break;
-                    case 2:
-                        ret = new ADD(exp.getResult(), newReg, exp.getOp2());
-                        break;
-                    case 3:
-                        ret = new ADD(exp.getResult(), exp.getOp1(), newReg);
-                        break;
-                }
-                break;
-        }
-        return ret;*/
     }
 
 }

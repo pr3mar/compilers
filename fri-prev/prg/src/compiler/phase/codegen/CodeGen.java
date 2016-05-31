@@ -72,7 +72,7 @@ public class CodeGen extends Phase{
         test.regGraph = new RegGraph(test);
         this.task.generatedCode.add(test);*/
 
-        CodeFragment test_frag = new CodeFragment(new Frame(0,"_test", 0,0,0,0,0), 253, 255, null);
+        /*CodeFragment test_frag = new CodeFragment(new Frame(0,"_test", 0,0,0,0,0), 253, 255, null);
         LinkedList<Expression> test_code = new LinkedList<>();
         TEMP t1 = new TEMP(1);
         TEMP t2 = new TEMP(2);
@@ -98,9 +98,9 @@ public class CodeGen extends Phase{
             System.out.println("use: " + n.use);
             System.out.println("in: " + n.in);
             System.out.println("out: " + n.out);
-        }*/
+        }
         test.regGraph = new RegGraph(test);
-        this.task.generatedCode.add(test);
+        this.task.generatedCode.add(test);*/
     }
 
 //    void generate(CodeFragment fragment) {

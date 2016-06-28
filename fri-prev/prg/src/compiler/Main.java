@@ -28,7 +28,7 @@ public class Main {
 	public static void main(String args[]) {
 		// OK, start at the very beginning.
 		System.out.println("This is PREV compiler (2016):");
-		int maxNumReg = 8;
+		int maxNumReg = 64;
 		System.out.println("Number of registers to allocate: " + maxNumReg);
 		try {
 			// Parse the command line.

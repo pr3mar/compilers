@@ -90,4 +90,10 @@ public class NullVisitor implements Visitor {
 	public void visit(WhileExpr whileExpr) {
 	}
 
+	public void visit(BreakExpr breakExpr) {
+	}
+
+	public void visit(ContinueExpr continueExpr) {
+	}
+
 }

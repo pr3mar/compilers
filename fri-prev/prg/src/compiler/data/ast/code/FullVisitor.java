@@ -128,4 +128,14 @@ public class FullVisitor implements Visitor {
 		whileExpr.body.accept(this);
 	}
 
+	@Override
+	public void visit(BreakExpr breakExpr) {
+
+	}
+
+	@Override
+	public void visit(ContinueExpr ContinueExpr) {
+
+	}
+
 }

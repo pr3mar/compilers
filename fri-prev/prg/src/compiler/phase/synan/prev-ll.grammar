@@ -49,9 +49,12 @@ AtomicExpression -> CONST_STRING .
 AtomicExpression -> CONST_NULL .
 AtomicExpression -> CONST_NONE .
 AtomicExpression -> IDENTIFIER ArgumentsOpt .
+AtomicExpression -> LoopExpr .
 AtomicExpression -> OPENING_PARENTHESIS Expressions CLOSING_PARENTHESIS .
 AtomicExpression -> IF Expression THEN Expression ELSE Expression END .
 AtomicExpression -> FOR IDENTIFIER ASSIGN Expression COMMA Expression COLON Expression END .
+AtomicExpression -> BREAK .
+AtomicExpression -> CONTINUE .
 AtomicExpression -> WHILE Expression COLON Expression END .
 ArgumentsOpt -> .
 ArgumentsOpt -> OPENING_PARENTHESIS ArgumentsOpt' .

@@ -86,4 +86,8 @@ public interface Visitor {
 
 	public void visit(WhileExpr whileExpr);
 
+	public void visit(BreakExpr breakExpr);
+
+	public void visit(ContinueExpr ContinueExpr);
+
 }

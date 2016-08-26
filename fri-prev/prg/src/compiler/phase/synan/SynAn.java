@@ -175,6 +175,8 @@ public class SynAn extends Phase {
             case IF:
             case FOR:
             case WHILE:
+            case BREAK:
+            case CONTINUE:
                 Symbol copy = laSymbol;
                 Expr tmp = parseExpression();
                 prg = new Program( new Position(copy, tmp), tmp);
@@ -207,6 +209,8 @@ public class SynAn extends Phase {
             case IF:
             case FOR:
             case WHILE:
+            case BREAK:
+            case CONTINUE:
                 expr = parseAssignmentExpression();
                 expr = parseExpressionPrime(expr);
                 break;
@@ -269,6 +273,8 @@ public class SynAn extends Phase {
             case IF:
             case FOR:
             case WHILE:
+            case BREAK:
+            case CONTINUE:
                 exprs.add(parseExpression());
                 exprs = parseExpressionsPrime(exprs);
                 break;
@@ -316,6 +322,8 @@ public class SynAn extends Phase {
             case IF:
             case FOR:
             case WHILE:
+            case BREAK:
+            case CONTINUE:
                 bin = parseDisjunctiveExpression();
                 bin = parseAssignmentExpressionPrime(bin);
                 break;
@@ -376,6 +384,8 @@ public class SynAn extends Phase {
             case IF:
             case FOR:
             case WHILE:
+            case BREAK:
+            case CONTINUE:
                 bin = parseConjunctiveExpression();
                 bin = parseDisjunctiveExpressionPrime(bin);
                 break;
@@ -438,6 +448,8 @@ public class SynAn extends Phase {
             case IF:
             case FOR:
             case WHILE:
+            case BREAK:
+            case CONTINUE:
                 bin = parseRelationalExpression();
                 bin = parseConjunctiveExpressionPrime(bin);
                 break;
@@ -501,6 +513,8 @@ public class SynAn extends Phase {
             case IF:
             case FOR:
             case WHILE:
+            case BREAK:
+            case CONTINUE:
                 bin = parseAdditiveExpression();
                 bin = parseRelationalExpressionPrime(bin);
                 break;
@@ -591,6 +605,8 @@ public class SynAn extends Phase {
             case IF:
             case FOR:
             case WHILE:
+            case BREAK:
+            case CONTINUE:
                 bin = parseMultiplicativeExpression();
                 bin = parseAdditiveExpressionPrime(bin);
                 break;
@@ -669,6 +685,8 @@ public class SynAn extends Phase {
             case IF:
             case FOR:
             case WHILE:
+            case BREAK:
+            case CONTINUE:
                 bin = parsePrefixExpression();
                 bin = parseMultiplicativeExpressionPrime(bin);
                 break;
@@ -782,6 +800,8 @@ public class SynAn extends Phase {
             case IF:
             case FOR:
             case WHILE:
+            case BREAK:
+            case CONTINUE:
                 exp = parsePostfixExpression();
                 break;
             default:
@@ -806,6 +826,8 @@ public class SynAn extends Phase {
             case IF:
             case FOR:
             case WHILE:
+            case BREAK:
+            case CONTINUE:
                 exp = parseAtomicExpression();
                 exp = parsePostfixExpressionPrime(exp);
                 break;
@@ -980,6 +1002,14 @@ public class SynAn extends Phase {
                 }
                 Symbol symEndFor = nextSymbol(); // shift end
                 exp = new ForExpr(new Position(symFor, symEndFor), new VarName(var.position, var.lexeme),loBound, hiBound, body);
+                break;
+            case BREAK:
+                Symbol symBreak = nextSymbol();
+                exp = new BreakExpr(symBreak);
+                break;
+            case CONTINUE:
+                Symbol symContinue = nextSymbol();
+                exp = new ContinueExpr(symContinue);
                 break;
             case WHILE:
                 Symbol symWhile = nextSymbol(); // shift while

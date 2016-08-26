@@ -19,6 +19,8 @@ import compiler.data.typ.*;
  */
 public class EvalImcode extends FullVisitor {
 
+    private final Stack<LinkedList<LABEL>> loops = new Stack<>();
+
 	private final Attributes attrs;
 
 	private final HashMap<String, Fragment> fragments;
@@ -185,15 +187,17 @@ public class EvalImcode extends FullVisitor {
 
     @Override
     public void visit(ForExpr forExpr) {
+        //        LABEL begin = new LABEL("for_begin" + LABEL.newLabelName());
+        LABEL body = new LABEL("for_body_" + LABEL.newLabelName());
+        LABEL sndCheck = new LABEL("for_check_" + LABEL.newLabelName());
+        LABEL exit = new LABEL("for_exit_" + LABEL.newLabelName());
+
+        this.loops.push(new LinkedList<LABEL>(Arrays.asList(sndCheck, exit)));
         forExpr.var.accept(this);
         forExpr.loBound.accept(this);
         forExpr.hiBound.accept(this);
         forExpr.body.accept(this);
-
-//        LABEL begin = new LABEL("for_begin" + LABEL.newLabelName());
-        LABEL body = new LABEL("for_body_" + LABEL.newLabelName());
-        LABEL sndCheck = new LABEL("for_check_" + LABEL.newLabelName());
-        LABEL exit = new LABEL("for_exit_" + LABEL.newLabelName());
+        this.loops.pop();
 
         IMCExpr var = (IMCExpr) this.attrs.imcAttr.get(forExpr.var);
         IMCExpr lo = (IMCExpr) this.attrs.imcAttr.get(forExpr.loBound);
@@ -380,12 +384,16 @@ public class EvalImcode extends FullVisitor {
 
     @Override
     public void visit(WhileExpr whileExpr) {
-        whileExpr.cond.accept(this);
-        whileExpr.body.accept(this);
-
         LABEL begin = new LABEL("while_begin_" + LABEL.newLabelName());
         LABEL body = new LABEL("while_body_" +LABEL.newLabelName());
         LABEL exit = new LABEL("while_exit_" + LABEL.newLabelName());
+
+        this.loops.push(new LinkedList<LABEL>(Arrays.asList(begin, exit)));
+
+        whileExpr.cond.accept(this);
+        whileExpr.body.accept(this);
+
+        this.loops.pop();
 
         IMC ex = this.attrs.imcAttr.get(whileExpr.cond);
         ex = new CJUMP((IMCExpr) ex, body.label, exit.label);
@@ -398,5 +406,23 @@ public class EvalImcode extends FullVisitor {
         stmts.add(new JUMP(begin.label));
         stmts.add(exit);
         this.attrs.imcAttr.set(whileExpr, new SEXPR(new STMTS(stmts), new NOP()));
+    }
+
+    @Override
+    public void visit(BreakExpr breakExpr) {
+        if(this.loops.empty()) {
+            throw new CompilerError("Break expression outside of a loop");
+        }
+        LinkedList<LABEL> loop = this.loops.peek();
+        this.attrs.imcAttr.set(breakExpr, new SEXPR(new JUMP(loop.get(1).label), new NOP()));
+    }
+
+    @Override
+    public void visit(ContinueExpr continueExpr) {
+        if(this.loops.empty()) {
+            throw new CompilerError("Continue expression outside of a loop");
+        }
+        LinkedList<LABEL> loop = this.loops.peek();
+        this.attrs.imcAttr.set(continueExpr, new SEXPR(new JUMP(loop.get(0).label), new NOP()));
     }
 }

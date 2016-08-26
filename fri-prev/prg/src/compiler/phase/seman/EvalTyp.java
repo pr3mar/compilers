@@ -579,4 +579,15 @@ public class EvalTyp extends FullVisitor {
             throw new CompilerError("[Semantic Error, EvalTyp, while] Type missmatch at while loop " + whileExpr);
         attrs.typAttr.set(whileExpr, new VoidTyp());
     }
+
+    @Override
+    public void visit(BreakExpr breakExpr) {
+        this.attrs.typAttr.set(breakExpr, new VoidTyp());
+    }
+
+    @Override
+    public void visit(ContinueExpr continueExpr) {
+        this.attrs.typAttr.set(continueExpr, new VoidTyp());
+    }
+
 }

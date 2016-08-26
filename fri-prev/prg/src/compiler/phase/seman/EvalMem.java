@@ -17,18 +17,18 @@ public class EvalMem extends FullVisitor {
 		this.attrs = attrs;
 	}
 
+	@Override
 	public void visit(ArrType arrType) {
 		arrType.size.accept(this);
 		arrType.elemType.accept(this);
 	}
 
+	@Override
 	public void visit(AtomExpr atomExpr) {
 		attrs.memAttr.set(atomExpr, false);
 	}
 
-	public void visit(AtomType atomType) {
-	}
-
+	@Override
 	public void visit(BinExpr binExpr) {
 		binExpr.fstExpr.accept(this);
 		binExpr.sndExpr.accept(this);
@@ -52,10 +52,12 @@ public class EvalMem extends FullVisitor {
 			case ASSIGN:
 				boolean mem = attrs.memAttr.get(binExpr.fstExpr);
 				if(mem) {
-					if (!(t1 instanceof BooleanTyp ||  t1 instanceof IntegerTyp || t1 instanceof CharTyp || t1 instanceof StringTyp || t1 instanceof PtrTyp)) {
+					if (!(t1 instanceof BooleanTyp ||  t1 instanceof IntegerTyp ||
+							t1 instanceof CharTyp || t1 instanceof StringTyp || t1 instanceof PtrTyp)) {
 						throw new CompilerError("[Semantic error, memEval] Cannot assign at " + binExpr.fstExpr);
 					}
-					if (!(t2 instanceof BooleanTyp ||  t2 instanceof IntegerTyp || t2 instanceof CharTyp || t2 instanceof StringTyp || t2 instanceof PtrTyp)){
+					if (!(t2 instanceof BooleanTyp ||  t2 instanceof IntegerTyp ||
+							t2 instanceof CharTyp || t2 instanceof StringTyp || t2 instanceof PtrTyp)){
 						throw new CompilerError("[Semantic error, memEval] Cannot assign at " + binExpr.sndExpr);
 					}
 					if(!t1.getClass().equals(t2.getClass())) {
@@ -86,23 +88,28 @@ public class EvalMem extends FullVisitor {
 		}
 	}
 
+	@Override
 	public void visit(CastExpr castExpr) {
 		castExpr.type.accept(this);
 		castExpr.expr.accept(this);
 		attrs.memAttr.set(castExpr, false);
 	}
 
+	@Override
 	public void visit(CompDecl compDecl) {
 		compDecl.type.accept(this);
 	}
 
+	@Override
 	public void visit(CompName compName) {
 		attrs.memAttr.set(compName, false);
 	}
 
+	@Override
 	public void visit(DeclError declError) {
 	}
 
+	@Override
 	public void visit(Exprs exprs) {
 //		Typ exp = null;
 		for (int e = 0; e < exprs.numExprs(); e++) {
@@ -113,9 +120,11 @@ public class EvalMem extends FullVisitor {
 		attrs.memAttr.set(exprs, false);
 	}
 
+	@Override
 	public void visit(ExprError exprError) {
 	}
 
+	@Override
 	public void visit(ForExpr forExpr) {
 		forExpr.var.accept(this);
 		forExpr.loBound.accept(this);
@@ -124,18 +133,21 @@ public class EvalMem extends FullVisitor {
 		attrs.memAttr.set(forExpr, false);
 	}
 
+	@Override
 	public void visit(FunCall funCall) {
 		for (int a = 0; a < funCall.numArgs(); a++)
 			funCall.arg(a).accept(this);
 		attrs.memAttr.set(funCall, false);
 	}
 
+	@Override
 	public void visit(FunDecl funDecl) {
 		for (int p = 0; p < funDecl.numPars(); p++)
 			funDecl.par(p).accept(this);
 		funDecl.type.accept(this);
 	}
 
+	@Override
 	public void visit(FunDef funDef) {
 		for (int p = 0; p < funDef.numPars(); p++)
 			funDef.par(p).accept(this);
@@ -143,6 +155,7 @@ public class EvalMem extends FullVisitor {
 		funDef.body.accept(this);
 	}
 
+	@Override
 	public void visit(IfExpr ifExpr) {
 		ifExpr.cond.accept(this);
 		ifExpr.thenExpr.accept(this);
@@ -150,34 +163,42 @@ public class EvalMem extends FullVisitor {
 		attrs.memAttr.set(ifExpr, false);
 	}
 
+	@Override
 	public void visit(ParDecl parDecl) {
 		parDecl.type.accept(this);
 	}
 
+	@Override
 	public void visit(Program program) {
 		program.expr.accept(this);
 		attrs.memAttr.set(program, false);
 	}
 
+	@Override
 	public void visit(PtrType ptrType) {
 		ptrType.baseType.accept(this);
 	}
 
+	@Override
 	public void visit(RecType recType) {
 		for (int c = 0; c < recType.numComps(); c++)
 			recType.comp(c).accept(this);
 	}
 
+	@Override
 	public void visit(TypeDecl typDecl) {
 		typDecl.type.accept(this);
 	}
 
+	@Override
 	public void visit(TypeError typeError) {
 	}
 
+	@Override
 	public void visit(TypeName typeName) {
 	}
 
+	@Override
 	public void visit(UnExpr unExpr) {
 		unExpr.subExpr.accept(this);
 		Typ type = attrs.typAttr.get(unExpr);
@@ -207,11 +228,12 @@ public class EvalMem extends FullVisitor {
 
 	}
 
+	@Override
 	public void visit(VarDecl varDecl) {
-
 		varDecl.type.accept(this);
 	}
 
+	@Override
 	public void visit(VarName varName) {
 		if(attrs.typAttr.get(varName) != null)
 			attrs.memAttr.set(varName, true);
@@ -219,6 +241,7 @@ public class EvalMem extends FullVisitor {
 			attrs.memAttr.set(varName, false);
 	}
 
+	@Override
 	public void visit(WhereExpr whereExpr) {
 		whereExpr.expr.accept(this);
 		for (int d = 0; d < whereExpr.numDecls(); d++)
@@ -227,6 +250,7 @@ public class EvalMem extends FullVisitor {
 //		attrs.typAttr.set(whereExpr, attrs.typAttr.get(whereExpr.expr).actualTyp());
 	}
 
+	@Override
 	public void visit(WhileExpr whileExpr) {
 		whileExpr.cond.accept(this);
 		whileExpr.body.accept(this);

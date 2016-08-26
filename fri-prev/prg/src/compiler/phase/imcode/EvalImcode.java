@@ -208,7 +208,6 @@ public class EvalImcode extends FullVisitor {
 
         IMCStmt increment = new MOVE(var, new BINOP(BINOP.Oper.ADD, var, new CONST(1)));
 
-
         Vector<IMCStmt> stmts = new Vector<IMCStmt>();
         stmts.add(new MOVE(var, lo));
 //        stmts.add(begin);

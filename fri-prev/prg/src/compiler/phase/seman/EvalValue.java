@@ -33,6 +33,7 @@ public class EvalValue extends FullVisitor {
 		unary = "";
 	}
 
+	@Override
 	public void visit(AtomExpr atomExpr) {
 		if(atomExpr.type.equals(AtomExpr.AtomTypes.INTEGER)) {
 			long atomExprVal;
@@ -45,6 +46,7 @@ public class EvalValue extends FullVisitor {
 		}
 	}
 
+	@Override
 	public void visit(BinExpr binExpr) {
 		binExpr.fstExpr.accept(this);
 		binExpr.sndExpr.accept(this);
@@ -74,6 +76,7 @@ public class EvalValue extends FullVisitor {
 			attrs.valueAttr.set(binExpr, val);
 	}
 
+	@Override
 	public void visit(UnExpr unExpr) {
 		if(unExpr.oper.equals(UnExpr.Oper.ADD)) {
 			unary = "+";

@@ -27,7 +27,7 @@ public class EvalDecl extends FullVisitor {
 
 	/** The symbol table. */
 	private SymbolTable symbolTable = new SymbolTable();
-	/** See which run-over is 1st or second*/
+	/** See which run-over is 1st or 2nd*/
 	boolean prototyping;
 
 
@@ -37,6 +37,7 @@ public class EvalDecl extends FullVisitor {
 //		attrs.declAttr.set(compDecl, type);
 	}
 
+	@Override
 	public void visit(FunCall funCall) {
 		for (int a = 0; a < funCall.numArgs(); a++)
 			funCall.arg(a).accept(this);
@@ -48,6 +49,7 @@ public class EvalDecl extends FullVisitor {
 		}
 	}
 
+	@Override
 	public void visit(FunDecl funDecl) {
 		if(prototyping) {
 			try {
@@ -64,9 +66,10 @@ public class EvalDecl extends FullVisitor {
 		}
 	}
 
+	@Override
 	public void visit(FunDef funDef) {
 		if(prototyping) {
-			try {// types of parameters in a separate scope
+			try {// types of parameters in a separate scope-
 				symbolTable.insDecl(funDef.name, funDef);
 			} catch (CannotInsNameDecl err) {
 				throw new CompilerError("[Semantic error, evalDecl]: Cannot insert new declaration of function at " + funDef);
@@ -81,6 +84,7 @@ public class EvalDecl extends FullVisitor {
 		}
 	}
 
+	@Override
 	public void visit(ParDecl parDecl) {
 		try { symbolTable.insDecl(parDecl.name, parDecl); }
 		catch (CannotInsNameDecl err) {
@@ -89,6 +93,7 @@ public class EvalDecl extends FullVisitor {
 		parDecl.type.accept(this);
 	}
 
+	@Override
 	public void visit(TypeDecl typDecl) {
 		typDecl.type.accept(this);
 		if(prototyping) {
@@ -100,6 +105,7 @@ public class EvalDecl extends FullVisitor {
 		}
 	}
 
+	@Override
 	public void visit(TypeName typeName) {
 		if(!prototyping) {
 			try {
@@ -111,6 +117,7 @@ public class EvalDecl extends FullVisitor {
 		}
 	}
 
+	@Override
 	public void visit(VarDecl varDecl) {
 		if(prototyping){
 			try { symbolTable.insDecl(varDecl.name, varDecl); }
@@ -122,6 +129,7 @@ public class EvalDecl extends FullVisitor {
 		}
 	}
 
+	@Override
 	public void visit(VarName varName) {
 		try {
 			Decl val = symbolTable.fndDecl(varName.name());
@@ -134,6 +142,7 @@ public class EvalDecl extends FullVisitor {
 		}
 	}
 
+	@Override
 	public void visit(WhereExpr whereExpr) {
 		symbolTable.enterScope();
 		// go through the declarations first

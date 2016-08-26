@@ -29,8 +29,6 @@ public class EvalFrames extends FullVisitor {
 
 	private HashMap<String, Integer> globals = new HashMap<String, Integer>();
 
-
-
 	public EvalFrames(Attributes attrs) {
 		this.attrs = attrs;
 		this.levels = 0;
@@ -60,8 +58,10 @@ public class EvalFrames extends FullVisitor {
 		}
 	}
 
+	@Override
 	public void visit(FunDecl funDecl) { }
 
+	@Override
 	public void visit(FunDef funDef) {
 		long oldParOff = this.parOffset, oldVarOff = this.varOffset;
 		this.parOffset = 8;
@@ -89,6 +89,7 @@ public class EvalFrames extends FullVisitor {
 		this.attrs.frmAttr.set(funDef, f);
 	}
 
+	@Override
 	public void visit(ParDecl parDecl) {
 		parDecl.type.accept(this);
 		long size = this.attrs.typAttr.get(parDecl).size();
@@ -97,13 +98,14 @@ public class EvalFrames extends FullVisitor {
 		this.attrs.accAttr.set(parDecl, off);
 	}
 
+	@Override
 	public void visit(VarDecl varDecl) {
 		Typ t = this.attrs.typAttr.get(varDecl);
 		varDecl.type.accept(this);
 		Access acc;
 		long size = t.size();
 		if (this.levels == 0)
-			acc= new StaticAccess(getLabel(varDecl), size);
+			acc = new StaticAccess(getLabel(varDecl), size);
 		else {
 			this.varOffset -= size;
 			acc = new OffsetAccess(this.levels - 1, this.varOffset, size); // -1 because of shitty implementation
@@ -111,7 +113,7 @@ public class EvalFrames extends FullVisitor {
 		this.attrs.accAttr.set(varDecl, acc);
 	}
 
-
+	@Override
 	public void visit(RecType recType) {
 		long oldOffset = this.recOffset;
 		this.recOffset = 0;
@@ -120,6 +122,7 @@ public class EvalFrames extends FullVisitor {
 		this.recOffset = oldOffset;
 	}
 
+	@Override
 	public void visit(CompDecl compDecl) {
 		compDecl.type.accept(this);
 		long size = this.attrs.typAttr.get(compDecl).size();
@@ -129,6 +132,7 @@ public class EvalFrames extends FullVisitor {
 		this.attrs.accAttr.set(compDecl, acc);
 	}
 
+	@Override
 	public void visit(FunCall funCall) {
 		long local = 8;
 		for (int a = 0; a < funCall.numArgs(); a++) {

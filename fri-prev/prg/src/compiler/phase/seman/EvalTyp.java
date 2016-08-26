@@ -24,14 +24,12 @@ public class EvalTyp extends FullVisitor {
     private final Attributes attrs;
     private RecType recNow;
     private RecTyp recUse;
-    boolean first;
-    int turn;
+    private int turn;
 
     public EvalTyp(Attributes attrs) {
         this.attrs = attrs;
         this.recNow = null;
         this.recUse = null;
-        this.first = true;
     }
 
     /**
@@ -39,6 +37,7 @@ public class EvalTyp extends FullVisitor {
      */
     private SymbolTable symbolTable = new SymbolTable();
 
+    @Override
     public void visit(ArrType arrType) {
         if (turn != 1) return;
         arrType.size.accept(this);
@@ -60,6 +59,7 @@ public class EvalTyp extends FullVisitor {
         attrs.typAttr.set(arrType, new ArrTyp(size, type));
     }
 
+    @Override
     public void visit(AtomExpr atomExpr) {
         switch (atomExpr.type) {
             case INTEGER:
@@ -83,6 +83,7 @@ public class EvalTyp extends FullVisitor {
         }
     }
 
+    @Override
     public void visit(AtomType atomType) {
         switch (atomType.type) {
             case INTEGER:
@@ -103,6 +104,7 @@ public class EvalTyp extends FullVisitor {
         }
     }
 
+    @Override
     public void visit(BinExpr binExpr) {
         binExpr.fstExpr.accept(this);
         Typ fst = attrs.typAttr.get(binExpr.fstExpr);
@@ -196,6 +198,7 @@ public class EvalTyp extends FullVisitor {
         }
     }
 
+    @Override
     public void visit(CastExpr castExpr) {
         castExpr.type.accept(this);
         castExpr.expr.accept(this);
@@ -213,6 +216,7 @@ public class EvalTyp extends FullVisitor {
         attrs.typAttr.set(castExpr, type);
     }
 
+    @Override
     public void visit(CompDecl compDecl) {
         if (turn != 1) return;
         try {
@@ -224,6 +228,7 @@ public class EvalTyp extends FullVisitor {
         attrs.typAttr.set(compDecl, attrs.typAttr.get(compDecl.type));
     }
 
+    @Override
     public void visit(CompName compName) {
         try {
             Decl dec = symbolTable.fndDecl(recUse.nameSpace, compName.name());
@@ -235,6 +240,7 @@ public class EvalTyp extends FullVisitor {
         }
     }
 
+    @Override
     public void visit(Exprs exprs) {
         Typ exp = null;
         for (int e = 0; e < exprs.numExprs(); e++) {
@@ -247,9 +253,7 @@ public class EvalTyp extends FullVisitor {
             attrs.typAttr.set(exprs, new VoidTyp());
     }
 
-    public void visit(ExprError exprError) {
-    }
-
+    @Override
     public void visit(ForExpr forExpr) {
         Typ var, lo, hi, body;
         forExpr.var.accept(this);
@@ -276,6 +280,7 @@ public class EvalTyp extends FullVisitor {
         attrs.typAttr.set(forExpr, new VoidTyp());
     }
 
+    @Override
     public void visit(FunCall funCall) {
         Decl fun = attrs.declAttr.get(funCall);
         FunTyp funTyp = null;
@@ -301,6 +306,7 @@ public class EvalTyp extends FullVisitor {
             throw new CompilerError("[Semantic Error, EvalTyp, funcall] Type missmatch at function call " + funCall);
     }
 
+    @Override
     public void visit(FunDecl funDecl) {
         if(turn == 1) {
             funDecl.type.accept(this);
@@ -324,6 +330,7 @@ public class EvalTyp extends FullVisitor {
         }
     }
 
+    @Override
     public void visit(FunDef funDef) {
         if(turn == 1) {
             funDef.type.accept(this);
@@ -358,6 +365,7 @@ public class EvalTyp extends FullVisitor {
         }
     }
 
+    @Override
     public void visit(IfExpr ifExpr) {
         ifExpr.cond.accept(this);
         ifExpr.thenExpr.accept(this);
@@ -377,7 +385,6 @@ public class EvalTyp extends FullVisitor {
         if(then == null) // assingment
             then = new VoidTyp();
 
-
         Typ elseExpr = attrs.typAttr.get(ifExpr.elseExpr);
         if(elseExpr instanceof TypName && !((TypName) elseExpr).isCircular())
             elseExpr = elseExpr.actualTyp();
@@ -396,6 +403,7 @@ public class EvalTyp extends FullVisitor {
         attrs.typAttr.set(ifExpr, new VoidTyp());
     }
 
+    @Override
     public void visit(ParDecl parDecl) {
         if(turn == 1) {
             parDecl.type.accept(this);
@@ -405,11 +413,14 @@ public class EvalTyp extends FullVisitor {
             if(parTyp instanceof TypName && !((TypName)parTyp).isCircular()) {
                 parTyp = parTyp.actualTyp();
             }
-            if (!(parTyp instanceof BooleanTyp ||  parTyp instanceof IntegerTyp || parTyp instanceof CharTyp || parTyp instanceof StringTyp || parTyp instanceof PtrTyp))
+            if (!(parTyp instanceof BooleanTyp ||  parTyp instanceof IntegerTyp
+                    || parTyp instanceof CharTyp || parTyp instanceof StringTyp || parTyp instanceof PtrTyp)) {
                 throw new CompilerError("[Semantic error, evalTyp] Parameter type not allowed at " + parDecl);
+            }
         }
     }
 
+    @Override
     public void visit(Program program) {
         program.expr.accept(this);
         Typ exprTyp = attrs.typAttr.get(program.expr);
@@ -421,6 +432,7 @@ public class EvalTyp extends FullVisitor {
             attrs.typAttr.set(program, new VoidTyp());
     }
 
+    @Override
     public void visit(PtrType ptrType) {
         ptrType.baseType.accept(this);
         Typ type;
@@ -432,6 +444,7 @@ public class EvalTyp extends FullVisitor {
         attrs.typAttr.set(ptrType, new PtrTyp(type));
     }
 
+    @Override
     public void visit(RecType recType) {
         if (turn != 1) return;
         symbolTable.newNamespace(recType.toString());
@@ -446,6 +459,7 @@ public class EvalTyp extends FullVisitor {
         this.recNow = tmp;
     }
 
+    @Override
     public void visit(TypeDecl typDecl) {
         TypName type;
         if(turn == 0) {
@@ -467,6 +481,7 @@ public class EvalTyp extends FullVisitor {
         }
     }
 
+    @Override
     public void visit(TypeName typeName) {
         try {
             attrs.typAttr.get(typeName);
@@ -478,8 +493,8 @@ public class EvalTyp extends FullVisitor {
         attrs.typAttr.set(typeName, type);
     }
 
+    @Override
     public void visit(UnExpr unExpr) {
-//        if (turn != 1) return;
         unExpr.subExpr.accept(this);
         Typ type = attrs.typAttr.get(unExpr.subExpr);
         if(type instanceof TypName && !((TypName) type).isCircular())
@@ -512,6 +527,7 @@ public class EvalTyp extends FullVisitor {
         }
     }
 
+    @Override
     public void visit(VarDecl varDecl) {
         if(turn != 1) return;
         varDecl.type.accept(this);
@@ -519,18 +535,19 @@ public class EvalTyp extends FullVisitor {
         attrs.typAttr.set(varDecl, type);
     }
 
+    @Override
     public void visit(VarName varName) {
         Decl dec = attrs.declAttr.get(varName);
         attrs.typAttr.set(varName, attrs.typAttr.get(dec));
     }
 
+    @Override
     public void visit(WhereExpr whereExpr) {
         int prevTurn = turn;
         turn = 0;
         for (int p = 0; p < 3; p++) {
             for (int d = 0; d < whereExpr.numDecls(); d++)
                 whereExpr.decl(d).accept(this);
-            first = false;
             turn++;
         }
         turn = prevTurn;
@@ -540,11 +557,12 @@ public class EvalTyp extends FullVisitor {
             /*if (act instanceof TypName && !((TypName) act).isCircular())
                 act = act.actualTyp();*/
             attrs.typAttr.set(whereExpr, act);
-        } else
+        } else {
             attrs.typAttr.set(whereExpr, new VoidTyp());
-            //throw new CompilerError("[Semantic error, evalTyp] No types defined at " + whereExpr);
+        }
     }
 
+    @Override
     public void visit(WhileExpr whileExpr) {
         whileExpr.cond.accept(this);
         whileExpr.body.accept(this);
@@ -561,6 +579,4 @@ public class EvalTyp extends FullVisitor {
             throw new CompilerError("[Semantic Error, EvalTyp, while] Type missmatch at while loop " + whileExpr);
         attrs.typAttr.set(whileExpr, new VoidTyp());
     }
-
-
 }

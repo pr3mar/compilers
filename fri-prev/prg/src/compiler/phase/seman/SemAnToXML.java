@@ -206,6 +206,19 @@ public class SemAnToXML extends AbstrToXML {
 	}
 
 	@Override
+	public void visit(ForEachExpr forEachExpr) {
+		begElement();
+		super.visit(forEachExpr);
+		logger.begElement("seman");
+		if (attrs.typAttr.get(forEachExpr) != null)
+			attrs.typAttr.get(forEachExpr).log(logger);
+		if (attrs.memAttr.get(forEachExpr))
+			logger.addAttribute("mem", "true");
+		logger.endElement();
+		endElement();
+	}
+
+	@Override
 	public void visit(FunCall funCall) {
 		begElement();
 		super.visit(funCall);

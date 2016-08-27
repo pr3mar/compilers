@@ -129,6 +129,9 @@ public class Symbol extends Position implements Loggable {
 		/** Keyword <code>while</code>. */
 		WHILE,
 
+		/** Keyword <code>forEach</code>. */
+		FOREACH,
+
 		// Identifiers.
 
 		/** Identifier. */

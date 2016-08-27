@@ -295,4 +295,14 @@ public class AbstrToXML implements Visitor {
 		endElement();
 	}
 
+	public void visit(ForEachExpr forEachExpr) {
+		begElement();
+		((Position) forEachExpr).log(logger);
+		logger.addAttribute("kind", "ForEachExpr");
+		forEachExpr.var.accept(this);
+		forEachExpr.array.accept(this);
+		forEachExpr.body.accept(this);
+		endElement();
+	}
+
 }

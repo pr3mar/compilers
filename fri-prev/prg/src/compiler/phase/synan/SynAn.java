@@ -175,6 +175,7 @@ public class SynAn extends Phase {
             case IF:
             case FOR:
             case WHILE:
+            case FOREACH:
                 Symbol copy = laSymbol;
                 Expr tmp = parseExpression();
                 prg = new Program( new Position(copy, tmp), tmp);
@@ -207,6 +208,7 @@ public class SynAn extends Phase {
             case IF:
             case FOR:
             case WHILE:
+            case FOREACH:
                 expr = parseAssignmentExpression();
                 expr = parseExpressionPrime(expr);
                 break;
@@ -269,6 +271,7 @@ public class SynAn extends Phase {
             case IF:
             case FOR:
             case WHILE:
+            case FOREACH:
                 exprs.add(parseExpression());
                 exprs = parseExpressionsPrime(exprs);
                 break;
@@ -316,6 +319,7 @@ public class SynAn extends Phase {
             case IF:
             case FOR:
             case WHILE:
+            case FOREACH:
                 bin = parseDisjunctiveExpression();
                 bin = parseAssignmentExpressionPrime(bin);
                 break;
@@ -376,6 +380,7 @@ public class SynAn extends Phase {
             case IF:
             case FOR:
             case WHILE:
+            case FOREACH:
                 bin = parseConjunctiveExpression();
                 bin = parseDisjunctiveExpressionPrime(bin);
                 break;
@@ -438,6 +443,7 @@ public class SynAn extends Phase {
             case IF:
             case FOR:
             case WHILE:
+            case FOREACH:
                 bin = parseRelationalExpression();
                 bin = parseConjunctiveExpressionPrime(bin);
                 break;
@@ -501,6 +507,7 @@ public class SynAn extends Phase {
             case IF:
             case FOR:
             case WHILE:
+            case FOREACH:
                 bin = parseAdditiveExpression();
                 bin = parseRelationalExpressionPrime(bin);
                 break;
@@ -591,6 +598,7 @@ public class SynAn extends Phase {
             case IF:
             case FOR:
             case WHILE:
+            case FOREACH:
                 bin = parseMultiplicativeExpression();
                 bin = parseAdditiveExpressionPrime(bin);
                 break;
@@ -669,6 +677,7 @@ public class SynAn extends Phase {
             case IF:
             case FOR:
             case WHILE:
+            case FOREACH:
                 bin = parsePrefixExpression();
                 bin = parseMultiplicativeExpressionPrime(bin);
                 break;
@@ -782,6 +791,7 @@ public class SynAn extends Phase {
             case IF:
             case FOR:
             case WHILE:
+            case FOREACH:
                 exp = parsePostfixExpression();
                 break;
             default:
@@ -806,6 +816,7 @@ public class SynAn extends Phase {
             case IF:
             case FOR:
             case WHILE:
+            case FOREACH:
                 exp = parseAtomicExpression();
                 exp = parsePostfixExpressionPrime(exp);
                 break;
@@ -995,6 +1006,36 @@ public class SynAn extends Phase {
                 Symbol endWhile = nextSymbol(); // shift end
                 exp = new WhileExpr(new Position(symWhile, endWhile), condWhile, bodyWhile);
                 break;
+            case FOREACH:
+                Symbol symForEach = nextSymbol(); // shift forEach
+                if(laSymbol.token != Symbol.Token.OPENING_PARENTHESIS) {
+                    throw new CompilerError("[syntax error, parseAtomicExpression] invalid expression at " + laSymbol);
+                }
+                nextSymbol(); // shift '('
+                if(laSymbol.token != Symbol.Token.IDENTIFIER) {
+                    throw new CompilerError("[syntax error, parseAtomicExpression] invalid expression at " + laSymbol);
+                }
+                Symbol forEachID = nextSymbol(); // shift identifier
+                if(laSymbol.token != Symbol.Token.COLON) {
+                    throw new CompilerError("[syntax error, parseAtomicExpression] invalid expression at " + laSymbol);
+                }
+                nextSymbol(); // shift ':'
+                Expr arrayExp = parseExpression();
+                if(laSymbol.token != Symbol.Token.CLOSING_PARENTHESIS) {
+                    throw new CompilerError("[syntax error, parseAtomicExpression] invalid expression at " + laSymbol);
+                }
+                nextSymbol(); // shift ')'
+                if(laSymbol.token != Symbol.Token.COLON) {
+                    throw new CompilerError("[syntax error, parseAtomicExpression] invalid expression at " + laSymbol);
+                }
+                nextSymbol(); // shift ':'
+                Expr forEachBody = parseExpression();
+                if(laSymbol.token != Symbol.Token.END) {
+                    throw new CompilerError("[syntax error, parseAtomicExpression] invalid expression at " + laSymbol);
+                }
+                Symbol forEachEnd = nextSymbol();
+                exp = new ForEachExpr(new Position(symForEach, forEachEnd), new VarName(forEachID, forEachID.lexeme), arrayExp, forEachBody);
+                break;
             default:
                 throw new CompilerError("[syntax error, parseAtomicExpression] invalid expression at " + laSymbol);
         }
@@ -1074,6 +1115,7 @@ public class SynAn extends Phase {
             case IF:
             case FOR:
             case WHILE:
+            case FOREACH:
 //                nextSymbol(); // shift
                 tmp = parseExpressions();
                 if (laSymbol.token != Symbol.Token.CLOSING_PARENTHESIS) {

@@ -579,4 +579,29 @@ public class EvalTyp extends FullVisitor {
             throw new CompilerError("[Semantic Error, EvalTyp, while] Type missmatch at while loop " + whileExpr);
         attrs.typAttr.set(whileExpr, new VoidTyp());
     }
+
+
+    @Override
+    public void visit(ForEachExpr forEachExpr) {
+        Typ var, array, elType, body;
+        forEachExpr.var.accept(this);
+        forEachExpr.array.accept(this);
+        forEachExpr.body.accept(this);
+
+        var = attrs.typAttr.get(forEachExpr.var);
+        array = attrs.typAttr.get(forEachExpr.array);
+        body = attrs.typAttr.get(forEachExpr.body);
+
+        if( (var instanceof TypName) && !((TypName)var).isCircular())
+            var = var.actualTyp();
+        if( (array instanceof TypName) && !((TypName)array).isCircular())
+            array = array.actualTyp();
+        if( body == null)
+            body = new VoidTyp();
+        if(!(array instanceof ArrTyp) ||
+                !(var.getClass().equals( ((ArrTyp) array).elemTyp.getClass() ) ) || body == null) {
+            throw new CompilerError("[Semantic Error, EvalTyp, for] Type missmatch in forEach loop" + forEachExpr);
+        }
+        attrs.typAttr.set(forEachExpr, new VoidTyp());
+    }
 }

@@ -399,4 +399,51 @@ public class EvalImcode extends FullVisitor {
         stmts.add(exit);
         this.attrs.imcAttr.set(whileExpr, new SEXPR(new STMTS(stmts), new NOP()));
     }
+
+    @Override
+    public void visit(ForEachExpr forEachExpr) {
+        forEachExpr.var.accept(this);
+        forEachExpr.array.accept(this);
+        forEachExpr.body.accept(this);
+
+        LABEL body = new LABEL("forEach_body_" + LABEL.newLabelName());
+        LABEL sndCheck = new LABEL("forEach_nextEl_" + LABEL.newLabelName());
+        LABEL exit = new LABEL("for_exit_" + LABEL.newLabelName());
+
+        IMCExpr var = (IMCExpr) this.attrs.imcAttr.get(forEachExpr.var);
+        IMCExpr array = (IMCExpr) this.attrs.imcAttr.get(forEachExpr.array);
+        IMCExpr bodyExpr = (IMCExpr) this.attrs.imcAttr.get(forEachExpr.body);
+
+        CONST lo = new CONST(0);
+        CONST hi = new CONST(((ArrTyp) attrs.typAttr.get(forEachExpr.array)).size);
+        long elSize = ((ArrTyp) attrs.typAttr.get(forEachExpr.array)).elemTyp.size();
+
+        TEMP iter = new TEMP(TEMP.newTempName());
+        IMC cjump_begin, cjump_end;
+        cjump_begin = new BINOP(BINOP.Oper.LEQ, iter, hi);
+        cjump_begin = new CJUMP((IMCExpr) cjump_begin, body.label, exit.label);
+        cjump_end = new BINOP(BINOP.Oper.LTH, iter, hi);
+        cjump_end = new CJUMP((IMCExpr) cjump_end, sndCheck.label, exit.label);
+
+        IMCStmt increment = new MOVE(var, new BINOP(BINOP.Oper.ADD, var, new CONST(1)));
+
+        Vector<IMCStmt> stmts = new Vector<IMCStmt>();
+        stmts.add(new MOVE(var, lo));
+        // todo: add array access of elements
+
+        IMCExpr tmp = new BINOP(BINOP.Oper.MUL, snd, new CONST(size));
+        tmp = new BINOP(BINOP.Oper.ADD, ((MEM)fst).addr, tmp);
+        binop = new MEM(tmp, size);
+
+//        stmts.add(begin);
+        stmts.add((IMCStmt) cjump_begin);
+        stmts.add(body);
+        stmts.add(new ESTMT(bodyExpr));
+        stmts.add((IMCStmt) cjump_end);
+        stmts.add(sndCheck);
+        stmts.add(increment);
+        stmts.add(new JUMP(body.label));
+        stmts.add(exit);
+        this.attrs.imcAttr.set(forEachExpr, new SEXPR(new STMTS(stmts), new NOP()));
+    }
 }

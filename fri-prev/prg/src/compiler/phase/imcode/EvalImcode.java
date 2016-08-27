@@ -406,6 +406,7 @@ public class EvalImcode extends FullVisitor {
         forEachExpr.array.accept(this);
         forEachExpr.body.accept(this);
 
+        LABEL begin = new LABEL("forEach_begin_" + LABEL.newLabelName());
         LABEL body = new LABEL("forEach_body_" + LABEL.newLabelName());
         LABEL sndCheck = new LABEL("forEach_nextEl_" + LABEL.newLabelName());
         LABEL exit = new LABEL("for_exit_" + LABEL.newLabelName());
@@ -425,24 +426,26 @@ public class EvalImcode extends FullVisitor {
         cjump_end = new BINOP(BINOP.Oper.LTH, iter, hi);
         cjump_end = new CJUMP((IMCExpr) cjump_end, sndCheck.label, exit.label);
 
-        IMCStmt increment = new MOVE(var, new BINOP(BINOP.Oper.ADD, var, new CONST(1)));
+        IMCStmt increment = new MOVE(iter, new BINOP(BINOP.Oper.ADD, iter, new CONST(1)));
 
         Vector<IMCStmt> stmts = new Vector<IMCStmt>();
-        stmts.add(new MOVE(var, lo));
+        stmts.add(new MOVE(iter, lo));
         // todo: add array access of elements
 
-        IMCExpr tmp = new BINOP(BINOP.Oper.MUL, snd, new CONST(size));
-        tmp = new BINOP(BINOP.Oper.ADD, ((MEM)fst).addr, tmp);
-        binop = new MEM(tmp, size);
 
-//        stmts.add(begin);
+        stmts.add(begin);
         stmts.add((IMCStmt) cjump_begin);
+
         stmts.add(body);
+        IMCExpr tmp = new BINOP(BINOP.Oper.MUL, iter, new CONST(elSize));
+        tmp = new BINOP(BINOP.Oper.ADD, ((MEM)array).addr, tmp);
+        stmts.add(new MOVE(var, new MEM(tmp, elSize)));
+
         stmts.add(new ESTMT(bodyExpr));
         stmts.add((IMCStmt) cjump_end);
         stmts.add(sndCheck);
         stmts.add(increment);
-        stmts.add(new JUMP(body.label));
+        stmts.add(new JUMP(begin.label));
         stmts.add(exit);
         this.attrs.imcAttr.set(forEachExpr, new SEXPR(new STMTS(stmts), new NOP()));
     }

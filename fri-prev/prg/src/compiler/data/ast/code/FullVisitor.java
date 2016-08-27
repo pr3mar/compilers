@@ -128,4 +128,8 @@ public class FullVisitor implements Visitor {
 		whileExpr.body.accept(this);
 	}
 
+	public void visit(DoWhileExpr doWhileExpr) {
+		doWhileExpr.body.accept(this);
+		doWhileExpr.cond.accept(this);
+	}
 }

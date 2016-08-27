@@ -348,4 +348,17 @@ public class ImcodeToXML extends FramesToXML {
 		endElement();
 	}
 
+	@Override
+	public void visit(DoWhileExpr doWhileExpr) {
+		begElement();
+		super.visit(doWhileExpr);
+		IMC imc = attrs.imcAttr.get(doWhileExpr);
+		if (imc != null) {
+			logger.begElement("imcode");
+			imc.toXML(logger);
+			logger.endElement();
+		}
+		endElement();
+	}
+
 }

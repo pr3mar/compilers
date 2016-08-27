@@ -384,7 +384,7 @@ public class EvalImcode extends FullVisitor {
         whileExpr.body.accept(this);
 
         LABEL begin = new LABEL("while_begin_" + LABEL.newLabelName());
-        LABEL body = new LABEL("while_body_" +LABEL.newLabelName());
+        LABEL body = new LABEL("while_body_" + LABEL.newLabelName());
         LABEL exit = new LABEL("while_exit_" + LABEL.newLabelName());
 
         IMC ex = this.attrs.imcAttr.get(whileExpr.cond);
@@ -398,5 +398,24 @@ public class EvalImcode extends FullVisitor {
         stmts.add(new JUMP(begin.label));
         stmts.add(exit);
         this.attrs.imcAttr.set(whileExpr, new SEXPR(new STMTS(stmts), new NOP()));
+    }
+
+    @Override
+    public void visit(DoWhileExpr doWhileExpr) {
+        doWhileExpr.body.accept(this);
+        doWhileExpr.cond.accept(this);
+
+        LABEL body = new LABEL("doWhile_body_" + LABEL.newLabelName());
+        LABEL exit = new LABEL("doWhile_exit_" + LABEL.newLabelName());
+
+        IMC ex = this.attrs.imcAttr.get(doWhileExpr.cond);
+        ex = new CJUMP((IMCExpr) ex, body.label, exit.label);
+
+        Vector<IMCStmt> stmts = new Vector<IMCStmt>();
+        stmts.add(body);
+        stmts.add( new ESTMT( (IMCExpr)this.attrs.imcAttr.get(doWhileExpr.body)) );
+        stmts.add((IMCStmt) ex);
+        stmts.add(exit);
+        this.attrs.imcAttr.set(doWhileExpr, new SEXPR(new STMTS(stmts), new NOP()));
     }
 }

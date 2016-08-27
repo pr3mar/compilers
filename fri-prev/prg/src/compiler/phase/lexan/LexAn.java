@@ -309,6 +309,8 @@ public class LexAn extends Phase {
                     return new Symbol(Symbol.Token.WHERE, "", new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
                 case "while":
                     return new Symbol(Symbol.Token.WHILE, "", new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+                case "do":
+                    return new Symbol(Symbol.Token.DO, "", new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
                 default:
                     return new Symbol(Symbol.Token.IDENTIFIER, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
             }

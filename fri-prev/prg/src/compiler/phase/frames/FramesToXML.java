@@ -259,5 +259,11 @@ public class FramesToXML extends SemAnToXML {
 		super.visit(whileExpr);
 		endElement();
 	}
+	@Override
+	public void visit(DoWhileExpr doWhileExpr) {
+		begElement();
+		super.visit(doWhileExpr);
+		endElement();
+	}
 
 }

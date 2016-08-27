@@ -240,6 +240,15 @@ public class FramesToXML extends SemAnToXML {
 	}
 
 	@Override
+	public void visit(VarCustomMem varCustomMem) {
+		begElement();
+		super.visit(varCustomMem);
+		if (attrs.accAttr.get(varCustomMem) != null)
+			attrs.accAttr.get(varCustomMem).log(logger);
+		endElement();
+	}
+
+	@Override
 	public void visit(VarName varName) {
 		begElement();
 		super.visit(varName);

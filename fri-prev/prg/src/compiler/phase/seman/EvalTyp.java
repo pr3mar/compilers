@@ -536,6 +536,14 @@ public class EvalTyp extends FullVisitor {
     }
 
     @Override
+    public void visit(VarCustomMem varCustomMem) {
+        if(turn != 1) return;
+        varCustomMem.type.accept(this);
+        Typ type = attrs.typAttr.get(varCustomMem.type);
+        attrs.typAttr.set(varCustomMem, type);
+    }
+
+    @Override
     public void visit(VarName varName) {
         Decl dec = attrs.declAttr.get(varName);
         attrs.typAttr.set(varName, attrs.typAttr.get(dec));

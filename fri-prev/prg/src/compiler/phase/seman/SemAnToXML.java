@@ -379,6 +379,17 @@ public class SemAnToXML extends AbstrToXML {
 	}
 
 	@Override
+	public void visit(VarCustomMem varCustomMem) {
+		begElement();
+		super.visit(varCustomMem);
+		logger.begElement("seman");
+		if (attrs.typAttr.get(varCustomMem) != null)
+			attrs.typAttr.get(varCustomMem).log(logger);
+		logger.endElement();
+//		endElement();
+	}
+
+	@Override
 	public void visit(VarName varName) {
 		begElement();
 		super.visit(varName);

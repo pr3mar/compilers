@@ -295,4 +295,13 @@ public class AbstrToXML implements Visitor {
 		endElement();
 	}
 
+	public void visit(VarCustomMem varCustomMem) {
+		begElement();
+		((Position) varCustomMem).log(logger);
+		logger.addAttribute("kind", "VarCustomMem");
+		logger.addAttribute("name", varCustomMem.name + ", " + varCustomMem.memoryLocation);
+		varCustomMem.type.accept(this);
+		endElement();
+	}
+
 }

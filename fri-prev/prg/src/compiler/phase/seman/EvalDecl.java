@@ -130,6 +130,18 @@ public class EvalDecl extends FullVisitor {
 	}
 
 	@Override
+	public void visit(VarCustomMem varCustomMem) {
+		if(prototyping){
+			try { symbolTable.insDecl(varCustomMem.name, varCustomMem); }
+			catch (CannotInsNameDecl err) {
+				throw new CompilerError("[Semantic error] Variable name already declared at " + varCustomMem);
+			}
+		} else {
+			varCustomMem.type.accept(this);
+		}
+	}
+
+	@Override
 	public void visit(VarName varName) {
 		try {
 			Decl val = symbolTable.fndDecl(varName.name());

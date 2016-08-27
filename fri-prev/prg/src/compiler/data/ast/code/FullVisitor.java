@@ -128,4 +128,8 @@ public class FullVisitor implements Visitor {
 		whileExpr.body.accept(this);
 	}
 
+	public void visit(VarCustomMem varCustomMem) {
+		varCustomMem.type.accept(this);
+	}
+
 }

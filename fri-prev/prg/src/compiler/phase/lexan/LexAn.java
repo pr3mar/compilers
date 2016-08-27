@@ -27,6 +27,8 @@ public class LexAn extends Phase {
     private String lexeme;
     private boolean escaped;
 
+    private boolean customMemory;
+
 	/**
 	 * Constructs a new lexical analyzer.
 	 * 
@@ -50,6 +52,7 @@ public class LexAn extends Phase {
         endLine = 1;
         endCol = 1;
         lexeme = "";
+        customMemory = false;
 	}
 
 	/**
@@ -82,6 +85,25 @@ public class LexAn extends Phase {
         } else {
             read = false;
         }
+        Symbol sym = null;
+        if(customMemory) {
+            detectWhiteSpace();
+            if (currentChar == ((int) '#')) {
+                lexeme = "#";
+                begLine = endLine;
+                begCol = endCol;
+                currentChar = readChar();
+                while (isBetween(currentChar, 48, 57)) {
+                    lexeme += (char) currentChar;
+                    endCol++;
+                    currentChar = readChar();
+                }
+                read = true;
+                sym = new Symbol(Symbol.Token.MEMORY_LOCATION, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+            } else {
+                customMemory = false;
+            }
+        }
         while(currentChar == ((int)'#') || currentChar == ((int) ' ')
                 || currentChar == ((int) '\n') || currentChar == ((int) '\r')
                     || currentChar == ((int) '\t')) {
@@ -89,7 +111,10 @@ public class LexAn extends Phase {
             detectWhiteSpace();
         }
 
-        Symbol sym;
+        if(customMemory) {
+            customMemory = false;
+            return log(sym);
+        }
 
         switch (currentChar) {
             case '+':
@@ -309,6 +334,10 @@ public class LexAn extends Phase {
                     return new Symbol(Symbol.Token.WHERE, "", new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
                 case "while":
                     return new Symbol(Symbol.Token.WHILE, "", new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+                case "at":
+                    customMemory = true;
+                    return new Symbol(Symbol.Token.AT, "", new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
+
                 default:
                     return new Symbol(Symbol.Token.IDENTIFIER, lexeme, new Position(task.srcFName, begLine, begCol, task.srcFName, endLine, endCol));
             }

@@ -74,6 +74,7 @@ Parameter -> IDENTIFIER COLON Type .
 FunctionBodyOpt -> .
 FunctionBodyOpt -> ASSIGN Expression .
 VariableDeclaration -> VAR IDENTIFIER COLON Type .
+VariableDeclaration -> VAR IDENTIFIER COLON Type AT MEMORY_LOCATION.
 Type -> INTEGER .
 Type -> BOOLEAN .
 Type -> CHAR .

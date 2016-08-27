@@ -114,6 +114,16 @@ public class EvalFrames extends FullVisitor {
 	}
 
 	@Override
+	public void visit(VarCustomMem varCustomMem) {
+		Typ t = this.attrs.typAttr.get(varCustomMem);
+		varCustomMem.type.accept(this);
+		Access acc;
+		long size = t.size();
+		acc = new StaticAccessMem(getLabel(varCustomMem), size, varCustomMem.memoryLocation);
+		this.attrs.accAttr.set(varCustomMem, acc);
+	}
+
+	@Override
 	public void visit(RecType recType) {
 		long oldOffset = this.recOffset;
 		this.recOffset = 0;

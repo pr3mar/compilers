@@ -167,6 +167,11 @@
 	    <xsl:value-of select="@level"/>
 	    <text>&#xA0;</text>
 	  </xsl:if>
+	  <xsl:if test="@location!=''">
+	    <xsl:text>location=#</xsl:text>
+	    <xsl:value-of select="@location"/>
+	    <text>&#xA0;</text>
+	  </xsl:if>
 	  <xsl:if test="@label!=''">
 	    <xsl:text>label=</xsl:text>
 	    <xsl:value-of select="@label"/>

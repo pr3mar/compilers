@@ -310,6 +310,19 @@ public class ImcodeToXML extends FramesToXML {
 	}
 
 	@Override
+	public void visit(VarCustomMem varCustomMem) {
+		begElement();
+		super.visit(varCustomMem);
+		Fragment fragment = attrs.frgAttr.get(varCustomMem);
+		if (fragment != null) {
+			logger.begElement("fragment");
+			fragment.toXML(logger);
+			logger.endElement();
+		}
+		endElement();
+	}
+
+	@Override
 	public void visit(VarName varName) {
 		begElement();
 		super.visit(varName);

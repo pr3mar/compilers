@@ -234,6 +234,11 @@ public class EvalMem extends FullVisitor {
 	}
 
 	@Override
+	public void visit(VarCustomMem varCustomMem) {
+		varCustomMem.type.accept(this);
+	}
+
+	@Override
 	public void visit(VarName varName) {
 		if(attrs.typAttr.get(varName) != null)
 			attrs.memAttr.set(varName, true);

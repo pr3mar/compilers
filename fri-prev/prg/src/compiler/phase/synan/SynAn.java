@@ -1315,7 +1315,8 @@ public class SynAn extends Phase {
                 }
                 nextSymbol(); // shift colon
                 Type typ = parseType();
-                vardec = new VarDecl(new Position(var, typ), name.lexeme, typ);
+//                vardec = new VarDecl(new Position(var, typ), name.lexeme, typ);
+                vardec = parseVariableDeclarationPrime(var, name, typ);
                 break;
             }
             default:
@@ -1323,6 +1324,32 @@ public class SynAn extends Phase {
         }
         endLog();
         return vardec;
+    }
+
+    private VarDecl parseVariableDeclarationPrime(Symbol var, Symbol name, Type typ) {
+        begLog("variableDeclarationPrime");
+        VarDecl varDecl;
+        switch (laSymbol.token) {
+            case TYP:
+            case FUN:
+            case VAR:
+            case END:
+                varDecl = new VarDecl(new Position(var, typ), name.lexeme, typ);
+                break;
+            case AT:
+                Symbol memory;
+                nextSymbol(); // shift at
+                if(laSymbol.token != Symbol.Token.MEMORY_LOCATION) {
+                    throw new CompilerError("[syntax error, parseVariableDeclarationPrime, memory] invalid expression at " + laSymbol);
+                }
+                memory = nextSymbol(); // shift memory
+                varDecl = new VarCustomMem(new Position(var, memory), name.lexeme, typ, memory.lexeme);
+                break;
+            default:
+                throw new CompilerError("[syntax error, parseVariableDeclarationPrime] invalid expression at " + laSymbol);
+        }
+        endLog();
+        return varDecl;
     }
 
     private Type parseType() {

@@ -347,6 +347,15 @@ public class EvalImcode extends FullVisitor {
     }
 
     @Override
+    public void visit(VarCustomMem varCustomMem) {
+        varCustomMem.type.accept(this);
+        StaticAccessMem acc = (StaticAccessMem) this.attrs.accAttr.get(varCustomMem);
+        Fragment frag = new DataFragmentMem(acc.label, acc.size, acc.memoryLocation);
+        this.fragments.put(acc.label, frag);
+        this.attrs.frgAttr.set(varCustomMem, frag);
+    }
+
+    @Override
 	public void visit(VarName varName) {
         Access acc = this.attrs.accAttr.get((VarDecl) this.attrs.declAttr.get(varName));
         IMC exprs = null;

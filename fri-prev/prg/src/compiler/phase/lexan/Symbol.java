@@ -129,6 +129,11 @@ public class Symbol extends Position implements Loggable {
 		/** Keyword <code>while</code>. */
 		WHILE,
 
+		/** Keyword <code>at</code>*/
+		AT,
+		/** Custom memory location */
+		MEMORY_LOCATION,
+
 		// Identifiers.
 
 		/** Identifier. */

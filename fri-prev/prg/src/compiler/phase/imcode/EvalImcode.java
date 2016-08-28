@@ -7,6 +7,7 @@ import compiler.data.acc.*;
 import compiler.data.ast.*;
 import compiler.data.ast.attr.*;
 import compiler.data.ast.code.*;
+import compiler.data.cod.LAB;
 import compiler.data.frg.*;
 import compiler.data.frm.*;
 import compiler.data.imc.*;
@@ -24,6 +25,7 @@ public class EvalImcode extends FullVisitor {
 	private final HashMap<String, Fragment> fragments;
 
 	private Stack<CodeFragment> codeFragments = new Stack<CodeFragment>();
+	private Stack<LABEL> funcExitLabel = new Stack<>();
 
 	public EvalImcode(Attributes attrs, HashMap<String, Fragment> fragments) {
 		this.attrs = attrs;
@@ -172,6 +174,7 @@ public class EvalImcode extends FullVisitor {
         IMC expr = null;
         Vector<IMCStmt> tmp = new Vector<IMCStmt>();
         for (int e = 0; e < exprs.numExprs() - 1; e++) {
+//        for (int e = 0; e < exprs.numExprs(); e++) {
             exprs.expr(e).accept(this);
             IMC exp = this.attrs.imcAttr.get(exprs.expr(e));
             if(exp instanceof IMCExpr)
@@ -256,7 +259,7 @@ public class EvalImcode extends FullVisitor {
         int RV = TEMP.newTempName();
         CodeFragment tmpFragment = new CodeFragment(frame, FP, RV, null);
         codeFragments.push(tmpFragment);
-
+        funcExitLabel.push(new LABEL(tmpFragment.label + "_exit_" + LABEL.newLabelName()));
         for (int p = 0; p < funDef.numPars(); p++)
             funDef.par(p).accept(this);
         funDef.type.accept(this);
@@ -265,9 +268,13 @@ public class EvalImcode extends FullVisitor {
         codeFragments.pop();
         IMCExpr expr = (IMCExpr) attrs.imcAttr.get(funDef.body);
         MOVE move = new MOVE(new TEMP(RV), expr);
-        Fragment fragment = new CodeFragment(tmpFragment.frame, tmpFragment.FP, tmpFragment.RV, move);
+        Vector<IMCStmt> stmts = new Vector<>();
+        stmts.add(move);
+        stmts.add(funcExitLabel.pop());
+        STMTS tmp = new STMTS(stmts);
+        Fragment fragment = new CodeFragment(tmpFragment.frame, tmpFragment.FP, tmpFragment.RV, tmp);
         attrs.frgAttr.set(funDef, fragment);
-        attrs.imcAttr.set(funDef, move);
+        attrs.imcAttr.set(funDef, tmp);
         fragments.put(fragment.label, fragment);
     }
 
@@ -403,6 +410,19 @@ public class EvalImcode extends FullVisitor {
     @Override
     public void visit(ReturnExpr returnExpr) {
         // TODO: do sth xD
-        
+        CodeFragment currentCode = this.codeFragments.peek();
+        Frame currentFrame = currentCode.frame;
+        LABEL jump = this.funcExitLabel.peek();
+        Vector<IMCStmt> stmts = new Vector<>();
+        if(returnExpr.retExpr == null) {
+            stmts.add(new MOVE(new TEMP(currentCode.RV), new CONST(0)));
+            stmts.add(new JUMP(jump.label));
+            this.attrs.imcAttr.set(returnExpr, new SEXPR(new STMTS(stmts), new NOP()));
+            return;
+        }
+        returnExpr.retExpr.accept(this);
+        stmts.add(new MOVE(new TEMP(currentCode.RV), (IMCExpr) this.attrs.imcAttr.get(returnExpr.retExpr)));
+        stmts.add(new JUMP(jump.label));
+        this.attrs.imcAttr.set(returnExpr, new SEXPR(new STMTS(stmts), new NOP()));
     }
 }

@@ -399,4 +399,10 @@ public class EvalImcode extends FullVisitor {
         stmts.add(exit);
         this.attrs.imcAttr.set(whileExpr, new SEXPR(new STMTS(stmts), new NOP()));
     }
+
+    @Override
+    public void visit(ReturnExpr returnExpr) {
+        // TODO: do sth xD
+        
+    }
 }

@@ -1,6 +1,7 @@
 package compiler.phase.seman;
 
 import java.util.LinkedList;
+import java.util.Stack;
 
 import compiler.common.report.*;
 import compiler.data.ast.*;
@@ -26,10 +27,14 @@ public class EvalTyp extends FullVisitor {
     private RecTyp recUse;
     private int turn;
 
+    private Stack<Typ> funTypes = new Stack<Typ>();
+    private boolean retType = false;
+
     public EvalTyp(Attributes attrs) {
         this.attrs = attrs;
         this.recNow = null;
         this.recUse = null;
+        funTypes.push(new VoidTyp());
     }
 
     /**
@@ -346,12 +351,18 @@ public class EvalTyp extends FullVisitor {
                 funDef.par(p).accept(this);
             }
             Typ type = attrs.typAttr.get(funDef.type);
+            funTypes.push(type);
             if(type instanceof TypName && !((TypName)type).isCircular()) {
                 type = type.actualTyp();
             }
             if (!(type instanceof BooleanTyp ||  type instanceof IntegerTyp || type instanceof CharTyp || type instanceof VoidTyp || type instanceof StringTyp || type instanceof PtrTyp))
                 throw new CompilerError("[Semantic error, evalTyp] Return type not allowed at " + funDef.type);
             funDef.body.accept(this);
+            funTypes.pop();
+            if(this.retType) {
+                this.retType = false;
+                return;
+            }
             Typ funRet = ((FunTyp) attrs.typAttr.get(funDef)).resultTyp;
             if(funRet instanceof TypName && !((TypName) funRet).isCircular())
                 funRet = funRet.actualTyp();
@@ -578,5 +589,35 @@ public class EvalTyp extends FullVisitor {
         if(!(cond instanceof BooleanTyp) || body == null)
             throw new CompilerError("[Semantic Error, EvalTyp, while] Type missmatch at while loop " + whileExpr);
         attrs.typAttr.set(whileExpr, new VoidTyp());
+    }
+
+    @Override
+    public void visit(ReturnExpr returnExpr) {
+        Typ retType = this.funTypes.peek();
+
+        if( (retType instanceof TypName) && !((TypName)retType).isCircular())
+            retType = retType.actualTyp();
+
+        if(returnExpr.retExpr == null) {
+            if(retType instanceof VoidTyp) {
+                this.attrs.typAttr.set(returnExpr, new VoidTyp());
+                this.retType = true;
+                return;
+            } else {
+                throw new CompilerError("[Semantic Error, EvalTyp, return] Type missmatch at return statement " + returnExpr);
+            }
+        }
+        returnExpr.retExpr.accept(this);
+
+        Typ argTyp = this.attrs.typAttr.get(returnExpr.retExpr);
+        if( (argTyp instanceof TypName) && !((TypName)argTyp).isCircular())
+            argTyp = argTyp.actualTyp();
+
+        if(!argTyp.getClass().equals(retType.getClass())) {
+            throw new CompilerError("[Semantic Error, EvalTyp, return] Type missmatch at return statement " + returnExpr);
+        } else {
+            this.attrs.typAttr.set(returnExpr, argTyp);
+            this.retType = true;
+        }
     }
 }

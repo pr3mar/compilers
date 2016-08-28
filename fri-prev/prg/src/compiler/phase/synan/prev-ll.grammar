@@ -36,6 +36,9 @@ PrefixExpression -> ADD PrefixExpression .
 PrefixExpression -> SUB PrefixExpression .
 PrefixExpression -> NOT PrefixExpression .
 PrefixExpression -> MEM PrefixExpression .
+PrefixExpression -> RETURN ReturnExpression .
+ReturnExpression -> .
+ReturnExpression -> PostfixExpression .
 PrefixExpression -> OPENING_BRACKET Type CLOSING_BRACKET PrefixExpression .
 PostfixExpression -> AtomicExpression PostfixExpression' .
 PostfixExpression' -> OPENING_BRACKET Expression CLOSING_BRACKET PostfixExpression' .

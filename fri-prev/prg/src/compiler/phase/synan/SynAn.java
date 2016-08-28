@@ -163,6 +163,7 @@ public class SynAn extends Phase {
             case SUB:
             case NOT:
             case MEM:
+            case RETURN:
             case OPENING_BRACKET:
             case IDENTIFIER:
             case CONST_INTEGER:
@@ -195,6 +196,7 @@ public class SynAn extends Phase {
             case SUB:
             case NOT:
             case MEM:
+            case RETURN:
             case OPENING_BRACKET:
             case IDENTIFIER:
             case CONST_INTEGER:
@@ -257,6 +259,7 @@ public class SynAn extends Phase {
             case SUB:
             case NOT:
             case MEM:
+            case RETURN:
             case OPENING_BRACKET:
             case IDENTIFIER:
             case CONST_INTEGER:
@@ -304,6 +307,7 @@ public class SynAn extends Phase {
             case SUB:
             case NOT:
             case MEM:
+            case RETURN:
             case OPENING_BRACKET:
             case IDENTIFIER:
             case CONST_INTEGER:
@@ -364,6 +368,7 @@ public class SynAn extends Phase {
             case SUB:
             case NOT:
             case MEM:
+            case RETURN:
             case OPENING_BRACKET:
             case IDENTIFIER:
             case CONST_INTEGER:
@@ -426,6 +431,7 @@ public class SynAn extends Phase {
             case SUB:
             case NOT:
             case MEM:
+            case RETURN:
             case OPENING_BRACKET:
             case IDENTIFIER:
             case CONST_INTEGER:
@@ -489,6 +495,7 @@ public class SynAn extends Phase {
             case SUB:
             case NOT:
             case MEM:
+            case RETURN:
             case OPENING_BRACKET:
             case IDENTIFIER:
             case CONST_INTEGER:
@@ -579,6 +586,7 @@ public class SynAn extends Phase {
             case SUB:
             case NOT:
             case MEM:
+            case RETURN:
             case OPENING_BRACKET:
             case IDENTIFIER:
             case CONST_INTEGER:
@@ -657,6 +665,7 @@ public class SynAn extends Phase {
             case SUB:
             case NOT:
             case MEM:
+            case RETURN:
             case OPENING_BRACKET:
             case IDENTIFIER:
             case CONST_INTEGER:
@@ -761,6 +770,15 @@ public class SynAn extends Phase {
                 exp = parsePrefixExpression();
                 exp = new UnExpr(new Position(symVal, exp), UnExpr.Oper.MEM, exp);
                 break;
+            case RETURN:
+                symVal = nextSymbol(); // shift return
+                exp = parseReturnExpression();
+                if(exp == null) {
+                    exp = new ReturnExpr(new Position(symVal, symVal));
+                } else {
+                    exp = new ReturnExpr(new Position(symVal, exp), exp);
+                }
+                break;
             case OPENING_BRACKET:
                 symVal = nextSymbol(); // shift opening bracket
                 Type typ = parseType();
@@ -789,6 +807,56 @@ public class SynAn extends Phase {
         }
         endLog();
         return exp;
+    }
+
+    private Expr parseReturnExpression() {
+        begLog("ReturnExpression");
+        Expr ret = null;
+        switch (laSymbol.token) {
+            case WHERE:
+            case END:
+            case COMMA:
+            case ASSIGN:
+            case OR:
+            case AND:
+            case EQU:
+            case NEQ:
+            case LTH:
+            case GTH:
+            case LEQ:
+            case GEQ:
+            case ADD:
+            case SUB:
+            case CLOSING_BRACKET:
+            case CLOSING_PARENTHESIS:
+            case THEN:
+            case ELSE:
+            case COLON:
+            case TYP:
+            case FUN:
+            case VAR:
+            case EOF:
+            case MUL:
+            case DIV:
+            case MOD:
+                break;
+            case IDENTIFIER:
+            case CONST_INTEGER:
+            case CONST_BOOLEAN:
+            case CONST_CHAR:
+            case CONST_STRING:
+            case CONST_NULL:
+            case CONST_NONE:
+            case IF:
+            case FOR:
+            case WHILE:
+                ret = parsePostfixExpression();
+                break;
+            default:
+                throw new CompilerError("[syntax error, parseReturnExpression] invalid expression at " + laSymbol);
+        }
+        endLog();
+        return ret;
     }
 
     private Expr parsePostfixExpression() {
@@ -1062,6 +1130,7 @@ public class SynAn extends Phase {
             case SUB:
             case NOT:
             case MEM:
+            case RETURN:
             case OPENING_BRACKET:
             case IDENTIFIER:
             case CONST_INTEGER:

@@ -257,4 +257,12 @@ public class EvalMem extends FullVisitor {
 		attrs.memAttr.set(whileExpr, false);
 	}
 
+	@Override
+	public void visit(ReturnExpr returnExpr) {
+		if(returnExpr.retExpr != null) {
+			returnExpr.retExpr.accept(this);
+		}
+		attrs.memAttr.set(returnExpr, false);
+	}
+
 }

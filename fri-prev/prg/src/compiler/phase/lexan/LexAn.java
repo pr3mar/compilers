@@ -93,7 +93,12 @@ public class LexAn extends Phase {
 
         switch (currentChar) {
             case '+':
-                sym = new Symbol(Symbol.Token.ADD, new Position(task.srcFName, endLine, endCol));
+                mode = 7; // + or ++
+                if(!readNext()) {
+                    sym = new Symbol(Symbol.Token.ADD, new Position(task.srcFName, endLine, endCol));
+                } else {
+                    sym = new Symbol(Symbol.Token.INC, new Position(task.srcFName, endLine, endCol));
+                }
                 break;
             case '&':
                 sym = new Symbol(Symbol.Token.AND, new Position(task.srcFName, endLine, endCol));
@@ -173,7 +178,12 @@ public class LexAn extends Phase {
                 sym = new Symbol(Symbol.Token.OR, new Position(task.srcFName, endLine, endCol));
                 break;
             case '-':
-                sym = new Symbol(Symbol.Token.SUB, new Position(task.srcFName, endLine, endCol));
+                mode = 8;
+                if(!readNext()) {
+                    sym = new Symbol(Symbol.Token.SUB, new Position(task.srcFName, endLine, endCol));
+                } else {
+                    sym = new Symbol(Symbol.Token.DEC, new Position(task.srcFName, endLine, endCol));
+                }
                 break;
             case '^':
                 sym = new Symbol(Symbol.Token.VAL, new Position(task.srcFName, endLine, endCol));
@@ -423,6 +433,20 @@ public class LexAn extends Phase {
                     throw  new CompilerError("bad character constant definition [only 1 char long]");
                 }
 //                break;
+            case 7: // + or ++
+                if(nextChar == ((int) '+')) {
+                    begCol = endCol; begLine = endLine;
+                    endCol++;
+                    return true;
+                }
+                break;
+            case 8: // - or --
+                if(nextChar == ((int) '-')) {
+                    begCol = endCol; begLine = endLine;
+                    endCol++;
+                    return true;
+                }
+                break;
         }
         read = true;
         currentChar = nextChar;

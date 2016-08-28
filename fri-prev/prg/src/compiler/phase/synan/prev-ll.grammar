@@ -41,6 +41,8 @@ PostfixExpression -> AtomicExpression PostfixExpression' .
 PostfixExpression' -> OPENING_BRACKET Expression CLOSING_BRACKET PostfixExpression' .
 PostfixExpression' -> DOT IDENTIFIER PostfixExpression' .
 PostfixExpression' -> VAL PostfixExpression' .
+PostfixExpression' -> INC PostfixExpression' .
+PostfixExpression' -> DEC PostfixExpression' .
 PostfixExpression' -> .
 AtomicExpression -> CONST_INTEGER .
 AtomicExpression -> CONST_BOOLEAN .

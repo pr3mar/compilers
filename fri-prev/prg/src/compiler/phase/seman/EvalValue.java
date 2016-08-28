@@ -98,6 +98,12 @@ public class EvalValue extends FullVisitor {
 		if(unExpr.oper.equals(UnExpr.Oper.SUB)) {
 			attrs.valueAttr.set(unExpr, -val);
 		}
+		if(unExpr.oper.equals(UnExpr.Oper.INC)) {
+			attrs.valueAttr.set(unExpr, val + 1);
+		}
+		if(unExpr.oper.equals(UnExpr.Oper.DEC)) {
+			attrs.valueAttr.set(unExpr, val - 1);
+		}
 		unary = "";
 	}
 }

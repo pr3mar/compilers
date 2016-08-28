@@ -322,6 +322,16 @@ public class EvalImcode extends FullVisitor {
             case SUB:
                 code = new UNOP(UNOP.Oper.SUB, (IMCExpr) this.attrs.imcAttr.get(unExpr.subExpr));
                 break;
+            case INC:
+                code = new BINOP(BINOP.Oper.ADD, (IMCExpr) this.attrs.imcAttr.get(unExpr.subExpr), new CONST(1));
+                code = new MOVE((IMCExpr)this.attrs.imcAttr.get(unExpr.subExpr), (IMCExpr) code);
+                code = new SEXPR((IMCStmt) code, new NOP());
+                break;
+            case DEC:
+                code = new BINOP(BINOP.Oper.SUB, (IMCExpr) this.attrs.imcAttr.get(unExpr.subExpr), new CONST(1));
+                code = new MOVE((IMCExpr)this.attrs.imcAttr.get(unExpr.subExpr), (IMCExpr) code);
+                code = new SEXPR((IMCStmt) code, new NOP());
+                break;
             case NOT:
                 code = new UNOP(UNOP.Oper.NOT, (IMCExpr) this.attrs.imcAttr.get(unExpr.subExpr));
                 break;

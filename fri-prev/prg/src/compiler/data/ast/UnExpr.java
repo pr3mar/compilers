@@ -9,7 +9,7 @@ import compiler.data.ast.code.*;
 public class UnExpr extends Expr {
 
 	public enum Oper {
-		ADD, SUB, NOT, VAL, MEM
+		ADD, SUB, NOT, VAL, MEM, INC, DEC
 	};
 
 	public final Oper oper;

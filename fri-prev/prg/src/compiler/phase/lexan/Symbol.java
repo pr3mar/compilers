@@ -134,6 +134,10 @@ public class Symbol extends Position implements Loggable {
 		/** Identifier. */
 		IDENTIFIER,
 
+		/** Increment */
+		INC,
+		/** Decrement */
+		DEC,
 		// Non-tokens.
 
 		/** End of file signal. */

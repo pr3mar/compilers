@@ -505,6 +505,7 @@ public class EvalTyp extends FullVisitor {
             type = new VoidTyp();
         switch (unExpr.oper) {
             case ADD: case SUB:
+            case INC: case DEC:
                 if(type instanceof IntegerTyp)
                     attrs.typAttr.set(unExpr,attrs.typAttr.get(unExpr.subExpr) );
                 else
@@ -524,6 +525,7 @@ public class EvalTyp extends FullVisitor {
                     attrs.typAttr.set(unExpr, ((PtrTyp) type).baseTyp);
                 else
                     throw new CompilerError("[Semantic Error, EvalType] Inconsistent types at " + unExpr);
+                break;
         }
     }
 

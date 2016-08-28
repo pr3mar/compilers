@@ -877,6 +877,16 @@ public class SynAn extends Phase {
 //                    exp = new UnExpr(new Position(exp, tmp), UnExpr.Oper.VAL, tmp);
 //                }
                 break;
+            case INC:
+                symVal = nextSymbol(); // shift INC
+                exp = new UnExpr(new Position(exp, symVal), UnExpr.Oper.INC, exp);
+                exp = parsePostfixExpressionPrime(exp);
+                break;
+            case DEC:
+                symVal = nextSymbol(); // shift DEC
+                exp = new UnExpr(new Position(exp, symVal), UnExpr.Oper.DEC, exp);
+                exp = parsePostfixExpressionPrime(exp);
+                break;
             default:
                 throw new CompilerError("[syntax error, parsePostfixExpressionPrime] invalid expression at " + laSymbol);
         }
@@ -1035,6 +1045,8 @@ public class SynAn extends Phase {
             case FUN:
             case VAR:
             case EOF:
+            case INC:
+            case DEC:
                 break;
             case OPENING_PARENTHESIS:
                 Symbol opPar = nextSymbol(); // shift opening parenthesis

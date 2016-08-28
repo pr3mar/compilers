@@ -421,7 +421,7 @@ public class EvalImcode extends FullVisitor {
 
         TEMP iter = new TEMP(TEMP.newTempName());
         IMC cjump_begin, cjump_end;
-        cjump_begin = new BINOP(BINOP.Oper.LEQ, iter, hi);
+        cjump_begin = new BINOP(BINOP.Oper.LTH, iter, hi);
         cjump_begin = new CJUMP((IMCExpr) cjump_begin, body.label, exit.label);
         cjump_end = new BINOP(BINOP.Oper.LTH, iter, hi);
         cjump_end = new CJUMP((IMCExpr) cjump_end, sndCheck.label, exit.label);
@@ -442,7 +442,7 @@ public class EvalImcode extends FullVisitor {
         stmts.add(new MOVE(var, new MEM(tmp, elSize)));
 
         stmts.add(new ESTMT(bodyExpr));
-        stmts.add((IMCStmt) cjump_end);
+//        stmts.add((IMCStmt) cjump_end);
         stmts.add(sndCheck);
         stmts.add(increment);
         stmts.add(new JUMP(begin.label));

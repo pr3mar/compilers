@@ -144,7 +144,7 @@ public class EvalImcode extends FullVisitor {
                 if(binExpr.sndExpr instanceof BinExpr && ((BinExpr)binExpr.sndExpr).oper == BinExpr.Oper.ASSIGN) {
                     Vector<IMCStmt> stmts = new Vector<>();
                     stmts.add((IMCStmt)((SEXPR) snd).stmt);
-                    snd = ((MOVE)((SEXPR) snd).stmt).src;
+                    snd = ((MOVE)((SEXPR) snd).stmt).dst;
                     stmts.add(new MOVE(fst, snd));
 
                     binop = new SEXPR(new STMTS(stmts), new NOP());

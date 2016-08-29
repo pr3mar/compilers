@@ -28,6 +28,8 @@ public class CodeGen extends Phase{
 
     private final HashMap<String, Fragment> fragments;
 
+    private final long MAX_STACK_SIZE = 10240; // bytes
+
     public CodeGen(Task task) {
         super(task, "codegen");
         this.task = task;
@@ -40,6 +42,7 @@ public class CodeGen extends Phase{
 
     void iterate() {
         for(Fragment fragment : this.fragments.values()) {
+
             if(fragment instanceof CodeFragment) {
                 GenerateCode generate = new GenerateCode((CodeFragment) fragment, task.fragments);
                 generate.generate();

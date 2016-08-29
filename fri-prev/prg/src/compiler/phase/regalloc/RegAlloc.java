@@ -53,7 +53,8 @@ public class RegAlloc extends Phase {
         for (int i = 0; i < this.fragCode.size(); i++) {
             FragmentCode currentCode = this.fragCode.get(i);
             Frame currentFrame = currentCode.fragment.frame;
-            stackSize += currentFrame.size + currentFrame.locVarsSize + currentFrame.tmpVarsSize;
+//            stackSize += currentFrame.size + currentFrame.locVarsSize + currentFrame.tmpVarsSize;
+            stackSize += currentFrame.locVarsSize + 16 + currentFrame.tmpVarsSize + currentFrame.hidRegsSize + currentFrame.outCallSize;
             if(stackSize > MAX_STACK_SIZE) {
                 throw new CompilerError("Stack is too big! ("  + stackSize + " bytes)");
             }

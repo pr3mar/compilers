@@ -163,12 +163,13 @@ public class EvalTyp extends FullVisitor {
         }
         if(fstAct instanceof IntegerTyp && sndAct instanceof IntegerTyp) {
             switch (binExpr.oper) {
-                case ADD: case SUB: case MUL: case MOD: case DIV:
+                case ADD: case SUB: case MUL: case MOD: case DIV: case ASSIGN:
                     attrs.typAttr.set(binExpr, new IntegerTyp());
                     break;
                 case EQU: case NEQ: case LTH: case GTH: case GEQ: case LEQ:
                     attrs.typAttr.set(binExpr, new BooleanTyp());
                     break;
+                default:
             }
         } else if(fstAct instanceof BooleanTyp && sndAct instanceof BooleanTyp) {
             switch (binExpr.oper) {
@@ -178,6 +179,10 @@ public class EvalTyp extends FullVisitor {
                 case EQU: case NEQ: case LTH: case GTH: case GEQ: case LEQ:
                     attrs.typAttr.set(binExpr, new BooleanTyp());
                     break;
+                case ASSIGN:
+                    attrs.typAttr.set(binExpr, new BooleanTyp());
+                    break;
+                default:
             }
         } else if(fstAct instanceof CharTyp && sndAct instanceof CharTyp
                 //|| fstAct instanceof StringTyp && sndAct instanceof StringTyp
@@ -186,9 +191,12 @@ public class EvalTyp extends FullVisitor {
                 case EQU: case NEQ: case LTH: case GTH: case GEQ: case LEQ:
                     attrs.typAttr.set(binExpr, new BooleanTyp());
                     break;
+                case ASSIGN:
+                    attrs.typAttr.set(binExpr, new BooleanTyp());
+                    break;
             }
         } else if(binExpr.oper == BinExpr.Oper.ASSIGN) {
-//            attrs.typAttr.set(binExpr, new VoidTyp());
+            attrs.typAttr.set(binExpr, fstAct.actualTyp());
         }/* else if(fstAct != null && sndAct != null
                 && binExpr.oper == BinExpr.Oper.REC) {
             attrs.typAttr.set(binExpr, sndAct);

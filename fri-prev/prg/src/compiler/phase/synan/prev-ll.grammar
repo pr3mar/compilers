@@ -7,7 +7,7 @@ Expressions' -> COMMA Expression Expressions' .
 Expressions' -> .
 AssignmentExpression -> DisjunctiveExpression AssignmentExpression' .
 AssignmentExpression' -> .
-AssignmentExpression' -> ASSIGN DisjunctiveExpression .
+AssignmentExpression' -> ASSIGN DisjunctiveExpression AssignmentExpression'.
 DisjunctiveExpression -> ConjunctiveExpression DisjunctiveExpression' .
 DisjunctiveExpression' -> OR ConjunctiveExpression DisjunctiveExpression' .
 DisjunctiveExpression' -> .

@@ -63,8 +63,8 @@ public class EvalMem extends FullVisitor {
 					if(!t1.getClass().equals(t2.getClass())) {
 						throw new CompilerError("[Semantic error, memEval] Cannot assign at " + binExpr.sndExpr);
 					}
-					attrs.memAttr.set(binExpr, false);
-					attrs.typAttr.set(binExpr, new VoidTyp());
+					attrs.memAttr.set(binExpr, true);
+//					attrs.typAttr.set(binExpr, t1);
 				} else {
 					throw new CompilerError("[Semantic error, memEval] Cannot assign at " + binExpr);
 				}

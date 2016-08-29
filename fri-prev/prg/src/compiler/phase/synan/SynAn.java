@@ -347,7 +347,9 @@ public class SynAn extends Phase {
             case ASSIGN:
                 Symbol symAssign = nextSymbol(); // shift assign
                 Expr op2 = parseDisjunctiveExpression();
-                bin = new BinExpr(new Position(op1, op2), BinExpr.Oper.ASSIGN, op1, op2);
+                bin = parseAssignmentExpressionPrime(op2);
+//                bin = new BinExpr(new Position(op1, op2), BinExpr.Oper.ASSIGN, op2, op3);
+                bin = new BinExpr(new Position(op1, bin), BinExpr.Oper.ASSIGN, op1, bin);
                 break;
             default:
                 throw new CompilerError("[syntax error, parseAssignmentExpressionPrime] invalid expression at " + laSymbol);

@@ -89,8 +89,11 @@ public class EvalImcode extends FullVisitor {
     public void visit(BinExpr binExpr) {
         binExpr.fstExpr.accept(this);
         binExpr.sndExpr.accept(this);
+
+
         IMCExpr fst = (IMCExpr) this.attrs.imcAttr.get(binExpr.fstExpr);
         IMCExpr snd = (IMCExpr) this.attrs.imcAttr.get(binExpr.sndExpr);
+
         IMC binop = null;
         switch (binExpr.oper) {
             /* logical operations */
@@ -138,7 +141,17 @@ public class EvalImcode extends FullVisitor {
 
             /* assign */
             case ASSIGN:
-                binop = new SEXPR(new MOVE(fst, snd), new NOP());
+                if(binExpr.sndExpr instanceof BinExpr && ((BinExpr)binExpr.sndExpr).oper == BinExpr.Oper.ASSIGN) {
+                    Vector<IMCStmt> stmts = new Vector<>();
+                    stmts.add((IMCStmt)((SEXPR) snd).stmt);
+                    snd = ((MOVE)((SEXPR) snd).stmt).src;
+                    stmts.add(new MOVE(fst, snd));
+
+                    binop = new SEXPR(new STMTS(stmts), new NOP());
+//                    binop = new SEXPR(stmts, new NOP());
+                } else {
+                    binop = new SEXPR(new MOVE(fst, snd), new NOP());
+                }
                 break;
             /* access record components */
             case REC:
